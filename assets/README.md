@@ -6,6 +6,7 @@ Recursos visuales y de diseño del proyecto (no código).
 
 | Carpeta | Contenido |
 |---------|-----------|
+| `branding/` | Logo, iconos de marca, capturas (ver [docs/branding/branding.md](../docs/branding/branding.md)) |
 | `disenos/` | Mockups, wireframes, exports de Figma, prototipos |
 | `imagenes/` | Iconos, logos, ilustraciones, fotos |
 

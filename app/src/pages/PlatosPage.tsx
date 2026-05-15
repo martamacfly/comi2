@@ -10,6 +10,12 @@ const MOMENTO_LABEL: Record<MomentoPlato, string> = {
   ambos: 'Comida y cena',
 };
 
+const MOMENTO_BADGE: Record<MomentoPlato, string> = {
+  comida: 'badge',
+  cena: 'badge badge--cena',
+  ambos: 'badge badge--ambos',
+};
+
 export function PlatosPage() {
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
   const etiquetasPorPlato = useLiveQuery(async () => {
@@ -58,7 +64,9 @@ export function PlatosPage() {
                 <Link to={`/platos/${plato.id}`} className="card">
                   <div className="card__top">
                     <strong>{plato.nombre}</strong>
-                    <span className="badge">{MOMENTO_LABEL[plato.momento]}</span>
+                    <span className={MOMENTO_BADGE[plato.momento]}>
+                      {MOMENTO_LABEL[plato.momento]}
+                    </span>
                   </div>
                   {tags.length > 0 && (
                     <div className="tag-row">

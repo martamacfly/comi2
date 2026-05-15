@@ -80,6 +80,7 @@ Comi2/
 | [docs/requisitos/requisitos.md](docs/requisitos/requisitos.md) | Requisitos funcionales y no funcionales |
 | [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funcionalidades.md) | Módulos y criterios de aceptación |
 | [docs/arquitectura/arquitectura.md](docs/arquitectura/arquitectura.md) | Modelo de datos y decisiones técnicas |
+| [docs/branding/branding.md](docs/branding/branding.md) | Identidad visual, colores pastel, UI |
 | [docs/guias/desarrollo.md](docs/guias/desarrollo.md) | Guía breve para desarrolladores |
 
 ## Assets de diseño

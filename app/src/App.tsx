@@ -5,6 +5,7 @@ import { PlatoEditPage } from './pages/PlatoEditPage';
 import { PlatosPage } from './pages/PlatosPage';
 import { ProductosPage } from './pages/ProductosPage';
 import { SemanaPage } from './pages/SemanaPage';
+import './styles/tokens.css';
 import './styles/index.css';
 
 function App() {

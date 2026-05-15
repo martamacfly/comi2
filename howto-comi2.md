@@ -388,6 +388,7 @@ Detalle: [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funciona
 | [docs/requisitos/requisitos.md](docs/requisitos/requisitos.md) | Requisitos funcionales y no funcionales |
 | [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funcionalidades.md) | Módulos, criterios de aceptación, flujos |
 | [docs/arquitectura/arquitectura.md](docs/arquitectura/arquitectura.md) | Capas, modelo de datos, decisiones técnicas |
+| [docs/branding/branding.md](docs/branding/branding.md) | Branding: pasteles, fuentes modernas, iconos, botones |
 | [docs/guias/desarrollo.md](docs/guias/desarrollo.md) | Guía breve para desarrolladores |
 | [README.md](README.md) | Resumen del repo y enlace a este howto |
 
