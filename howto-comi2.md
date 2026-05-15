@@ -162,8 +162,8 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 
 ### Primer uso (paso a paso)
 
-1. **Productos** — Crea los ingredientes que usarás (ej. tomate, pasta, aceite).
-2. **Platos → Nuevo plato** — Nombre, momento (comida/cena/ambos), productos del plato, etiquetas con color.
+1. **Platos → Nuevo plato** — Nombre, momento (comida/cena/ambos), productos del plato, etiquetas con color. (Puedes crear productos al vuelo desde la edición del plato.)
+2. **Productos** — Opcional: revisa o amplía el catálogo de ingredientes.
 3. **Semana** — Asigna un plato a cada comida y cena de lunes a domingo.
 4. **Lista** — Pulsa **Generar lista** para ver los productos únicos a comprar.
 
@@ -182,13 +182,26 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 |------|----------|----------|
 | `/` | — | Redirige a `/platos` |
 | `/productos` | Productos | Alta, listado y eliminación de productos |
-| `/platos` | Platos | Listado con momento y chips de etiquetas |
-| `/platos/nuevo` | Editar plato | Crear plato |
+| `/platos` | Platos | Catálogo agrupado (ver abajo) |
+| `/platos/nuevo` | Editar plato | Crear plato (`:id` = `nuevo`) |
 | `/platos/:id` | Editar plato | Modificar plato, productos y etiquetas |
 | `/semana` | Semana | Planificador 7 días × (comida, cena) |
 | `/lista` | Lista de la compra | Generar lista desde la semana actual |
 
-Navegación superior: **Productos · Platos · Semana · Lista**.
+Navegación (orden en menú): **Platos · Productos · Semana · Lista**. La ruta `/` redirige a `/platos`.
+
+### Pantalla Platos — vistas y subsecciones
+
+En `/platos` hay dos pestañas:
+
+| Pestaña | Agrupación |
+|---------|------------|
+| **Por momento** | Subsecciones: Comida, Cena, Comida y cena |
+| **Por etiquetas** | Una subsección por cada etiqueta del catálogo + **Sin etiquetas** si aplica |
+
+Cada subsección es un **acordeón cerrado por defecto**: el título muestra el nombre (o el chip de la etiqueta) y el **número de platos**; al pulsarla se despliega la lista de tarjetas. Un plato con varias etiquetas aparece en varias subsecciones en la vista por etiquetas.
+
+En la vista por momento no se repite la pastilla de momento en cada tarjeta (ya está en el título de la subsección).
 
 ---
 
@@ -281,15 +294,17 @@ app/src/
 ├── lib/
 │   ├── color.ts             # Hex, contraste, paleta de etiquetas
 │   ├── platos.ts            # Guardar plato, etiquetas, sincronizar relaciones
+│   ├── productos.ts         # crearProducto, reglas de unicidad
 │   ├── lista.ts             # generarListaCompra()
-│   └── semana.ts            # lunesDeSemana(), DIAS_SEMANA
+│   └── semana.ts            # Semana activa, normalización de fechas
 ├── components/
-│   ├── Layout.tsx           # Cabecera y navegación
-│   └── TagChip.tsx          # Chip de etiqueta con color
+│   ├── Layout.tsx           # Cabecera y navegación (Platos primero)
+│   ├── TagChip.tsx          # Chip de etiqueta con color
+│   └── InlineProductoAdd.tsx # Alta rápida de producto desde edición de plato
 ├── pages/
 │   ├── ProductosPage.tsx
-│   ├── PlatosPage.tsx
-│   ├── PlatoEditPage.tsx    # Edición + etiquetas
+│   ├── PlatosPage.tsx       # Pestañas momento/etiquetas y acordeones
+│   ├── PlatoEditPage.tsx    # Edición + etiquetas + productos en el plato
 │   ├── SemanaPage.tsx
 │   └── ListaPage.tsx
 └── styles/
@@ -301,7 +316,8 @@ app/src/
 | Archivo | Responsabilidad |
 |---------|-----------------|
 | `lib/platos.ts` | `guardarPlato`, `crearEtiqueta`, `actualizarEtiqueta`, `eliminarEtiqueta`, sync de productos/etiquetas |
-| `PlatoEditPage.tsx` | Formulario completo del plato y modal de edición de etiqueta |
+| `PlatosPage.tsx` | Agrupación por momento o etiquetas; subsecciones `<details>` colapsables |
+| `PlatoEditPage.tsx` | Formulario del plato; lista «En este plato»; catálogo desplegable; `InlineProductoAdd` (sin `<form>` anidado) |
 | `SemanaPage.tsx` | Grilla semanal; filtra platos por `momento` |
 | `ListaPage.tsx` | Botón generar + listado de productos |
 
@@ -314,8 +330,14 @@ app/src/
 1. Ir a **Platos** → **Nuevo plato**.
 2. Nombre y **momento** (comida / cena / ambos).
 3. Crear o seleccionar **etiquetas** (con color).
-4. Marcar **productos** del catálogo.
-5. **Guardar**.
+4. Añadir **productos**: marcar en «Añadir del catálogo», crear con **Añadir producto al catálogo**, o quitar con × en «En este plato».
+5. **Guardar** (vuelves al listado con mensaje de confirmación).
+
+### A2 — Consultar el catálogo de platos
+
+1. Ir a **Platos**.
+2. Elige **Por momento** o **Por etiquetas**.
+3. Abre la subsección que te interese para ver sus platos.
 
 ### B — Planificar la semana
 

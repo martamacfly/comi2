@@ -16,8 +16,8 @@ const navItems: {
   label: string;
   Icon: NavIcon;
 }[] = [
-  { to: '/productos', label: 'Productos', Icon: Carrot },
   { to: '/platos', label: 'Platos', Icon: CookingPot },
+  { to: '/productos', label: 'Productos', Icon: Carrot },
   { to: '/semana', label: 'Semana', Icon: CalendarDots },
   { to: '/lista', label: 'Lista', Icon: ClipboardText },
 ];

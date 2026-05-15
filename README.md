@@ -30,14 +30,14 @@ npm run dev
 
 Abre `http://localhost:5173` (o la URL que indique Vite).
 
-**Primer uso:** Productos → Nuevo plato → Semana → Generar lista.
+**Primer uso:** Nuevo plato → Semana → Generar lista. (Los productos se pueden crear también al editar un plato.)
 
 ## Pantallas
 
 | Ruta | Descripción |
 |------|-------------|
+| `/platos` | Catálogo agrupado por momento o por etiquetas (subsecciones colapsables) |
 | `/productos` | Ingredientes |
-| `/platos` | Listado de platos |
 | `/platos/nuevo`, `/platos/:id` | Crear o editar plato (etiquetas, productos) |
 | `/semana` | Planificador semanal |
 | `/lista` | Lista de la compra |

@@ -152,6 +152,6 @@ Al implementar v2 en [`app/src/db/database.ts`](../../app/src/db/database.ts), r
 | Vista | Responsabilidad |
 |-------|-----------------|
 | Productos | CRUD productos |
-| Platos / editar | Listado, alta, edición, ingredientes, momento, etiquetas (crear con color, asignar, editar) |
+| Platos / editar | Listado agrupado (momento \| etiquetas, acordeones), alta, edición, ingredientes inline, momento, etiquetas |
 | Semana | Grilla lunes–domingo × (comida, cena); selector filtrado por tipo |
 | Lista | Generar y mostrar productos únicos |

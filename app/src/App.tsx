@@ -16,7 +16,6 @@ function App() {
           <Route index element={<Navigate to="/platos" replace />} />
           <Route path="productos" element={<ProductosPage />} />
           <Route path="platos" element={<PlatosPage />} />
-          <Route path="platos/nuevo" element={<PlatoEditPage />} />
           <Route path="platos/:id" element={<PlatoEditPage />} />
           <Route path="semana" element={<SemanaPage />} />
           <Route path="lista" element={<ListaPage />} />

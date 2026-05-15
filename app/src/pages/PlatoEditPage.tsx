@@ -8,6 +8,7 @@ import {
   ETIQUETA_COLORES_PREDEFINIDOS,
   normalizeHex,
 } from '../lib/color';
+import { InlineProductoAdd } from '../components/InlineProductoAdd';
 import {
   actualizarEtiqueta,
   crearEtiqueta,
@@ -15,12 +16,15 @@ import {
   eliminarPlato,
   guardarPlato,
 } from '../lib/platos';
+import { CookingPot, X } from '@phosphor-icons/react';
 
 export function PlatoEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNew = id === 'nuevo';
-  const platoId = isNew ? undefined : Number(id);
+  const platoIdNum = isNew ? NaN : Number(id);
+  const platoId =
+    !isNew && Number.isFinite(platoIdNum) ? platoIdNum : undefined;
 
   const plato = useLiveQuery(
     () => (platoId != null && !Number.isNaN(platoId) ? db.platos.get(platoId) : undefined),
@@ -62,7 +66,7 @@ export function PlatoEditPage() {
   const [editEtiqueta, setEditEtiqueta] = useState<Etiqueta | null>(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const [initialized, setInitialized] = useState(isNew);
+  const [loadedFromDb, setLoadedFromDb] = useState(isNew);
 
   useEffect(() => {
     if (isNew || plato === undefined) return;
@@ -70,20 +74,23 @@ export function PlatoEditPage() {
       navigate('/platos', { replace: true });
       return;
     }
-    if (!initialized) {
-      setNombre(plato.nombre);
-      setMomento(plato.momento);
-      setInitialized(true);
+    if (loadedFromDb) return;
+    if (productoIdsAsignados === undefined || etiquetaIdsAsignados === undefined) {
+      return;
     }
-  }, [isNew, plato, navigate, initialized]);
-
-  useEffect(() => {
-    if (productoIdsAsignados) setSelectedProductoIds(productoIdsAsignados);
-  }, [productoIdsAsignados]);
-
-  useEffect(() => {
-    if (etiquetaIdsAsignados) setSelectedEtiquetaIds(etiquetaIdsAsignados);
-  }, [etiquetaIdsAsignados]);
+    setNombre(plato.nombre);
+    setMomento(plato.momento);
+    setSelectedProductoIds(productoIdsAsignados);
+    setSelectedEtiquetaIds(etiquetaIdsAsignados);
+    setLoadedFromDb(true);
+  }, [
+    isNew,
+    plato,
+    navigate,
+    loadedFromDb,
+    productoIdsAsignados,
+    etiquetaIdsAsignados,
+  ]);
 
   const etiquetasAsignadas =
     todasEtiquetas?.filter(
@@ -94,6 +101,20 @@ export function PlatoEditPage() {
     todasEtiquetas?.filter(
       (e) => e.id != null && !selectedEtiquetaIds.includes(e.id),
     ) ?? [];
+
+  const productosAsignados =
+    productos
+      ?.filter((p) => p.id != null && selectedProductoIds.includes(p.id))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')) ?? [];
+
+  const productosDisponibles =
+    productos
+      ?.filter((p) => p.id != null && !selectedProductoIds.includes(p.id))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')) ?? [];
+
+  const quitarProducto = (productoId: number) => {
+    setSelectedProductoIds((prev) => prev.filter((x) => x !== productoId));
+  };
 
   const toggleProducto = (productoId: number) => {
     setSelectedProductoIds((prev) =>
@@ -156,14 +177,22 @@ export function PlatoEditPage() {
     setSaving(true);
     setError('');
     try {
-      const savedId = await guardarPlato({
+      await guardarPlato({
         id: platoId,
         nombre,
         momento,
         productoIds: selectedProductoIds,
         etiquetaIds: selectedEtiquetaIds,
       });
-      navigate(isNew ? `/platos/${savedId}` : '/platos');
+      if (isNew) {
+        navigate('/platos', {
+          state: { platoCreado: nombre.trim() },
+        });
+      } else {
+        navigate('/platos', {
+          state: { platoActualizado: nombre.trim() },
+        });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {
@@ -177,6 +206,17 @@ export function PlatoEditPage() {
     await eliminarPlato(platoId);
     navigate('/platos');
   };
+
+  if (!isNew && (platoId == null || Number.isNaN(platoIdNum))) {
+    return (
+      <section className="page">
+        <p className="muted">Plato no encontrado.</p>
+        <Link to="/platos" className="btn-ghost">
+          Volver a platos
+        </Link>
+      </section>
+    );
+  }
 
   if (!isNew && plato === undefined) {
     return (
@@ -195,14 +235,34 @@ export function PlatoEditPage() {
       </p>
 
       <form className="plato-form" onSubmit={onSubmit}>
-        <h1>{isNew ? 'Nuevo plato' : 'Editar plato'}</h1>
+        <div className="plato-form__header">
+          <CookingPot size={32} weight="duotone" className="plato-form__icon" aria-hidden />
+          <div>
+            <h1>{isNew ? 'Nuevo plato' : 'Editar plato'}</h1>
+            {isNew && (
+              <p className="page__lead plato-form__lead">
+                Define el plato, sus ingredientes y etiquetas. Después podrás usarlo en la semana.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {isNew && (
+          <ol className="form-steps">
+            <li className="form-steps__item form-steps__item--active">Nombre y momento</li>
+            <li className="form-steps__item">Etiquetas</li>
+            <li className="form-steps__item">Productos</li>
+          </ol>
+        )}
 
         <label className="field">
-          <span>Nombre</span>
+          <span>Nombre del plato</span>
           <input
             type="text"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            placeholder="Ej. Lentejas con verduras"
+            autoFocus={isNew}
             required
           />
         </label>
@@ -325,27 +385,77 @@ export function PlatoEditPage() {
         )}
 
         <div className="field">
-          <span>Productos</span>
-          {!productos?.length ? (
+          <span>Productos del plato</span>
+          <p className="field-hint">
+            Lista de ingredientes de este plato. Se actualiza al añadir o quitar.
+          </p>
+
+          <div className="plato-productos-asignados">
+            <span className="plato-productos-asignados__title">
+              En este plato ({productosAsignados.length})
+            </span>
+            {productosAsignados.length === 0 ? (
+              <p className="muted plato-productos-asignados__empty">
+                Aún no hay productos. Añádelos desde el catálogo o crea uno nuevo.
+              </p>
+            ) : (
+              <ul className="plato-productos-list">
+                {productosAsignados.map((p) => (
+                  <li key={p.id} className="plato-productos-list__item">
+                    <span>{p.nombre}</span>
+                    <button
+                      type="button"
+                      className="btn-icon btn-icon--remove"
+                      onClick={() => quitarProducto(p.id!)}
+                      aria-label={`Quitar ${p.nombre}`}
+                    >
+                      <X size={18} weight="bold" aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <InlineProductoAdd
+            onCreated={(id) =>
+              setSelectedProductoIds((prev) =>
+                prev.includes(id) ? prev : [...prev, id],
+              )
+            }
+          />
+
+          {productos === undefined ? (
+            <p className="muted">Cargando catálogo…</p>
+          ) : productos.length === 0 ? (
             <p className="muted">
-              No hay productos.{' '}
-              <Link to="/productos">Crea productos</Link> primero.
+              No hay productos en el catálogo. Crea el primero con el formulario de arriba.
             </p>
+          ) : productosDisponibles.length > 0 ? (
+            <details
+              className="plato-productos-catalogo"
+              open={productosAsignados.length === 0}
+            >
+              <summary>Añadir del catálogo ({productosDisponibles.length})</summary>
+              <ul className="check-list check-list--spaced">
+                {productosDisponibles.map((p) => (
+                  <li key={p.id}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        onChange={() => toggleProducto(p.id!)}
+                      />
+                      {p.nombre}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </details>
           ) : (
-            <ul className="check-list">
-              {productos.map((p) => (
-                <li key={p.id}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={selectedProductoIds.includes(p.id!)}
-                      onChange={() => toggleProducto(p.id!)}
-                    />
-                    {p.nombre}
-                  </label>
-                </li>
-              ))}
-            </ul>
+            <p className="muted field-hint">
+              Todos los productos del catálogo ya están en este plato.
+            </p>
           )}
         </div>
 
@@ -353,7 +463,7 @@ export function PlatoEditPage() {
 
         <div className="form-actions">
           <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? 'Guardando…' : 'Guardar'}
+            {saving ? 'Guardando…' : isNew ? 'Crear plato' : 'Guardar cambios'}
           </button>
           <Link to="/platos" className="btn-ghost">
             Cancelar

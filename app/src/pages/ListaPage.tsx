@@ -1,20 +1,15 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
-import { db } from '../db/database';
 import { generarListaCompra } from '../lib/lista';
-import { lunesDeSemana, mismaFecha } from '../lib/semana';
+import { obtenerSemanaActiva } from '../lib/semana';
 import type { Producto } from '../db/types';
 
 export function ListaPage() {
   const [lista, setLista] = useState<Producto[] | null>(null);
   const [generando, setGenerando] = useState(false);
 
-  const semana = useLiveQuery(async () => {
-    const lunes = lunesDeSemana();
-    const todas = await db.semanas.toArray();
-    return todas.find((s) => mismaFecha(s.fechaInicioLunes, lunes));
-  });
+  const semana = useLiveQuery(() => obtenerSemanaActiva());
 
   const generar = async () => {
     if (!semana?.id) {

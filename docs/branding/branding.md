@@ -130,10 +130,12 @@ Uso ligero en header o pantalla vacía:
 
 ### 4.2 Iconos del menú principal
 
+Orden en la UI: **Platos** → Productos → Semana → Lista.
+
 | Sección | Icono Phosphor | Icono Lucide | Notas |
 |---------|----------------|--------------|-------|
+| **Platos** | `cooking-pot` o `fork-knife` | `chef-hat` / `utensils-crossed` | Recetas (primera opción) |
 | **Productos** | `carrot` o `shopping-basket` | `carrot` / `shopping-basket` | Ingredientes |
-| **Platos** | `cooking-pot` o `fork-knife` | `chef-hat` / `utensils-crossed` | Recetas |
 | **Semana** | `calendar-dots` | `calendar-days` | Plan semanal |
 | **Lista** | `clipboard-text` o `list-checks` | `clipboard-list` | Compra |
 
@@ -198,7 +200,7 @@ Uso ligero en header o pantalla vacía:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Comi2          [🥕 Productos] [🍳 Platos] [📅 Semana] [📋 Lista] │
+│  Comi2          [🍳 Platos] [🥕 Productos] [📅 Semana] [📋 Lista] │
 └─────────────────────────────────────────────────────────────┘
 ```
 

@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { CalendarDots } from '@phosphor-icons/react';
 import { db } from '../db/database';
-import type { Etiqueta, MomentoSlot, Plato } from '../db/types';
+import type { Etiqueta, MomentoSlot, Plato, PlatoEtiqueta } from '../db/types';
 import { TagChip } from '../components/TagChip';
-import { DIAS_SEMANA, lunesDeSemana, mismaFecha } from '../lib/semana';
+import { DIAS_SEMANA, obtenerOCrearSemanaActiva } from '../lib/semana';
 
 const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
 
@@ -12,30 +15,51 @@ function platoCompatible(plato: Plato, momento: MomentoSlot): boolean {
 }
 
 export function SemanaPage() {
-  const lunes = lunesDeSemana();
+  const [semanaId, setSemanaId] = useState<number | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
+  const [listo, setListo] = useState(false);
 
-  const semana = useLiveQuery(async () => {
-    const todas = await db.semanas.toArray();
-    return (
-      todas.find((s) => mismaFecha(s.fechaInicioLunes, lunes)) ??
-      (await db.semanas.add({ fechaInicioLunes: lunes }).then((id) =>
-        db.semanas.get(id),
-      ))
-    );
-  }, [lunes.getTime()]);
+  useEffect(() => {
+    let activo = true;
+    setListo(false);
+    setInitError(null);
 
-  const semanaId = semana?.id;
+    obtenerOCrearSemanaActiva()
+      .then((semana) => {
+        if (!activo) return;
+        if (semana.id == null) {
+          setInitError('No se pudo inicializar la semana.');
+          return;
+        }
+        setSemanaId(semana.id);
+      })
+      .catch((err) => {
+        if (!activo) return;
+        console.error('SemanaPage init:', err);
+        setInitError(
+          err instanceof Error ? err.message : 'Error al cargar la semana',
+        );
+      })
+      .finally(() => {
+        if (activo) setListo(true);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   const slots = useLiveQuery(
-    () =>
-      semanaId != null
-        ? db.planSlots.where('semanaId').equals(semanaId).toArray()
-        : [],
+    async () => {
+      if (semanaId == null) return [];
+      return db.planSlots.where('semanaId').equals(semanaId).toArray();
+    },
     [semanaId],
   );
 
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
   const etiquetas = useLiveQuery(() => db.etiquetas.toArray());
+  const platoEtiquetas = useLiveQuery(() => db.platoEtiquetas.toArray());
 
   const asignar = async (
     diaSemana: number,
@@ -43,7 +67,8 @@ export function SemanaPage() {
     platoId: number | '',
   ) => {
     if (semanaId == null) return;
-    const existente = slots?.find(
+    const lista = slots ?? [];
+    const existente = lista.find(
       (s) => s.diaSemana === diaSemana && s.momento === momento,
     );
     if (platoId === '') {
@@ -64,36 +89,80 @@ export function SemanaPage() {
     }
   };
 
-  const getPlato = (dia: number, momento: MomentoSlot) => {
-    const slot = slots?.find(
-      (s) => s.diaSemana === dia && s.momento === momento,
-    );
-    if (!slot?.platoId || !platos) return null;
-    return platos.find((p) => p.id === slot.platoId) ?? null;
+  const etiquetasDePlato = (platoId: number): Etiqueta[] => {
+    if (!platoEtiquetas || !etiquetas) return [];
+    const ids = platoEtiquetas
+      .filter((pe: PlatoEtiqueta) => pe.platoId === platoId)
+      .map((pe) => pe.etiquetaId);
+    return etiquetas.filter((e) => e.id != null && ids.includes(e.id));
   };
+
+  const datosListos =
+    listo && platos !== undefined && slots !== undefined && etiquetas !== undefined;
 
   return (
     <section className="page">
-      <h1>Semana</h1>
-      <p className="page__lead">
-        Planifica comida y cena de lunes a domingo.
-      </p>
+      <div className="page__head">
+        <div>
+          <h1>Semana</h1>
+          <p className="page__lead">
+            Planifica comida y cena de lunes a domingo.
+          </p>
+        </div>
+        <CalendarDots
+          size={36}
+          weight="duotone"
+          className="page__head-icon"
+          aria-hidden
+        />
+      </div>
 
-      {semanaId == null || slots === undefined || !platos ? (
-        <p className="muted">Cargando…</p>
-      ) : (
+      {initError && (
+        <div className="alert alert--error" role="alert">
+          <p>{initError}</p>
+          <p className="muted">
+            Prueba a recargar la página. Si persiste, borra los datos del sitio en
+            DevTools → Application → IndexedDB → comi2-db.
+          </p>
+        </div>
+      )}
+
+      {!datosListos && !initError && (
+        <p className="muted">Cargando planificador…</p>
+      )}
+
+      {datosListos && !initError && platos.length === 0 && (
+        <div className="empty-state">
+          <p className="muted">
+            Necesitas al menos un plato para planificar la semana.
+          </p>
+          <Link to="/platos/nuevo" className="btn-primary">
+            Crear un plato
+          </Link>
+        </div>
+      )}
+
+      {datosListos && !initError && platos.length > 0 && semanaId != null && (
         <div className="semana-grid">
           {DIAS_SEMANA.map((diaLabel, diaSemana) => (
             <article key={diaLabel} className="semana-dia">
               <h2>{diaLabel}</h2>
               {MOMENTOS.map((momento) => {
-                const plato = getPlato(diaSemana, momento);
-                const opciones = platos.filter((p) =>
-                  platoCompatible(p, momento),
-                );
                 const slot = slots.find(
                   (s) => s.diaSemana === diaSemana && s.momento === momento,
                 );
+                const opciones = platos.filter((p) =>
+                  platoCompatible(p, momento),
+                );
+                const platoAsignado =
+                  slot?.platoId != null
+                    ? platos.find((p) => p.id === slot.platoId)
+                    : undefined;
+                const tags =
+                  platoAsignado?.id != null
+                    ? etiquetasDePlato(platoAsignado.id)
+                    : [];
+
                 return (
                   <div key={momento} className="semana-slot">
                     <label>
@@ -102,15 +171,14 @@ export function SemanaPage() {
                       </span>
                       <select
                         value={slot?.platoId ?? ''}
-                        onChange={(e) =>
-                          asignar(
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          void asignar(
                             diaSemana,
                             momento,
-                            e.target.value === ''
-                              ? ''
-                              : Number(e.target.value),
-                          )
-                        }
+                            v === '' ? '' : Number(v),
+                          );
+                        }}
                       >
                         <option value="">— Sin plato —</option>
                         {opciones.map((p) => (
@@ -120,8 +188,18 @@ export function SemanaPage() {
                         ))}
                       </select>
                     </label>
-                    {plato && (
-                      <PlatoTags platoId={plato.id!} etiquetas={etiquetas} />
+                    {opciones.length === 0 && (
+                      <p className="muted semana-slot__hint">
+                        No hay platos de{' '}
+                        {momento === 'comida' ? 'comida' : 'cena'}.
+                      </p>
+                    )}
+                    {tags.length > 0 && (
+                      <div className="tag-row">
+                        {tags.map((t) => (
+                          <TagChip key={t.id} etiqueta={t} small />
+                        ))}
+                      </div>
                     )}
                   </div>
                 );
@@ -131,29 +209,5 @@ export function SemanaPage() {
         </div>
       )}
     </section>
-  );
-}
-
-function PlatoTags({
-  platoId,
-  etiquetas,
-}: {
-  platoId: number;
-  etiquetas: Etiqueta[] | undefined;
-}) {
-  const links = useLiveQuery(
-    () => db.platoEtiquetas.where('platoId').equals(platoId).toArray(),
-    [platoId],
-  );
-  if (!links || !etiquetas) return null;
-  const ids = links.map((l) => l.etiquetaId);
-  const tags = etiquetas.filter((e) => e.id != null && ids.includes(e.id));
-  if (!tags.length) return null;
-  return (
-    <div className="tag-row">
-      {tags.map((t) => (
-        <TagChip key={t.id} etiqueta={t} small />
-      ))}
-    </div>
   );
 }
