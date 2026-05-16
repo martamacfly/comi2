@@ -237,7 +237,7 @@ export function PlatoEditPage() {
 
       <form className="plato-form" onSubmit={onSubmit}>
         <div className="plato-form__header">
-          <CookingPot size={32} weight="duotone" className="plato-form__icon" aria-hidden />
+          <CookingPot size={26} weight="duotone" className="plato-form__icon" aria-hidden />
           <div>
             <h1>{isNew ? 'Nuevo plato' : 'Editar plato'}</h1>
             {isNew && (
@@ -247,14 +247,6 @@ export function PlatoEditPage() {
             )}
           </div>
         </div>
-
-        {isNew && (
-          <ol className="form-steps">
-            <li className="form-steps__item form-steps__item--active">Nombre y momento</li>
-            <li className="form-steps__item">Etiquetas</li>
-            <li className="form-steps__item">Productos</li>
-          </ol>
-        )}
 
         <label className="field">
           <span>Nombre del plato</span>
@@ -303,7 +295,10 @@ export function PlatoEditPage() {
               />
             ))}
             {etiquetasAsignadas.length === 0 && (
-              <span className="muted">Sin etiquetas</span>
+              <TagChip
+                etiqueta={{ nombre: 'Sin etiquetas', color: '#e8e4df' }}
+                disabled
+              />
             )}
           </div>
 

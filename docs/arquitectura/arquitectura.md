@@ -156,4 +156,4 @@ Definición en [`app/src/db/database.ts`](../../app/src/db/database.ts). La tabl
 | Productos / detalle | Emoji, nombre inline, platos que usan el producto |
 | Platos / editar | Pestañas Todos/momento/etiquetas, acordeones con color, alta, edición, ingredientes |
 | Semana | Grilla lunes–domingo × (comida, cena); selector filtrado por tipo |
-| Lista | Generar y mostrar productos únicos |
+| Lista | Generar y mostrar productos únicos (emoji + nombre por fila, alineación izquierda) |

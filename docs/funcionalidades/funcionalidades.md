@@ -27,7 +27,7 @@ flowchart LR
 | Feature | Descripción | Estado |
 |---------|-------------|--------|
 | CRUD productos | Alta, listado, detalle, borrado | Hecho |
-| Emoji por producto | Elegir emoji en detalle; auto al crear | Hecho |
+| Emoji por producto | Selector con buscador y rejilla; auto al crear | Hecho |
 | CRUD platos | Alta, edición y listado de platos | Hecho |
 | Etiquetas | CRUD de etiquetas y asignación de varias etiquetas por plato | Hecho |
 | Ingredientes del plato | Añadir/quitar productos; alta inline desde edición del plato | Hecho |
@@ -58,7 +58,7 @@ Gestión del inventario de ingredientes reutilizables entre platos.
 
 - [x] Puedo crear un producto con nombre (recibe emoji automático).
 - [x] En el detalle (`/productos/:id`), edito el **nombre** con el lápiz (inline, Enter guarda).
-- [x] En el detalle, pulso el **emoji** y elijo otro en la rejilla de sugerencias.
+- [x] En el detalle, pulso el **emoji** y elijo otro en el panel (buscador + rejilla de sugerencias).
 - [x] Puedo eliminar un producto si no está en ningún plato (o se avisa).
 - [x] Puedo crear un producto al editar un plato (`InlineProductoAdd`) y asignarlo al plato al instante.
 - [x] Al pulsar un producto en el listado, veo todos los **platos** que lo usan.
@@ -77,6 +77,7 @@ Cada plato agrupa los productos de su elaboración, tiene un **momento** (comida
 - [x] Puedo quitar una etiqueta del plato sin borrarla del catálogo.
 - [x] Puedo eliminar una etiqueta del catálogo (se desvincula de todos los platos).
 - [x] Las etiquetas se muestran como **chips** con color en listado, edición y planificador.
+- [x] Si un plato no tiene etiquetas, se muestra el chip **«Sin etiquetas»** en estado deshabilitado.
 - [x] En **Platos**: pestaña **Todos** (lista directa); **Por momento** / **Por etiquetas** con acordeones colapsables y color.
 - [ ] Puedo eliminar un plato desde el listado o la edición.
 
@@ -97,7 +98,7 @@ Generación automática desde el plan de la semana activa.
 
 **Criterios de aceptación:**
 
-- [x] Al generar la lista, aparecen todos los productos de los platos planificados (con emoji).
+- [x] Al generar la lista, aparecen todos los productos de los platos planificados (emoji y nombre alineados a la izquierda en cada fila).
 - [x] Si el mismo producto aparece en varios platos, aparece **una sola vez** (sin cantidades).
 - [x] Puedo regenerar la lista si cambio el plan semanal.
 - [x] Puedo marcar productos que **ya tengo en casa** con un checkbox para quitarlos de la lista principal.

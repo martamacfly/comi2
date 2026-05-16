@@ -21,7 +21,7 @@ export function PageHeader({
       <div className="page__head-text">
         <h1 className="page__title">
           <Icon
-            size={32}
+            size={26}
             weight="duotone"
             className={`page__title-icon page__title-icon--${iconTone}`}
             aria-hidden

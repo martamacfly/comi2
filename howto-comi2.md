@@ -187,7 +187,7 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 | `/platos/nuevo` | Editar plato | Crear plato (`:id` = `nuevo`) |
 | `/platos/:id` | Editar plato | Modificar plato, productos y etiquetas |
 | `/semana` | Semana | Planificador 7 días × (comida, cena) |
-| `/lista` | Lista de la compra | Generar lista; checkbox «Ya lo tengo» para ocultar productos en casa |
+| `/lista` | Lista de la compra | Generar lista; filas con checkbox, emoji y nombre alineados a la izquierda; «Ya lo tengo» |
 
 Navegación (orden en menú): **Platos · Productos · Semana · Lista**. La ruta `/` redirige a `/platos`.
 
@@ -206,7 +206,7 @@ En **Por momento** y **Por etiquetas**, cada subsección es un **acordeón cerra
 ### Pantalla Productos — detalle (`/productos/:id`)
 
 1. Pulsa un producto en el listado.
-2. **Emoji:** pulsa el emoji para elegir otro en la rejilla.
+2. **Emoji:** pulsa el emoji para abrir el selector (cuadrícula con varias filas y **buscador** por nombre en español, p. ej. «tomate», «leche»).
 3. **Nombre:** pulsa el **lápiz**, edita en línea; Enter o salir del campo guarda; Escape cancela.
 4. Debajo, los **platos** que usan ese ingrediente.
 
@@ -219,6 +219,7 @@ Gestionadas en la pantalla **Editar plato** (`/platos/nuevo` o `/platos/:id`).
 ### Asignar al plato
 
 - **Chips asignados** — Muestran etiquetas del plato; **×** las quita del plato (no borra del catálogo).
+- **Sin etiquetas** — Si el plato aún no tiene ninguna, se muestra un chip **deshabilitado** con el texto «Sin etiquetas» (mismo aspecto que una etiqueta, pero atenuado y sin interacción).
 - **Añadir existente** — Clic en un chip disponible para asignarlo.
 - **Nueva etiqueta** — Nombre + color (selector nativo o paleta de colores) → **Crear y asignar**.
 
@@ -231,7 +232,7 @@ Sección desplegable **Catálogo de etiquetas (editar o eliminar)**:
 
 ### Visualización
 
-Componente `TagChip`: fondo con el color de la etiqueta y texto con contraste automático (claro/oscuro según luminancia).
+Componente `TagChip`: fondo con el color de la etiqueta y texto con contraste automático (claro/oscuro según luminancia). Variante `disabled` para el estado «Sin etiquetas».
 
 ---
 
@@ -303,7 +304,7 @@ app/src/
 │   ├── color.ts             # Hex, contraste, paleta de etiquetas
 │   ├── platos.ts            # Guardar plato, etiquetas, sincronizar relaciones
 │   ├── productos.ts         # CRUD producto, platos por producto
-│   ├── producto-emoji.ts    # Emojis sugeridos y asignación por defecto
+│   ├── producto-emoji.ts    # Catálogo de emojis, búsqueda por keywords ES, valor por defecto
 │   ├── lista.ts             # generarListaCompra()
 │   ├── momento-icons.tsx    # Iconos sol/luna para comida y cena
 │   └── semana.ts            # Semana activa, normalización de fechas
@@ -314,7 +315,7 @@ app/src/
 │   ├── TagChip.tsx          # Chip de etiqueta con color
 │   ├── MomentoBadge.tsx     # Pastilla comida/cena/ambos
 │   ├── ProductoEmoji.tsx    # Muestra emoji de producto
-│   ├── ProductoEmojiPicker.tsx
+│   ├── ProductoEmojiPicker.tsx # Panel con buscador y rejilla 8×N
 │   ├── ProductoInlineTitle.tsx # Nombre editable + selector emoji
 │   └── InlineProductoAdd.tsx
 ├── pages/
@@ -335,9 +336,9 @@ app/src/
 | `lib/platos.ts` | `guardarPlato`, `crearEtiqueta`, `actualizarEtiqueta`, `eliminarEtiqueta`, sync de productos/etiquetas |
 | `ProductoPlatosPage.tsx` | Detalle: emoji, nombre inline, platos que lo usan |
 | `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color |
-| `PlatoEditPage.tsx` | Formulario del plato; productos con emoji; sin `<form>` anidado |
+| `PlatoEditPage.tsx` | Formulario del plato (sin pasos intermedios al crear); chip «Sin etiquetas»; sin `<form>` anidado |
 | `SemanaPage.tsx` | Grilla semanal; iconos sol/luna en huecos |
-| `ListaPage.tsx` | Generar lista; checkbox «ya en casa»; emoji por producto |
+| `ListaPage.tsx` | Generar lista; checkbox «ya en casa»; emoji + nombre compactos a la izquierda |
 
 ---
 
@@ -345,9 +346,9 @@ app/src/
 
 ### A — Configurar un plato
 
-1. Ir a **Platos** → **Nuevo plato**.
+1. Ir a **Platos** → **Nuevo plato** (formulario directo, sin indicador de pasos).
 2. Nombre y **momento** (comida / cena / ambos).
-3. Crear o seleccionar **etiquetas** (con color).
+3. Crear o seleccionar **etiquetas** (con color); si no hay ninguna, verás el chip «Sin etiquetas» deshabilitado.
 4. Añadir **productos**: marcar en «Añadir del catálogo», crear con **Añadir producto al catálogo**, o quitar con × en «En este plato».
 5. **Guardar** (vuelves al listado con mensaje de confirmación).
 
@@ -366,9 +367,10 @@ app/src/
 ### C — Hacer la compra
 
 1. Ir a **Lista** → **Generar lista**.
-2. Marca con el checkbox los productos que **ya tienes**; desaparecen de la lista principal.
-3. Si te equivocas, ábrelos en **Ya en casa** y desmarca para volver a añadirlos.
-4. Si cambias el plan en **Semana**, vuelve a **Generar lista**.
+2. Cada fila muestra **checkbox · emoji · nombre** alineados a la izquierda.
+3. Marca con el checkbox los productos que **ya tienes**; desaparecen de la lista principal.
+4. Si te equivocas, ábrelos en **Ya en casa** (misma fila con emoji y nombre) y desmarca para volver a añadirlos.
+5. Si cambias el plan en **Semana**, vuelve a **Generar lista**.
 
 ---
 

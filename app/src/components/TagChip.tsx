@@ -7,11 +7,31 @@ interface TagChipProps {
   onRemove?: () => void;
   onClick?: () => void;
   small?: boolean;
+  /** Placeholder visual (p. ej. «Sin etiquetas») */
+  disabled?: boolean;
 }
 
-export function TagChip({ etiqueta, onRemove, onClick, small }: TagChipProps) {
+export function TagChip({
+  etiqueta,
+  onRemove,
+  onClick,
+  small,
+  disabled,
+}: TagChipProps) {
   const bg = normalizeHex(etiqueta.color);
   const fg = textColorForBackground(bg);
+
+  if (disabled) {
+    return (
+      <span
+        className={`tag-chip tag-chip--disabled${small ? ' tag-chip--small' : ''}`}
+        aria-disabled="true"
+      >
+        {!small && <Tag size={14} weight="duotone" aria-hidden />}
+        {etiqueta.nombre}
+      </span>
+    );
+  }
 
   return (
     <span

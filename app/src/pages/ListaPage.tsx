@@ -133,7 +133,7 @@ export function ListaPage() {
                       aria-label={`Ya tengo ${p.nombre}`}
                     />
                     <ProductoEmoji producto={p} size="sm" />
-                    <span>{p.nombre}</span>
+                    <span className="lista-compra__nombre">{p.nombre}</span>
                   </label>
                 </li>
               ))}
@@ -156,7 +156,8 @@ export function ListaPage() {
                         onChange={() => desmarcarYaTengo(p.id!)}
                         aria-label={`Volver a añadir ${p.nombre} a la compra`}
                       />
-                      <span>{p.nombre}</span>
+                      <ProductoEmoji producto={p} size="sm" />
+                      <span className="lista-compra__nombre">{p.nombre}</span>
                     </label>
                   </li>
                 ))}

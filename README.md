@@ -39,8 +39,8 @@ Abre `http://localhost:5173` (o la URL que indique Vite).
 | `/platos` | Catálogo: todos, por momento o por etiquetas (subsecciones colapsables) |
 | `/productos` | Ingredientes con emoji |
 | `/productos/:id` | Editar nombre/emoji y ver platos que lo usan |
-| `/lista` | Lista de la compra (marcar lo que ya tienes en casa) |
-| `/platos/nuevo`, `/platos/:id` | Crear o editar plato (etiquetas, productos) |
+| `/lista` | Lista de la compra (emoji + nombre; marcar lo que ya tienes en casa) |
+| `/platos/nuevo`, `/platos/:id` | Crear o editar plato (etiquetas con chip «Sin etiquetas» si vacío, productos) |
 | `/semana` | Planificador semanal |
 
 ## Estructura del repositorio
