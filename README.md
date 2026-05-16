@@ -1,26 +1,33 @@
 # Comi2
 
-Aplicación web para **planificar comidas y cenas de la semana** (lunes a domingo) y **generar la lista de la compra** a partir de los platos que elijas.
+**Comi2** es una aplicación web sencilla para organizar **qué comer cada día de la semana** y sacar una **lista de la compra** con lo que necesitas. Pensada para el día a día en casa: tus platos, tus productos, tu menú.
 
-Funciona **sin servidor**: todos los datos se guardan en el navegador (IndexedDB) con [Dexie.js](https://dexie.org/).
+> **Proyecto personal · hecho con IA y vibecoding**  
+> Este repositorio nació como una herramienta para uso propio. El código y la documentación se han ido construyendo con ayuda de **inteligencia artificial** y **vibecoding** (iterar en conversación con el asistente, probar en el navegador, ajustar). No es un producto comercial ni un servicio con soporte: si te sirve, adelante; si encuentras algo raro, es normal en un proyecto así.
 
-## Qué puedes hacer
+---
 
-- Gestionar un catálogo de **productos** (ingredientes con emoji).
-- Crear **platos** con sus productos, momento del día (**comida**, **cena** o **ambos**) y **etiquetas con color**.
-- Planificar la **semana**: un plato por comida y otro por cena cada día (14 huecos).
-- **Generar la lista de la compra** con los productos únicos de los platos planificados.
+## ¿Para qué sirve?
+
+1. Guardas **productos** (ingredientes, con emoji si quieres).
+2. Creas **platos** con esos productos, si son de comida, cena o ambos, y etiquetas de color.
+3. En **Semana** asignas un plato a cada comida y cena (lunes a domingo).
+4. En **Lista** generas la compra: productos únicos de los platos planificados; puedes tachar lo que ya tienes en casa.
+
+Todo se guarda **en tu navegador** (sin cuenta ni servidor). Si borras los datos del sitio, pierdes el contenido.
 
 ```mermaid
 flowchart LR
   Productos[Productos] --> Platos[Platos]
   Platos --> Semana[Semana]
-  Semana --> Lista[Lista compra]
+  Semana --> Lista[Lista de la compra]
 ```
 
-## Inicio rápido
+---
 
-Requisitos: [Node.js](https://nodejs.org/) LTS (v20+).
+## Probar la app en tu ordenador
+
+Necesitas [Node.js](https://nodejs.org/) LTS (v20 o superior).
 
 ```bash
 cd app
@@ -28,64 +35,60 @@ npm install
 npm run dev
 ```
 
-Abre `http://localhost:5173` (o la URL que indique Vite).
+Abre la URL que muestre la terminal (suele ser `http://localhost:5173`).
 
-La app incluye **marca** en cabecera (wordmark + icono), **favicon** y **manifest** PWA (`app/public/`). Detalle en [howto-comi2.md](howto-comi2.md#marca-en-cabecera-y-favicon).
+**Primer paseo:** crea un plato → rellena la semana → genera la lista. Los productos también puedes crearlos al editar un plato.
 
-**Primer uso:** Nuevo plato → Semana → Generar lista. (Los productos se pueden crear también al editar un plato.)
+---
 
-## Pantallas
+## Si quieres profundizar
 
-| Ruta | Descripción |
-|------|-------------|
-| `/platos` | Catálogo: todos, por momento o por etiquetas (subsecciones colapsables) |
-| `/productos` | Ingredientes con emoji |
-| `/productos/:id` | Editar nombre/emoji y ver platos que lo usan |
-| `/lista` | Lista de la compra (emoji + nombre; marcar lo que ya tienes en casa) |
-| `/platos/nuevo`, `/platos/:id` | Crear o editar plato (etiquetas con chip «Sin etiquetas» si vacío, productos) |
-| `/semana` | Planificador semanal |
+| Quiero… | Dónde mirar |
+|--------|-------------|
+| Entender el proyecto de punta a punta | **[howto-comi2.md](howto-comi2.md)** — guía principal |
+| Requisitos y funcionalidades | [docs/](docs/) |
+| Colores, logo y cabecera | [docs/branding/branding.md](docs/branding/branding.md) |
+| Código de la app | carpeta [`app/`](app/) (React + Vite + TypeScript + Dexie) |
 
-## Estructura del repositorio
+### Rutas de la app
+
+| Ruta | Qué es |
+|------|--------|
+| `/platos` | Tu recetario (por listado, momento o etiquetas) |
+| `/productos` | Ingredientes |
+| `/semana` | Planificador de la semana |
+| `/lista` | Lista de la compra |
+
+---
+
+## Cómo está hecho (resumen)
+
+| Parte | Tecnología |
+|-------|------------|
+| Interfaz | React, TypeScript |
+| Navegación | React Router |
+| Build | Vite |
+| Datos en el navegador | Dexie (IndexedDB), base `comi2-db` |
+
+Comandos útiles dentro de `app/`: `npm run dev`, `npm run build`, `npm run lint`.
+
+---
+
+## Estructura del repo
 
 ```
 Comi2/
-├── howto-comi2.md    # Guía completa del proyecto
-├── docs/             # Requisitos, funcionalidades, arquitectura
-├── assets/           # Diseños e imágenes
-└── app/              # React + Vite + TypeScript + Dexie
+├── README.md         ← estás aquí
+├── howto-comi2.md    ← documentación detallada
+├── docs/             ← requisitos, arquitectura, branding…
+├── assets/           ← logos e imágenes (logo2, comi2…)
+└── app/              ← código de la aplicación
 ```
 
-## Stack
+---
 
-| Capa | Tecnología |
-|------|------------|
-| UI | React 19, TypeScript |
-| Enrutado | React Router |
-| Build | Vite |
-| Datos locales | Dexie → IndexedDB (`comi2-db`) |
+## Licencia y uso
 
-## Scripts (`app/`)
+Uso **personal**. Puedes inspirarte en el código o forkarlo para ti, pero no hay garantías. La marca y los assets en `assets/imagenes/` son parte de este proyecto concreto.
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Desarrollo |
-| `npm run build` | Build de producción |
-| `npm run preview` | Vista previa del build |
-| `npm run lint` | ESLint |
-
-## Documentación
-
-**Empieza aquí:** [howto-comi2.md](howto-comi2.md) — producto, uso, base de datos, código fuente y flujos.
-
-| Documento | Contenido |
-|-----------|-----------|
-| [docs/README.md](docs/README.md) | Índice de documentación |
-| [docs/requisitos/requisitos.md](docs/requisitos/requisitos.md) | Requisitos funcionales y no funcionales |
-| [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funcionalidades.md) | Módulos y criterios de aceptación |
-| [docs/arquitectura/arquitectura.md](docs/arquitectura/arquitectura.md) | Modelo de datos y decisiones técnicas |
-| [docs/branding/branding.md](docs/branding/branding.md) | Identidad visual, colores pastel, UI |
-| [docs/guias/desarrollo.md](docs/guias/desarrollo.md) | Guía breve para desarrolladores |
-
-## Assets de diseño
-
-Mockups e imágenes en [`assets/`](assets/) (`disenos/`, `imagenes/` con `logo2.svg`, `comi2.svg`, etc.). Ver [assets/README.md](assets/README.md).
+Si tienes curiosidad por el proceso (IA, decisiones, MVP), la [howto](howto-comi2.md) y los docs en `docs/` cuentan el resto con más detalle técnico.
