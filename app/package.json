@@ -7,9 +7,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "npm run build && cap sync",
+    "cap:android": "cap open android",
+    "cap:apk:debug": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleDebug && mkdir ..\\..\\releases 2>nul & copy /Y app\\build\\outputs\\apk\\debug\\app-debug.apk ..\\..\\releases\\comi2-debug.apk",
+    "cap:apk:release": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleRelease",
+    "cap:apk:debug:unix": "npm run cap:sync && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
     "@phosphor-icons/react": "^2.1.10",
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",

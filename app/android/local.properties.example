@@ -1,0 +1,11 @@
+# Copia este archivo a local.properties (misma carpeta) y ajusta sdk.dir.
+# local.properties NO se sube a git — es específico de tu máquina.
+#
+# Windows (ruta típica con Android Studio):
+sdk.dir=C\:\\Users\\TU_USUARIO\\AppData\\Local\\Android\\Sdk
+#
+# macOS:
+# sdk.dir=/Users/TU_USUARIO/Library/Android/sdk
+#
+# Linux:
+# sdk.dir=/home/TU_USUARIO/Android/Sdk

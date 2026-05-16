@@ -5,9 +5,10 @@
 | Capa | Tecnología |
 |------|------------|
 | UI | React + TypeScript |
-| Build | Vite |
+| Build | Vite (`base: './'` para empaquetado móvil) |
 | Estado / datos locales | Dexie.js (IndexedDB) |
-| Estilos | CSS (por ampliar) |
+| Estilos | CSS |
+| APK Android | Capacitor 8 → WebView + proyecto Gradle en `app/android/` |
 
 ## Estructura del repositorio
 
@@ -15,8 +16,10 @@
 Comi2/
 ├── docs/       # Documentación
 ├── assets/     # Diseños e imágenes
-└── app/        # Código fuente (React)
+└── app/        # Código fuente (React) + android/ (Capacitor)
 ```
+
+Detalle del empaquetado Android: [../guias/android-apk.md](../guias/android-apk.md).
 
 ## Capas de la aplicación
 

@@ -41,14 +41,37 @@ Abre la URL que muestre la terminal (suele ser `http://localhost:5173`).
 
 ---
 
+## App Android (APK)
+
+Comi2 se puede instalar en el móvil como **APK** gracias a [Capacitor](https://capacitorjs.com/): la misma app web va dentro de una WebView; los datos siguen en **IndexedDB** en el dispositivo.
+
+**Requisitos:** Node (como arriba), **JDK 21**, **Android SDK** (p. ej. con Android Studio).
+
+```bash
+cd app
+npm install
+# Una vez: copia android/local.properties.example → android/local.properties y pon tu sdk.dir
+npm run cap:apk:debug
+```
+
+La APK queda en:
+
+- **`releases/comi2-debug.apk`** (copia fácil de encontrar en la raíz del repo)
+- `app/android/app/build/outputs/apk/debug/app-debug.apk` (salida de Gradle; carpeta ignorada por git)
+
+Pasos completos, requisitos, solución de problemas y lista de cambios en el repo: **[docs/guias/android-apk.md](docs/guias/android-apk.md)**.
+
+---
+
 ## Si quieres profundizar
 
 | Quiero… | Dónde mirar |
 |--------|-------------|
 | Entender el proyecto de punta a punta | **[howto-comi2.md](howto-comi2.md)** — guía principal |
+| Generar la APK Android | **[docs/guias/android-apk.md](docs/guias/android-apk.md)** |
 | Requisitos y funcionalidades | [docs/](docs/) |
 | Colores, logo y cabecera | [docs/branding/branding.md](docs/branding/branding.md) |
-| Código de la app | carpeta [`app/`](app/) (React + Vite + TypeScript + Dexie) |
+| Código de la app | carpeta [`app/`](app/) (React + Vite + TypeScript + Dexie + Capacitor) |
 
 ### Rutas de la app
 
@@ -68,9 +91,10 @@ Abre la URL que muestre la terminal (suele ser `http://localhost:5173`).
 | Interfaz | React, TypeScript |
 | Navegación | React Router |
 | Build | Vite |
-| Datos en el navegador | Dexie (IndexedDB), base `comi2-db` |
+| Datos en el navegador / móvil | Dexie (IndexedDB), base `comi2-db` |
+| APK Android | Capacitor 8 (`es.comi2.app`) |
 
-Comandos útiles dentro de `app/`: `npm run dev`, `npm run build`, `npm run lint`.
+Comandos útiles dentro de `app/`: `npm run dev`, `npm run build`, `npm run lint`, `npm run cap:apk:debug`.
 
 ---
 
@@ -80,9 +104,10 @@ Comandos útiles dentro de `app/`: `npm run dev`, `npm run build`, `npm run lint
 Comi2/
 ├── README.md         ← estás aquí
 ├── howto-comi2.md    ← documentación detallada
-├── docs/             ← requisitos, arquitectura, branding…
+├── releases/         ← APK de prueba (comi2-debug.apk) tras npm run cap:apk:debug
+├── docs/             ← requisitos, arquitectura, branding, guía APK…
 ├── assets/           ← logos e imágenes (logo2, comi2…)
-└── app/              ← código de la aplicación
+└── app/              ← código (web + proyecto Android en app/android/)
 ```
 
 ---

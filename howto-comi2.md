@@ -20,9 +20,10 @@ Guía completa del proyecto: producto, estructura, desarrollo, base de datos y u
 12. [Flujos de usuario](#flujos-de-usuario)
 13. [Requisitos (resumen)](#requisitos-resumen)
 14. [Funcionalidades futuras](#funcionalidades-futuras)
-15. [Documentación adicional](#documentación-adicional)
-16. [Assets de diseño](#assets-de-diseño)
-17. [Enlaces útiles](#enlaces-útiles)
+15. [APK Android (Capacitor)](#apk-android-capacitor)
+16. [Documentación adicional](#documentación-adicional)
+17. [Assets de diseño](#assets-de-diseño)
+18. [Enlaces útiles](#enlaces-útiles)
 
 ---
 
@@ -86,21 +87,27 @@ flowchart LR
 Comi2/
 ├── README.md
 ├── howto-comi2.md          # Este documento
+├── releases/               # APK comi2-debug.apk (generada; ver README ahí)
 ├── .gitignore
 ├── docs/                   # Documentación de producto (español)
 │   ├── README.md
 │   ├── requisitos/requisitos.md
 │   ├── funcionalidades/funcionalidades.md
 │   ├── arquitectura/arquitectura.md
-│   └── guias/desarrollo.md
+│   └── guias/
+│       ├── desarrollo.md
+│       └── android-apk.md   # Guía completa APK
 ├── assets/                 # Diseños e imágenes (no código)
 │   ├── README.md
 │   ├── disenos/
 │   └── imagenes/
-└── app/                    # Aplicación React
+└── app/                    # Aplicación React + Capacitor
     ├── package.json
+    ├── capacitor.config.ts
     ├── vite.config.ts
     ├── index.html
+    ├── scripts/            # Atajos build (p. ej. build-apk-debug.ps1)
+    ├── android/            # Proyecto Gradle (APK)
     └── src/
 ```
 
@@ -118,6 +125,7 @@ Comi2/
 | BD local | Dexie.js → IndexedDB (`comi2-db`) |
 | Estilos | CSS en `app/src/styles/index.css` |
 | Reactividad datos | `dexie-react-hooks` (`useLiveQuery`) |
+| APK Android | Capacitor 8 — WebView, `appId` `es.comi2.app` |
 
 ---
 
@@ -146,6 +154,11 @@ Abre la URL de Vite (por defecto `http://localhost:5173`).
 | `npm run build` | Compilación de producción (`dist/`) |
 | `npm run preview` | Vista previa del build |
 | `npm run lint` | ESLint |
+| `npm run cap:sync` | Build + `cap sync` (web → Android) |
+| `npm run cap:android` | Abre Android Studio |
+| `npm run cap:apk:debug` | APK de prueba → `releases/comi2-debug.apk` |
+| `npm run cap:apk:release` | Build release (firma / keystore) |
+| `npm run cap:apk:debug:unix` | APK debug en Linux/macOS |
 
 ### Inspeccionar la base de datos
 
@@ -442,6 +455,52 @@ Detalle: [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funciona
 
 ---
 
+## APK Android (Capacitor)
+
+La misma app web se empaqueta como **APK** para Android. Los datos siguen en **IndexedDB** en el dispositivo (sin servidor).
+
+### Requisitos
+
+- Node.js LTS (v20+)
+- **JDK 21** (Capacitor 8; en Windows suele usarse el JBR de Android Studio)
+- **Android SDK** — p. ej. con [Android Studio](https://developer.android.com/studio)
+- Archivo local **`app/android/local.properties`** con `sdk.dir` (plantilla: `app/android/local.properties.example`)
+
+### Comando rápido
+
+```bash
+cd app
+npm install
+# Primera vez: copiar local.properties.example → local.properties y ajustar sdk.dir
+npm run cap:apk:debug
+```
+
+**Salida:** `releases/comi2-debug.apk` (raíz del repo)
+
+### Qué hace el flujo
+
+1. `npm run build` — genera `app/dist/`
+2. `cap sync` — copia assets y config a `app/android/`
+3. Gradle `assembleDebug` — compila la APK
+
+### Cambios clave en el código (ya en el repo)
+
+| Archivo | Cambio |
+|---------|--------|
+| `app/capacitor.config.ts` | `appId`, `webDir: 'dist'`, `androidScheme: 'https'` |
+| `app/vite.config.ts` | `base: './'` (rutas relativas en WebView) |
+| `app/index.html` | `viewport-fit=cover` |
+| `app/package.json` | Dependencias `@capacitor/*` y scripts `cap:*` |
+| `app/android/` | Proyecto nativo generado por Capacitor |
+
+### Documentación completa
+
+Todos los pasos desde cero, instalación en el móvil, release firmado y errores frecuentes:
+
+**[docs/guias/android-apk.md](docs/guias/android-apk.md)**
+
+---
+
 ## Documentación adicional
 
 | Documento | Contenido |
@@ -452,6 +511,7 @@ Detalle: [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funciona
 | [docs/arquitectura/arquitectura.md](docs/arquitectura/arquitectura.md) | Capas, modelo de datos, decisiones técnicas |
 | [docs/branding/branding.md](docs/branding/branding.md) | Branding: pasteles, fuentes modernas, iconos, botones |
 | [docs/guias/desarrollo.md](docs/guias/desarrollo.md) | Guía breve para desarrolladores |
+| [docs/guias/android-apk.md](docs/guias/android-apk.md) | APK Android: Capacitor, Gradle, JDK 21, troubleshooting |
 | [README.md](README.md) | Resumen del repo y enlace a este howto |
 
 ---
@@ -478,3 +538,4 @@ Convenciones de nombres: [assets/README.md](assets/README.md) (kebab-case, versi
 - [Vite](https://vite.dev/)
 - [React](https://react.dev/)
 - [React Router](https://reactrouter.com/)
+- [Capacitor](https://capacitorjs.com/)
