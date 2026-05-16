@@ -25,7 +25,7 @@ Abre la URL que muestra Vite (normalmente `http://localhost:5173`).
 | `npm run lint` | Linter (si está configurado en el proyecto) |
 | `npm run cap:sync` | Build web + sincronizar con Android |
 | `npm run cap:android` | Abrir proyecto en Android Studio |
-| `npm run cap:apk:debug` | Generar APK → `releases/comi2-debug.apk` |
+| `npm run cap:apk:debug` | Generar APK → `releases/comi2.apk` |
 | `npm run cap:apk:release` | Build release (requiere firma / keystore) |
 | `npm run cap:apk:debug:unix` | APK debug en Linux/macOS (`JAVA_HOME` = JDK 21) |
 

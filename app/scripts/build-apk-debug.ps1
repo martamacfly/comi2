@@ -29,7 +29,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $apk = "app\build\outputs\apk\debug\app-debug.apk"
 $releases = Join-Path (Split-Path $appRoot -Parent) "releases"
 New-Item -ItemType Directory -Force -Path $releases | Out-Null
-$dest = Join-Path $releases "comi2-debug.apk"
+$dest = Join-Path $releases "comi2.apk"
 Copy-Item -Force $apk $dest
 Write-Host ""
 Write-Host "APK lista: $(Resolve-Path $dest)"

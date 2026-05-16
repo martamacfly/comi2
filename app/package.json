@@ -8,9 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "cap:icons": "node scripts/sync-favicon-icon.mjs && npx @capacitor/assets generate --android --iconBackgroundColor \"#f7f6f3\" --splashBackgroundColor \"#f7f6f3\"",
     "cap:sync": "npm run build && cap sync",
     "cap:android": "cap open android",
-    "cap:apk:debug": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleDebug && mkdir ..\\..\\releases 2>nul & copy /Y app\\build\\outputs\\apk\\debug\\app-debug.apk ..\\..\\releases\\comi2-debug.apk",
+    "cap:apk:debug": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleDebug && mkdir ..\\..\\releases 2>nul & copy /Y app\\build\\outputs\\apk\\debug\\app-debug.apk ..\\..\\releases\\comi2.apk",
     "cap:apk:release": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleRelease",
     "cap:apk:debug:unix": "npm run cap:sync && cd android && ./gradlew assembleDebug"
   },
@@ -27,6 +28,7 @@
     "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",

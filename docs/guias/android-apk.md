@@ -14,7 +14,7 @@ La carpeta nativa `app/android/` ya está en el repo; en una máquina nueva solo
 | `appId` | `es.comi2.app` |
 | Nombre en el launcher | Comi2 |
 | Web empaquetada | `app/dist/` (build de Vite) |
-| APK debug (fácil de localizar) | **`releases/comi2-debug.apk`** (raíz del repo, tras `npm run cap:apk:debug`) |
+| APK debug (fácil de localizar) | **`releases/comi2.apk`** (raíz del repo, tras `npm run cap:apk:debug`) |
 | APK debug (Gradle) | `app/android/app/build/outputs/apk/debug/app-debug.apk` |
 | Datos en el móvil | IndexedDB (`comi2-db`), igual que en el navegador |
 
@@ -70,9 +70,10 @@ Estos cambios **ya están hechos** en Comi2; sirven de inventario si clonas el p
 |--------|--------|
 | `npm run cap:sync` | `npm run build` + `cap sync` (copia `dist/` al proyecto Android) |
 | `npm run cap:android` | Abre el proyecto en Android Studio |
-| `npm run cap:apk:debug` | Sync + `assembleDebug` + copia a `releases/comi2-debug.apk` |
+| `npm run cap:apk:debug` | Sync + `assembleDebug` + copia a `releases/comi2.apk` |
 | `npm run cap:apk:release` | Sync + `assembleRelease` → APK/AAB firmable (requiere keystore) |
 | `npm run cap:apk:debug:unix` | Igual que debug en Linux/macOS (`./gradlew`; define `JAVA_HOME` a JDK 21) |
+| `npm run cap:icons` | Regenera iconos/splash Android desde `favicon.svg` |
 
 ### Configuración Capacitor (`app/capacitor.config.ts`)
 
@@ -159,7 +160,7 @@ npm install
    npm run cap:apk:debug
    ```
 
-5. **APK:** `releases/comi2-debug.apk` (y copia en `app/android/.../app-debug.apk`)
+5. **APK:** `releases/comi2.apk` (y copia en `app/android/.../app-debug.apk`)
 
 ### Script alternativo (Windows PowerShell)
 
@@ -205,7 +206,7 @@ npm run cap:apk:debug
 | **Windows** | `package.json` define `JAVA_HOME` al JBR de Android Studio |
 | **Linux / macOS** | Antes del comando: `export JAVA_HOME=$(/usr/libexec/java_home -v 21)` (macOS) o ruta a tu JDK 21 |
 
-Salida principal: **`releases/comi2-debug.apk`** en la raíz del repo (~4–5 MB). El script `cap:apk:debug` la copia ahí tras compilar; Gradle también genera `app/android/.../app-debug.apk`.
+Salida principal: **`releases/comi2.apk`** en la raíz del repo (~4–5 MB). El script `cap:apk:debug` la copia ahí tras compilar; Gradle también genera `app/android/.../app-debug.apk`.
 
 ### Release (distribución)
 
@@ -221,7 +222,7 @@ Requiere **firmar** la app (keystore + configuración en `app/android/app/build.
 
 ### Copiar el APK
 
-1. Pasa `releases/comi2-debug.apk` al móvil (USB, Drive, correo…).
+1. Pasa `releases/comi2.apk` al móvil (USB, Drive, correo…).
 2. En Android: permite **instalar apps desconocidas** para el gestor de archivos o navegador que uses.
 3. Abre el archivo y confirma.
 
@@ -238,7 +239,8 @@ adb install -r app\android\app\build\outputs\apk\debug\app-debug.apk
 - **Datos:** IndexedDB vía Dexie; persisten en el dispositivo hasta desinstalar o borrar datos de la app.
 - **Sin servidor:** todo es local; no hay cuenta ni sync entre móviles.
 - **Router:** React Router con `BrowserRouter` y esquema `https` de Capacitor; las rutas `/platos`, `/semana`, etc. funcionan igual que en web.
-- **PWA:** el `manifest.webmanifest` aplica sobre todo al navegador; en APK el icono y nombre salen del proyecto Android.
+- **PWA:** el `manifest.webmanifest` aplica sobre todo al navegador.
+- **Icono del launcher:** mismo diseño que `app/public/favicon.svg`. Fuente en `app/assets/icon.svg`; regenerar mipmaps con `npm run cap:icons` (usa `@capacitor/assets`, fondo `#f7f6f3`).
 
 ---
 
@@ -260,7 +262,7 @@ adb install -r app\android\app\build\outputs\apk\debug\app-debug.apk
 Comi2/
 ├── releases/
 │   ├── README.md
-│   └── comi2-debug.apk          # Generada por npm run cap:apk:debug (gitignore)
+│   └── comi2.apk          # Generada por npm run cap:apk:debug (gitignore)
 └── app/
     ├── capacitor.config.ts
     ├── vite.config.ts

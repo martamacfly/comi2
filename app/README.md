@@ -34,10 +34,11 @@ copy android\local.properties.example android\local.properties
 npm run cap:apk:debug
 ```
 
-APK: **`../releases/comi2-debug.apk`** (el script la copia ahí; Gradle también deja una copia en `android/app/build/outputs/apk/debug/`)
+APK: **`../releases/comi2.apk`** (el script la copia ahí; Gradle también deja una copia en `android/app/build/outputs/apk/debug/`)
 
 | Script | Descripción |
 |--------|-------------|
+| `npm run cap:icons` | Regenerar icono launcher desde `favicon.svg` |
 | `npm run cap:sync` | Build + sincronizar web con Android |
 | `npm run cap:android` | Abrir Android Studio |
 | `npm run cap:apk:debug` | APK de prueba |

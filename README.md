@@ -56,7 +56,7 @@ npm run cap:apk:debug
 
 La APK queda en:
 
-- **`releases/comi2-debug.apk`** (copia fácil de encontrar en la raíz del repo)
+- **`releases/comi2.apk`** (copia fácil de encontrar en la raíz del repo)
 - `app/android/app/build/outputs/apk/debug/app-debug.apk` (salida de Gradle; carpeta ignorada por git)
 
 Pasos completos, requisitos, solución de problemas y lista de cambios en el repo: **[docs/guias/android-apk.md](docs/guias/android-apk.md)**.
@@ -104,7 +104,7 @@ Comandos útiles dentro de `app/`: `npm run dev`, `npm run build`, `npm run lint
 Comi2/
 ├── README.md         ← estás aquí
 ├── howto-comi2.md    ← documentación detallada
-├── releases/         ← APK de prueba (comi2-debug.apk) tras npm run cap:apk:debug
+├── releases/         ← APK de prueba (comi2.apk) tras npm run cap:apk:debug
 ├── docs/             ← requisitos, arquitectura, branding, guía APK…
 ├── assets/           ← logos e imágenes (logo2, comi2…)
 └── app/              ← código (web + proyecto Android en app/android/)

@@ -2,7 +2,7 @@
 
 Tras `npm run cap:apk:debug` (desde `app/`), la APK de prueba se copia aquí:
 
-**`comi2-debug.apk`**
+**`comi2.apk`**
 
 Copia también generada por Gradle en:
 

@@ -34,10 +34,23 @@
   --color-info-text: #3d6b8a;
 
   --color-nav-active-bg: rgba(184, 212, 200, 0.35);
+  --color-nav-mobile-active-bg: color-mix(in srgb, var(--color-sage) 72%, var(--color-surface));
   --color-header-bg: color-mix(in srgb, var(--color-sage) 72%, var(--color-surface));
   --color-header-border: color-mix(in srgb, var(--color-sage-dark) 28%, var(--color-border));
   --color-header-title: var(--color-sage-deep);
   --color-icon: var(--color-sage-deep);
+
+  --layout-header-inset-top: max(var(--space-4), env(safe-area-inset-top, 0px));
+  --layout-header-height: 4.25rem;
+  --layout-header-height-desktop: 4.75rem;
+  --layout-header-total-height: calc(
+    var(--layout-header-height) + var(--layout-header-inset-top)
+  );
+  --layout-header-total-height-desktop: calc(
+    var(--layout-header-height-desktop) + var(--layout-header-inset-top)
+  );
+
+  --layout-nav-mobile-height: 4.5rem;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;

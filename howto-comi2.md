@@ -87,7 +87,7 @@ flowchart LR
 Comi2/
 ├── README.md
 ├── howto-comi2.md          # Este documento
-├── releases/               # APK comi2-debug.apk (generada; ver README ahí)
+├── releases/               # APK comi2.apk (generada; ver README ahí)
 ├── .gitignore
 ├── docs/                   # Documentación de producto (español)
 │   ├── README.md
@@ -156,9 +156,10 @@ Abre la URL de Vite (por defecto `http://localhost:5173`).
 | `npm run lint` | ESLint |
 | `npm run cap:sync` | Build + `cap sync` (web → Android) |
 | `npm run cap:android` | Abre Android Studio |
-| `npm run cap:apk:debug` | APK de prueba → `releases/comi2-debug.apk` |
+| `npm run cap:apk:debug` | APK de prueba → `releases/comi2.apk` |
 | `npm run cap:apk:release` | Build release (firma / keystore) |
 | `npm run cap:apk:debug:unix` | APK debug en Linux/macOS |
+| `npm run cap:icons` | Icono APK = favicon (`@capacitor/assets`) |
 
 ### Inspeccionar la base de datos
 
@@ -208,16 +209,17 @@ Navegación (orden en menú): **Platos · Productos · Semana · Lista**. La rut
 
 | Elemento | Archivo fuente | En la app (`app/public/`) |
 |----------|----------------|---------------------------|
-| Wordmark «Comi2» | `assets/imagenes/logo2.svg` | `logo-mark.svg` |
-| Icono (cuchara / marca) | `assets/imagenes/comi2.svg` | `brand-icon.svg` |
+| Wordmark «Comi2» | `assets/imagenes/logo2.svg` | `logo-mark.svg` (fuente) |
+| Icono (cuchara / marca) | `assets/imagenes/comi2.svg` | `brand-icon.svg` (fuente) |
+| Cabecera (marca) | `logo2.svg` + `comi2.svg` recortados | `logo-mark.svg` + `brand-icon.svg` |
 | Favicon y PWA | `assets/imagenes/favicon.svg` (recorte de `logo2`) | `favicon.svg`, `icon-512.png`, `manifest.webmanifest` |
 
-La **cabecera** muestra, de izquierda a derecha: **logo2** + **comi2**, centrados en la barra con fondo verde pastel (`--color-header-bg`). Títulos de página en verde oscuro (`--color-sage-deep` / `--color-header-title`). Menú inferior en móvil con iconos Phosphor en verde oscuro cuando la ruta está activa.
+La **cabecera** muestra **logo-mark** + **brand-icon** (dos SVG recortados, sin solapar). Centrada en la barra con fondo verde pastel (`--color-header-bg`). Títulos de página en verde oscuro (`--color-sage-deep` / `--color-header-title`). Menú inferior en móvil con iconos Phosphor en verde oscuro cuando la ruta está activa.
 
-Al cambiar los SVG en `assets/imagenes/`, copia a `app/public/`:
+Al cambiar los SVG en `assets/imagenes/`:
 
-- `logo2.svg` → `logo-mark.svg` y regenera `favicon.svg` (viewBox recortado al dibujo, ver `assets/imagenes/favicon.svg`).
-- `comi2.svg` → `brand-icon.svg`.
+- En `app/`: `npm run brand:sync` → genera `logo-mark.svg` y `brand-icon.svg` (trazos separados en x=402, uno al lado del otro en la cabecera).
+- Regenera `favicon.svg` si cambia el dibujo (ver `assets/imagenes/favicon.svg`).
 - `logo2.png` → `apple-touch-icon.png` e `icon-512.png` (opcional, para iOS / PWA).
 
 ### Pantalla Platos — vistas y subsecciones
@@ -475,7 +477,7 @@ npm install
 npm run cap:apk:debug
 ```
 
-**Salida:** `releases/comi2-debug.apk` (raíz del repo)
+**Salida:** `releases/comi2.apk` (raíz del repo)
 
 ### Qué hace el flujo
 
@@ -492,6 +494,7 @@ npm run cap:apk:debug
 | `app/index.html` | `viewport-fit=cover` |
 | `app/package.json` | Dependencias `@capacitor/*` y scripts `cap:*` |
 | `app/android/` | Proyecto nativo generado por Capacitor |
+| `app/assets/icon.svg` | Favicon → iconos launcher (`npm run cap:icons`) |
 
 ### Documentación completa
 
