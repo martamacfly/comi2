@@ -152,6 +152,7 @@ Definición en [`app/src/db/database.ts`](../../app/src/db/database.ts). La tabl
 
 | Vista | Responsabilidad |
 |-------|-----------------|
+| Layout (global) | Cabecera con `logo2.svg` + `comi2.svg`; menú; estáticos en `app/public/` (favicon, manifest PWA) |
 | Productos | CRUD productos |
 | Productos / detalle | Emoji, nombre inline, platos que usan el producto |
 | Platos / editar | Pestañas Todos/momento/etiquetas, acordeones con color, alta, edición, ingredientes |

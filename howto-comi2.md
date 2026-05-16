@@ -191,6 +191,22 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 
 Navegación (orden en menú): **Platos · Productos · Semana · Lista**. La ruta `/` redirige a `/platos`.
 
+### Marca en cabecera y favicon
+
+| Elemento | Archivo fuente | En la app (`app/public/`) |
+|----------|----------------|---------------------------|
+| Wordmark «Comi2» | `assets/imagenes/logo2.svg` | `logo-mark.svg` |
+| Icono (cuchara / marca) | `assets/imagenes/comi2.svg` | `brand-icon.svg` |
+| Favicon y PWA | `assets/imagenes/favicon.svg` (recorte de `logo2`) | `favicon.svg`, `icon-512.png`, `manifest.webmanifest` |
+
+La **cabecera** muestra, de izquierda a derecha: **logo2** + **comi2**, centrados en la barra con fondo verde pastel (`--color-header-bg`). Títulos de página en verde oscuro (`--color-sage-deep` / `--color-header-title`). Menú inferior en móvil con iconos Phosphor en verde oscuro cuando la ruta está activa.
+
+Al cambiar los SVG en `assets/imagenes/`, copia a `app/public/`:
+
+- `logo2.svg` → `logo-mark.svg` y regenera `favicon.svg` (viewBox recortado al dibujo, ver `assets/imagenes/favicon.svg`).
+- `comi2.svg` → `brand-icon.svg`.
+- `logo2.png` → `apple-touch-icon.png` e `icon-512.png` (opcional, para iOS / PWA).
+
 ### Pantalla Platos — vistas y subsecciones
 
 En `/platos` hay tres pestañas en dos filas (**Todos** a ancho completo; debajo **Por momento** y **Por etiquetas**):
@@ -309,7 +325,7 @@ app/src/
 │   ├── momento-icons.tsx    # Iconos sol/luna para comida y cena
 │   └── semana.ts            # Semana activa, normalización de fechas
 ├── components/
-│   ├── Layout.tsx           # Cabecera y navegación (Platos primero)
+│   ├── Layout.tsx           # Cabecera (logo2 + comi2), nav escritorio/móvil
 │   ├── PageHeader.tsx       # Título de página con icono
 │   ├── EmptyState.tsx       # Estados vacíos con ilustración
 │   ├── TagChip.tsx          # Chip de etiqueta con color
@@ -447,11 +463,11 @@ Recursos visuales fuera del código:
 | Carpeta | Uso |
 |---------|-----|
 | `assets/disenos/` | Mockups, wireframes, exports Figma |
-| `assets/imagenes/` | Iconos, logos, ilustraciones |
+| `assets/imagenes/` | Logos (`logo2.svg`, `comi2.svg`, `favicon.svg`), PNG auxiliares |
 
 Convenciones de nombres: [assets/README.md](assets/README.md) (kebab-case, versiones en el nombre del archivo).
 
-Para assets en producción, copiar o referenciar desde `app/public/` cuando corresponda.
+**Producción:** los archivos servidos por Vite están en `app/public/` (`favicon.svg`, `logo-mark.svg`, `brand-icon.svg`, `manifest.webmanifest`). Mantener sincronizados con `assets/imagenes/` tras cambiar la marca.
 
 ---
 

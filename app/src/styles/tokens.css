@@ -6,6 +6,7 @@
 
   --color-sage: #b8d4c8;
   --color-sage-dark: #7fa896;
+  --color-sage-deep: #1e5a36;
   --color-peach: #f5d5c8;
   --color-peach-dark: #e8b4a0;
   --color-lavender: #d4c8e8;
@@ -33,6 +34,10 @@
   --color-info-text: #3d6b8a;
 
   --color-nav-active-bg: rgba(184, 212, 200, 0.35);
+  --color-header-bg: color-mix(in srgb, var(--color-sage) 72%, var(--color-surface));
+  --color-header-border: color-mix(in srgb, var(--color-sage-dark) 28%, var(--color-border));
+  --color-header-title: var(--color-sage-deep);
+  --color-icon: var(--color-sage-deep);
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;

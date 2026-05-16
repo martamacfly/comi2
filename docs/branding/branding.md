@@ -19,8 +19,10 @@ Guía de identidad visual para la aplicación Comi2: tipografía moderna, paleta
 ### Logo y nombre
 
 - **Nombre:** Comi2 (C mayúscula; «2» como segunda versión / evolución del producto).
-- **Logotipo (recomendado):** wordmark «Comi2» con acento en la «i» o un icono de plato + hoja (comida equilibrada).
-- **Zona de respeto:** altura de la «C» alrededor del logotipo.
+- **Wordmark:** `assets/imagenes/logo2.svg` — texto «Comi2» en verde (`#1E5A36` y variantes).
+- **Icono de marca:** `assets/imagenes/comi2.svg` — ilustración (cuchara / comida); va a la **derecha** del wordmark en la cabecera.
+- **Favicon / PWA:** `assets/imagenes/favicon.svg` (mismo motivo que logo2 con `viewBox` recortado); copias en `app/public/favicon.svg`, `icon-512.png`, `apple-touch-icon.png`.
+- **Cabecera:** fondo `--color-header-bg` (sage pastel); títulos `--color-header-title` / `--color-sage-deep` (`#1E5A36`); iconografía de UI `--color-icon`.
 - **Fondos:** usar sobre blanco, crema (`--color-surface`) o pastel muy suave; evitar sobre fotos sin overlay.
 
 ---
@@ -65,7 +67,10 @@ Colores de aplicación suaves, con suficiente contraste para texto oscuro (`--co
 | Token | Hex | Muestra | Uso |
 |-------|-----|---------|-----|
 | `--color-sage` | `#B8D4C8` | Verde menta suave | Primario, navegación activa, acentos |
-| `--color-sage-dark` | `#7FA896` | Verde más definido | Hover primario, iconos activos |
+| `--color-sage-dark` | `#7FA896` | Verde más definido | Hover primario |
+| `--color-sage-deep` | `#1E5A36` | Verde marca | Títulos de cabecera, iconos activos (`--color-icon`) |
+| `--color-header-bg` | mezcla sage + surface | Cabecera y franjas de página |
+| `--color-header-title` | `#1E5A36` | Títulos en cabecera de cada pantalla |
 | `--color-peach` | `#F5D5C8` | Melocotón | Secundario, fondos destacados |
 | `--color-peach-dark` | `#E8B4A0` | Melocotón intenso | Hover secundario |
 | `--color-lavender` | `#D4C8E8` | Lavanda | Comida (momento), chips informativos |

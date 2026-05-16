@@ -1,0 +1,24 @@
+{
+  "name": "Comi2",
+  "short_name": "Comi2",
+  "description": "Planifica tus comidas y genera la lista de la compra",
+  "start_url": "/",
+  "display": "standalone",
+  "lang": "es",
+  "background_color": "#f7f6f3",
+  "theme_color": "#b8d4c8",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

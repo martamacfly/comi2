@@ -5,9 +5,11 @@ import {
   Carrot,
   ClipboardText,
   CookingPot,
-  ForkKnife,
 } from '@phosphor-icons/react';
 import type { IconProps } from '@phosphor-icons/react';
+/** Origen: `assets/imagenes/logo2.svg` (wordmark y favicon), `comi2.svg` (icono cabecera). */
+const BRAND_MARK_SRC = '/logo-mark.svg';
+const BRAND_ICON_SRC = '/brand-icon.svg';
 
 type NavIcon = ComponentType<IconProps>;
 
@@ -42,7 +44,11 @@ function NavItem({
     >
       {({ isActive }) => (
         <>
-          <Icon size={20} weight={isActive ? 'duotone' : 'regular'} aria-hidden />
+          <Icon
+            size={20}
+            weight={isActive ? 'duotone' : 'regular'}
+            aria-hidden
+          />
           <span>{label}</span>
         </>
       )}
@@ -54,10 +60,18 @@ export function Layout() {
   return (
     <div className="layout">
       <header className="layout__header">
-        <NavLink to="/platos" className="layout__brand">
-          <ForkKnife size={26} weight="duotone" aria-hidden />
-          <span>Comi2</span>
-        </NavLink>
+        <div className="layout__brand-center">
+          <NavLink to="/platos" className="layout__brand" aria-label="Comi2">
+            <img
+              src={BRAND_MARK_SRC}
+              alt=""
+              className="layout__brand-wordmark"
+            />
+            <span className="layout__brand-icon-wrap" aria-hidden>
+              <img src={BRAND_ICON_SRC} alt="" className="layout__brand-icon" />
+            </span>
+          </NavLink>
+        </div>
         <nav className="layout__nav layout__nav--desktop" aria-label="Principal">
           {navItems.map((item) => (
             <NavItem key={item.to} {...item} />

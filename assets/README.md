@@ -25,6 +25,22 @@ Recursos visuales y de diseño del proyecto (no código).
 | Iconos | SVG preferido |
 | Fotos | WebP o PNG optimizado |
 
+## Logos de marca (`imagenes/`)
+
+| Archivo | Uso |
+|---------|-----|
+| `logo2.svg` | Wordmark «Comi2» (cabecera, base del favicon) |
+| `comi2.svg` | Icono junto al wordmark en cabecera |
+| `favicon.svg` | Recorte para favicon (copiar a `app/public/favicon.svg`) |
+| `logo2.png`, `comi2.png` | Raster para PWA / touch icon si hace falta |
+
 ## Uso en la app
 
-Los assets que deban empaquetarse en la build de React pueden copiarse o referenciarse desde `app/public/` cuando estén listos para producción.
+Copiar a `app/public/` al actualizar la marca:
+
+- `logo2.svg` → `logo-mark.svg`
+- `comi2.svg` → `brand-icon.svg`
+- `favicon.svg` → `favicon.svg`
+- `logo2.png` → `apple-touch-icon.png`, `icon-512.png` (opcional)
+
+La cabecera y el `manifest.webmanifest` están documentados en [howto-comi2.md](../howto-comi2.md#marca-en-cabecera-y-favicon).

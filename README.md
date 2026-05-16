@@ -30,6 +30,8 @@ npm run dev
 
 Abre `http://localhost:5173` (o la URL que indique Vite).
 
+La app incluye **marca** en cabecera (wordmark + icono), **favicon** y **manifest** PWA (`app/public/`). Detalle en [howto-comi2.md](howto-comi2.md#marca-en-cabecera-y-favicon).
+
 **Primer uso:** Nuevo plato → Semana → Generar lista. (Los productos se pueden crear también al editar un plato.)
 
 ## Pantallas
@@ -86,4 +88,4 @@ Comi2/
 
 ## Assets de diseño
 
-Mockups e imágenes en [`assets/`](assets/) (`disenos/`, `imagenes/`). Ver [assets/README.md](assets/README.md).
+Mockups e imágenes en [`assets/`](assets/) (`disenos/`, `imagenes/` con `logo2.svg`, `comi2.svg`, etc.). Ver [assets/README.md](assets/README.md).
