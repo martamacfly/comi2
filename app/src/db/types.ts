@@ -3,6 +3,7 @@ export type MomentoPlato = 'comida' | 'cena' | 'ambos';
 export interface Producto {
   id?: number;
   nombre: string;
+  emoji: string;
 }
 
 export interface Plato {

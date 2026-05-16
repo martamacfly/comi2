@@ -111,7 +111,7 @@ erDiagram
 
 | Tabla | Índices | Descripción |
 |-------|---------|-------------|
-| `productos` | `++id, nombre` | Ingredientes del catálogo |
+| `productos` | `++id, nombre` | Ingredientes (`nombre`, `emoji`) |
 | `platos` | `++id, nombre, momento` | Platos con momento comida/cena/ambos |
 | `etiquetas` | `++id, nombre, color` | Catálogo de etiquetas (nombre único, color hex) |
 | `platoEtiquetas` | `++id, platoId, etiquetaId, [platoId+etiquetaId]` | Etiquetas asignadas a cada plato |
@@ -136,8 +136,9 @@ La **lista de la compra** se calcula en memoria (sin tabla en el MVP).
 |---------|---------|
 | 1 | Tabla `items` de ejemplo (smoke test) |
 | 2 | `productos`, `platos`, `etiquetas`, `platoEtiquetas`, `platoProductos`, `semanas`, `planSlots` |
+| 3 | Campo `emoji` en `productos` (upgrade asigna emoji a filas existentes) |
 
-Al implementar v2 en [`app/src/db/database.ts`](../../app/src/db/database.ts), retirar o migrar `items`.
+Definición en [`app/src/db/database.ts`](../../app/src/db/database.ts). La tabla `items` (v1) quedó obsoleta.
 
 ## Decisiones técnicas
 
@@ -152,6 +153,7 @@ Al implementar v2 en [`app/src/db/database.ts`](../../app/src/db/database.ts), r
 | Vista | Responsabilidad |
 |-------|-----------------|
 | Productos | CRUD productos |
-| Platos / editar | Listado agrupado (momento \| etiquetas, acordeones), alta, edición, ingredientes inline, momento, etiquetas |
+| Productos / detalle | Emoji, nombre inline, platos que usan el producto |
+| Platos / editar | Pestañas Todos/momento/etiquetas, acordeones con color, alta, edición, ingredientes |
 | Semana | Grilla lunes–domingo × (comida, cena); selector filtrado por tipo |
 | Lista | Generar y mostrar productos únicos |

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarDots } from '@phosphor-icons/react';
+import { CalendarDots, CalendarPlus, CookingPot } from '@phosphor-icons/react';
 import { db } from '../db/database';
 import type { Etiqueta, MomentoSlot, Plato, PlatoEtiqueta } from '../db/types';
+import { EmptyState } from '../components/EmptyState';
+import { PageHeader } from '../components/PageHeader';
 import { TagChip } from '../components/TagChip';
+import { MomentoSlotIcon } from '../lib/momento-icons';
 import { DIAS_SEMANA, obtenerOCrearSemanaActiva } from '../lib/semana';
 
 const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
@@ -102,20 +105,12 @@ export function SemanaPage() {
 
   return (
     <section className="page">
-      <div className="page__head">
-        <div>
-          <h1>Semana</h1>
-          <p className="page__lead">
-            Planifica comida y cena de lunes a domingo.
-          </p>
-        </div>
-        <CalendarDots
-          size={36}
-          weight="duotone"
-          className="page__head-icon"
-          aria-hidden
-        />
-      </div>
+      <PageHeader
+        title="Semana"
+        lead="Planifica comida y cena de lunes a domingo."
+        icon={CalendarDots}
+        iconTone="sky"
+      />
 
       {initError && (
         <div className="alert alert--error" role="alert">
@@ -132,14 +127,15 @@ export function SemanaPage() {
       )}
 
       {datosListos && !initError && platos.length === 0 && (
-        <div className="empty-state">
+        <EmptyState icon={CalendarPlus} iconTone="sky">
           <p className="muted">
             Necesitas al menos un plato para planificar la semana.
           </p>
-          <Link to="/platos/nuevo" className="btn-primary">
+          <Link to="/platos/nuevo" className="btn-primary btn-primary--icon">
+            <CookingPot size={20} weight="duotone" aria-hidden />
             Crear un plato
           </Link>
-        </div>
+        </EmptyState>
       )}
 
       {datosListos && !initError && platos.length > 0 && semanaId != null && (
@@ -167,6 +163,7 @@ export function SemanaPage() {
                   <div key={momento} className="semana-slot">
                     <label>
                       <span className="semana-slot__label">
+                        <MomentoSlotIcon momento={momento} />
                         {momento === 'comida' ? 'Comida' : 'Cena'}
                       </span>
                       <select

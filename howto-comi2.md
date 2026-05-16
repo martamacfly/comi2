@@ -56,7 +56,7 @@ flowchart LR
 
 | Término | Definición |
 |---------|------------|
-| **Producto** | Ingrediente o artículo de compra (ej. arroz, pollo, aceite) |
+| **Producto** | Ingrediente o artículo de compra; tiene **nombre** y **emoji** (icono visual) |
 | **Plato** | Comida preparada, compuesta por uno o más productos |
 | **Momento del plato** | `comida`, `cena` o `ambos` — define en qué huecos del planificador puede asignarse |
 | **Etiqueta** | Etiqueta libre con **nombre** y **color**; se gestiona al editar un plato; varias por plato |
@@ -165,7 +165,7 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 1. **Platos → Nuevo plato** — Nombre, momento (comida/cena/ambos), productos del plato, etiquetas con color. (Puedes crear productos al vuelo desde la edición del plato.)
 2. **Productos** — Opcional: revisa o amplía el catálogo de ingredientes.
 3. **Semana** — Asigna un plato a cada comida y cena de lunes a domingo.
-4. **Lista** — Pulsa **Generar lista** para ver los productos únicos a comprar.
+4. **Lista** — Pulsa **Generar lista** y marca con el checkbox los productos que **ya tienes en casa** para quitarlos de la compra.
 
 ### Reglas importantes
 
@@ -181,27 +181,34 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 | Ruta | Pantalla | Qué hace |
 |------|----------|----------|
 | `/` | — | Redirige a `/platos` |
-| `/productos` | Productos | Alta, listado y eliminación de productos |
+| `/productos` | Productos | Alta, listado (con emoji) y eliminación |
+| `/productos/:id` | Detalle del producto | Editar nombre (lápiz inline), emoji y ver platos |
 | `/platos` | Platos | Catálogo agrupado (ver abajo) |
 | `/platos/nuevo` | Editar plato | Crear plato (`:id` = `nuevo`) |
 | `/platos/:id` | Editar plato | Modificar plato, productos y etiquetas |
 | `/semana` | Semana | Planificador 7 días × (comida, cena) |
-| `/lista` | Lista de la compra | Generar lista desde la semana actual |
+| `/lista` | Lista de la compra | Generar lista; checkbox «Ya lo tengo» para ocultar productos en casa |
 
 Navegación (orden en menú): **Platos · Productos · Semana · Lista**. La ruta `/` redirige a `/platos`.
 
 ### Pantalla Platos — vistas y subsecciones
 
-En `/platos` hay dos pestañas:
+En `/platos` hay tres pestañas en dos filas (**Todos** a ancho completo; debajo **Por momento** y **Por etiquetas**):
 
 | Pestaña | Agrupación |
 |---------|------------|
+| **Todos** | Listado completo visible al instante (orden alfabético, sin acordeón) |
 | **Por momento** | Subsecciones: Comida, Cena, Comida y cena |
 | **Por etiquetas** | Una subsección por cada etiqueta del catálogo + **Sin etiquetas** si aplica |
 
-Cada subsección es un **acordeón cerrado por defecto**: el título muestra el nombre (o el chip de la etiqueta) y el **número de platos**; al pulsarla se despliega la lista de tarjetas. Un plato con varias etiquetas aparece en varias subsecciones en la vista por etiquetas.
+En **Por momento** y **Por etiquetas**, cada subsección es un **acordeón cerrado por defecto** con **tinte de color** (comida/cena/ambos o color de la etiqueta). En **Todos** la lista se muestra directamente. En la vista por momento no se repite la pastilla de momento en cada tarjeta.
 
-En la vista por momento no se repite la pastilla de momento en cada tarjeta (ya está en el título de la subsección).
+### Pantalla Productos — detalle (`/productos/:id`)
+
+1. Pulsa un producto en el listado.
+2. **Emoji:** pulsa el emoji para elegir otro en la rejilla.
+3. **Nombre:** pulsa el **lápiz**, edita en línea; Enter o salir del campo guarda; Escape cancela.
+4. Debajo, los **platos** que usan ese ingrediente.
 
 ---
 
@@ -240,12 +247,13 @@ Componente `TagChip`: fondo con el color de la etiqueta y texto con contraste au
 |---------|-----------|
 | 1 | Tabla `items` (prueba inicial; obsoleta) |
 | 2 | Modelo de dominio completo |
+| 3 | Campo `emoji` en `productos` (migración asigna emoji a registros existentes) |
 
-### Tablas (v2)
+### Tablas (v3)
 
 | Tabla | Campos principales | Descripción |
 |-------|-------------------|-------------|
-| `productos` | `id`, `nombre` | Ingredientes |
+| `productos` | `id`, `nombre`, `emoji` | Ingredientes con emoji visual |
 | `platos` | `id`, `nombre`, `momento` | Platos (`momento`: comida \| cena \| ambos) |
 | `etiquetas` | `id`, `nombre`, `color` | Etiquetas (nombre único, color hex) |
 | `platoProductos` | `platoId`, `productoId` | Productos de cada plato |
@@ -294,17 +302,26 @@ app/src/
 ├── lib/
 │   ├── color.ts             # Hex, contraste, paleta de etiquetas
 │   ├── platos.ts            # Guardar plato, etiquetas, sincronizar relaciones
-│   ├── productos.ts         # crearProducto, reglas de unicidad
+│   ├── productos.ts         # CRUD producto, platos por producto
+│   ├── producto-emoji.ts    # Emojis sugeridos y asignación por defecto
 │   ├── lista.ts             # generarListaCompra()
+│   ├── momento-icons.tsx    # Iconos sol/luna para comida y cena
 │   └── semana.ts            # Semana activa, normalización de fechas
 ├── components/
 │   ├── Layout.tsx           # Cabecera y navegación (Platos primero)
+│   ├── PageHeader.tsx       # Título de página con icono
+│   ├── EmptyState.tsx       # Estados vacíos con ilustración
 │   ├── TagChip.tsx          # Chip de etiqueta con color
-│   └── InlineProductoAdd.tsx # Alta rápida de producto desde edición de plato
+│   ├── MomentoBadge.tsx     # Pastilla comida/cena/ambos
+│   ├── ProductoEmoji.tsx    # Muestra emoji de producto
+│   ├── ProductoEmojiPicker.tsx
+│   ├── ProductoInlineTitle.tsx # Nombre editable + selector emoji
+│   └── InlineProductoAdd.tsx
 ├── pages/
 │   ├── ProductosPage.tsx
-│   ├── PlatosPage.tsx       # Pestañas momento/etiquetas y acordeones
-│   ├── PlatoEditPage.tsx    # Edición + etiquetas + productos en el plato
+│   ├── ProductoPlatosPage.tsx
+│   ├── PlatosPage.tsx
+│   ├── PlatoEditPage.tsx
 │   ├── SemanaPage.tsx
 │   └── ListaPage.tsx
 └── styles/
@@ -316,10 +333,11 @@ app/src/
 | Archivo | Responsabilidad |
 |---------|-----------------|
 | `lib/platos.ts` | `guardarPlato`, `crearEtiqueta`, `actualizarEtiqueta`, `eliminarEtiqueta`, sync de productos/etiquetas |
-| `PlatosPage.tsx` | Agrupación por momento o etiquetas; subsecciones `<details>` colapsables |
-| `PlatoEditPage.tsx` | Formulario del plato; lista «En este plato»; catálogo desplegable; `InlineProductoAdd` (sin `<form>` anidado) |
-| `SemanaPage.tsx` | Grilla semanal; filtra platos por `momento` |
-| `ListaPage.tsx` | Botón generar + listado de productos |
+| `ProductoPlatosPage.tsx` | Detalle: emoji, nombre inline, platos que lo usan |
+| `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color |
+| `PlatoEditPage.tsx` | Formulario del plato; productos con emoji; sin `<form>` anidado |
+| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna en huecos |
+| `ListaPage.tsx` | Generar lista; checkbox «ya en casa»; emoji por producto |
 
 ---
 
@@ -336,7 +354,7 @@ app/src/
 ### A2 — Consultar el catálogo de platos
 
 1. Ir a **Platos**.
-2. Elige **Por momento** o **Por etiquetas**.
+2. Elige **Todos**, **Por momento** o **Por etiquetas**.
 3. Abre la subsección que te interese para ver sus platos.
 
 ### B — Planificar la semana
@@ -348,8 +366,9 @@ app/src/
 ### C — Hacer la compra
 
 1. Ir a **Lista** → **Generar lista**.
-2. Revisar productos únicos.
-3. Si cambias el plan en **Semana**, vuelve a **Generar lista**.
+2. Marca con el checkbox los productos que **ya tienes**; desaparecen de la lista principal.
+3. Si te equivocas, ábrelos en **Ya en casa** y desmarca para volver a añadirlos.
+4. Si cambias el plan en **Semana**, vuelve a **Generar lista**.
 
 ---
 
@@ -365,12 +384,15 @@ app/src/
 | RF-009 | Etiquetas con color, gestión al editar plato |
 | RF-004 | Plan semanal lunes–domingo, 14 huecos |
 | RF-005 | Lista de compra (productos únicos) |
+| RF-006 | Checkbox «Ya lo tengo» en la lista de la compra |
+| RF-010 | Emoji por producto; edición inline del nombre en detalle |
+| RF-011 | Detalle producto: platos que usan el ingrediente |
+| RF-012 | Listado platos: pestañas Todos / momento / etiquetas con acordeones |
 
 ### Pendientes / futuro
 
 | ID | Descripción |
 |----|-------------|
-| RF-006 | Marcar productos comprados en la lista |
 | RF-007 | Copiar semana anterior |
 | RF-008 | Categorías de productos |
 
@@ -389,7 +411,7 @@ Detalle completo: [docs/requisitos/requisitos.md](docs/requisitos/requisitos.md)
 
 | Feature | Prioridad |
 |---------|-----------|
-| Marcar comprado en la lista | Media |
+| Persistir «ya en casa» entre sesiones | Baja |
 | Cantidades y unidades en productos / lista | Media |
 | Filtrar platos por etiqueta en Semana | Media |
 | Copiar semana anterior | Baja |

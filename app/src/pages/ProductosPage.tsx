@@ -1,6 +1,12 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Carrot, Plus, Trash } from '@phosphor-icons/react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
+import { crearProducto } from '../lib/productos';
+import { EmptyState } from '../components/EmptyState';
+import { PageHeader } from '../components/PageHeader';
+import { ProductoEmoji } from '../components/ProductoEmoji';
 
 export function ProductosPage() {
   const productos = useLiveQuery(() =>
@@ -21,7 +27,7 @@ export function ProductosPage() {
       setError('Ya existe ese producto');
       return;
     }
-    await db.productos.add({ nombre: n });
+    await crearProducto(n);
     setNombre('');
     setError('');
   };
@@ -41,8 +47,12 @@ export function ProductosPage() {
 
   return (
     <section className="page">
-      <h1>Productos</h1>
-      <p className="page__lead">Ingredientes que usan tus platos.</p>
+      <PageHeader
+        title="Productos"
+        lead="Ingredientes que usan tus platos."
+        icon={Carrot}
+        iconTone="peach"
+      />
 
       <form className="form-inline" onSubmit={add}>
         <input
@@ -51,24 +61,33 @@ export function ProductosPage() {
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
         />
-        <button type="submit">Añadir</button>
+        <button type="submit" className="btn-primary btn-primary--icon">
+          <Plus size={20} weight="bold" aria-hidden />
+          Añadir
+        </button>
       </form>
       {error && <p className="form-error">{error}</p>}
 
       {productos === undefined ? (
         <p className="muted">Cargando…</p>
       ) : productos.length === 0 ? (
-        <p className="muted">Aún no hay productos.</p>
+        <EmptyState icon={Carrot} iconTone="peach">
+          <p className="muted">Aún no hay productos.</p>
+        </EmptyState>
       ) : (
         <ul className="list">
           {productos.map((p) => (
             <li key={p.id} className="list__row">
-              <span>{p.nombre}</span>
+              <Link to={`/productos/${p.id}`} className="list__row-link">
+                <ProductoEmoji producto={p} size="sm" />
+                {p.nombre}
+              </Link>
               <button
                 type="button"
-                className="btn-ghost"
+                className="btn-ghost btn-ghost--icon"
                 onClick={() => remove(p.id!)}
               >
+                <Trash size={18} weight="regular" aria-hidden />
                 Eliminar
               </button>
             </li>

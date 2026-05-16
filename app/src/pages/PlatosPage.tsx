@@ -1,30 +1,44 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { CaretRight, Plus } from '@phosphor-icons/react';
+import {
+  CaretRight,
+  CheckCircle,
+  CookingPot,
+  ForkKnife,
+  ListBullets,
+  Plus,
+  Sun,
+  Tag,
+  Moon,
+} from '@phosphor-icons/react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
+import { EmptyState } from '../components/EmptyState';
+import { PageHeader } from '../components/PageHeader';
 import { TagChip } from '../components/TagChip';
+import { MomentoBadge } from '../components/MomentoBadge';
+import { normalizeHex } from '../lib/color';
 import type { Etiqueta, MomentoPlato, Plato } from '../db/types';
 
-const MOMENTO_LABEL: Record<MomentoPlato, string> = {
-  comida: 'Comida',
-  cena: 'Cena',
-  ambos: 'Comida y cena',
-};
+type SubseccionTone = MomentoPlato | 'neutral' | 'etiqueta';
 
-const MOMENTO_BADGE: Record<MomentoPlato, string> = {
-  comida: 'badge',
-  cena: 'badge badge--cena',
-  ambos: 'badge badge--ambos',
-};
-
-const MOMENTO_SECCIONES: { momento: MomentoPlato; titulo: string }[] = [
-  { momento: 'comida', titulo: 'Comida' },
-  { momento: 'cena', titulo: 'Cena' },
-  { momento: 'ambos', titulo: 'Comida y cena' },
+const MOMENTO_SECCIONES: {
+  momento: MomentoPlato;
+  titulo: string;
+  Icon: typeof Sun;
+}[] = [
+  { momento: 'comida', titulo: 'Comida', Icon: Sun },
+  { momento: 'cena', titulo: 'Cena', Icon: Moon },
+  { momento: 'ambos', titulo: 'Comida y cena', Icon: ForkKnife },
 ];
 
-type VistaPlatos = 'momento' | 'etiquetas';
+type VistaPlatos = 'todos' | 'momento' | 'etiquetas';
 
 type LocationState = {
   platoCreado?: string;
@@ -44,12 +58,16 @@ function PlatoCard({
     <li>
       <Link to={`/platos/${plato.id}`} className="card">
         <div className="card__top">
-          <strong>{plato.nombre}</strong>
-          {showMomentoBadge && (
-            <span className={MOMENTO_BADGE[plato.momento]}>
-              {MOMENTO_LABEL[plato.momento]}
-            </span>
-          )}
+          <div className="card__title-row">
+            <ForkKnife
+              size={20}
+              weight="duotone"
+              className="card__dish-icon"
+              aria-hidden
+            />
+            <strong>{plato.nombre}</strong>
+          </div>
+          {showMomentoBadge && <MomentoBadge momento={plato.momento} />}
         </div>
         {tags.length > 0 && (
           <div className="tag-row">
@@ -99,13 +117,25 @@ function PlatosSubseccion({
   titulo,
   count,
   children,
+  tone = 'neutral',
+  accentColor,
 }: {
   titulo: ReactNode;
   count: number;
   children: ReactNode;
+  tone?: SubseccionTone;
+  accentColor?: string;
 }) {
+  const style: CSSProperties | undefined =
+    tone === 'etiqueta' && accentColor
+      ? ({ '--section-accent': normalizeHex(accentColor) } as CSSProperties)
+      : undefined;
+
   return (
-    <details className="platos-section">
+    <details
+      className={`platos-section platos-section--${tone}`}
+      style={style}
+    >
       <summary className="platos-section__summary">
         <CaretRight
           className="platos-section__chevron"
@@ -125,7 +155,7 @@ export function PlatosPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mensaje, setMensaje] = useState<string | null>(null);
-  const [vista, setVista] = useState<VistaPlatos>('momento');
+  const [vista, setVista] = useState<VistaPlatos>('todos');
 
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
   const todasEtiquetas = useLiveQuery(() => db.etiquetas.orderBy('nombre').toArray());
@@ -177,30 +207,34 @@ export function PlatosPage() {
 
   return (
     <section className="page">
-      <div className="page__head">
-        <h1>Platos</h1>
+      <PageHeader
+        title="Platos"
+        lead="Tu recetario: organízalo como prefieras."
+        icon={CookingPot}
+      >
         <Link to="/platos/nuevo" className="btn-primary btn-primary--icon">
           <Plus size={20} weight="bold" aria-hidden />
           Nuevo plato
         </Link>
-      </div>
+      </PageHeader>
 
       {mensaje && (
-        <p className="alert alert--success" role="status">
-          {mensaje}
+        <p className="alert alert--success alert--with-icon" role="status">
+          <CheckCircle size={22} weight="duotone" aria-hidden />
+          <span>{mensaje}</span>
         </p>
       )}
 
       {platos === undefined ? (
         <p className="muted">Cargando…</p>
       ) : platos.length === 0 ? (
-        <div className="empty-state">
+        <EmptyState icon={CookingPot} iconTone="peach">
           <p className="muted">Aún no tienes platos en tu catálogo.</p>
           <Link to="/platos/nuevo" className="btn-primary btn-primary--icon">
             <Plus size={20} weight="bold" aria-hidden />
             Crear tu primer plato
           </Link>
-        </div>
+        </EmptyState>
       ) : (
         <>
           <div
@@ -208,6 +242,22 @@ export function PlatosPage() {
             role="tablist"
             aria-label="Agrupar platos"
           >
+            <button
+              type="button"
+              role="tab"
+              id="platos-tab-todos"
+              aria-selected={vista === 'todos'}
+              aria-controls="platos-panel-todos"
+              className={
+                vista === 'todos'
+                  ? 'platos-tabs__btn platos-tabs__btn--wide platos-tabs__btn--active'
+                  : 'platos-tabs__btn platos-tabs__btn--wide'
+              }
+              onClick={() => setVista('todos')}
+            >
+              <ListBullets size={18} weight="duotone" aria-hidden />
+              Todos
+            </button>
             <button
               type="button"
               role="tab"
@@ -221,6 +271,7 @@ export function PlatosPage() {
               }
               onClick={() => setVista('momento')}
             >
+              <Sun size={18} weight="duotone" aria-hidden />
               Por momento
             </button>
             <button
@@ -236,24 +287,45 @@ export function PlatosPage() {
               }
               onClick={() => setVista('etiquetas')}
             >
+              <Tag size={18} weight="duotone" aria-hidden />
               Por etiquetas
             </button>
           </div>
 
-          {vista === 'momento' ? (
+          {vista === 'todos' ? (
+            <div
+              id="platos-panel-todos"
+              role="tabpanel"
+              aria-labelledby="platos-tab-todos"
+              className="platos-panels platos-panels--flat"
+            >
+              <PlatosLista
+                platos={platos}
+                etiquetasPorPlato={etiquetasPorPlato}
+                showMomentoBadge
+                vacio="No hay platos en el catálogo."
+              />
+            </div>
+          ) : vista === 'momento' ? (
             <div
               id="platos-panel-momento"
               role="tabpanel"
               aria-labelledby="platos-tab-momento"
               className="platos-panels"
             >
-              {MOMENTO_SECCIONES.map(({ momento, titulo }) => {
+              {MOMENTO_SECCIONES.map(({ momento, titulo, Icon }) => {
                 const grupo = platos.filter((p) => p.momento === momento);
                 return (
                   <PlatosSubseccion
                     key={momento}
-                    titulo={titulo}
+                    titulo={
+                      <>
+                        <Icon size={20} weight="duotone" aria-hidden />
+                        {titulo}
+                      </>
+                    }
                     count={grupo.length}
+                    tone={momento}
                   >
                     <PlatosLista
                       platos={grupo}
@@ -289,6 +361,8 @@ export function PlatosPage() {
                         key={etiqueta.id}
                         titulo={<TagChip etiqueta={etiqueta} small />}
                         count={grupo.length}
+                        tone="etiqueta"
+                        accentColor={etiqueta.color}
                       >
                         <PlatosLista
                           platos={grupo}
@@ -303,6 +377,7 @@ export function PlatosPage() {
                     <PlatosSubseccion
                       titulo="Sin etiquetas"
                       count={platosSinEtiqueta.length}
+                      tone="neutral"
                     >
                       <PlatosLista
                         platos={platosSinEtiqueta}

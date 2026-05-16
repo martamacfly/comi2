@@ -6,7 +6,7 @@ Funciona **sin servidor**: todos los datos se guardan en el navegador (IndexedDB
 
 ## Qué puedes hacer
 
-- Gestionar un catálogo de **productos** (ingredientes).
+- Gestionar un catálogo de **productos** (ingredientes con emoji).
 - Crear **platos** con sus productos, momento del día (**comida**, **cena** o **ambos**) y **etiquetas con color**.
 - Planificar la **semana**: un plato por comida y otro por cena cada día (14 huecos).
 - **Generar la lista de la compra** con los productos únicos de los platos planificados.
@@ -36,11 +36,12 @@ Abre `http://localhost:5173` (o la URL que indique Vite).
 
 | Ruta | Descripción |
 |------|-------------|
-| `/platos` | Catálogo agrupado por momento o por etiquetas (subsecciones colapsables) |
-| `/productos` | Ingredientes |
+| `/platos` | Catálogo: todos, por momento o por etiquetas (subsecciones colapsables) |
+| `/productos` | Ingredientes con emoji |
+| `/productos/:id` | Editar nombre/emoji y ver platos que lo usan |
+| `/lista` | Lista de la compra (marcar lo que ya tienes en casa) |
 | `/platos/nuevo`, `/platos/:id` | Crear o editar plato (etiquetas, productos) |
 | `/semana` | Planificador semanal |
-| `/lista` | Lista de la compra |
 
 ## Estructura del repositorio
 

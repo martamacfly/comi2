@@ -1,3 +1,4 @@
+import { Tag } from '@phosphor-icons/react';
 import { normalizeHex, textColorForBackground } from '../lib/color';
 import type { Etiqueta } from '../db/types';
 
@@ -30,6 +31,7 @@ export function TagChip({ etiqueta, onRemove, onClick, small }: TagChipProps) {
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
+      {!small && <Tag size={14} weight="duotone" aria-hidden />}
       {etiqueta.nombre}
       {onRemove && (
         <button

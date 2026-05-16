@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { emojiPorDefecto } from '../lib/producto-emoji';
 import type {
   Etiqueta,
   PlanSlot,
@@ -34,6 +35,22 @@ export class Comi2Database extends Dexie {
       semanas: '++id, fechaInicioLunes',
       planSlots: '++id, semanaId, [semanaId+diaSemana+momento]',
     });
+
+    this.version(3)
+      .stores({
+        productos: '++id, nombre',
+        platos: '++id, nombre, momento',
+        etiquetas: '++id, nombre',
+        platoProductos: '++id, platoId, productoId',
+        platoEtiquetas: '++id, platoId, etiquetaId, [platoId+etiquetaId]',
+        semanas: '++id, fechaInicioLunes',
+        planSlots: '++id, semanaId, [semanaId+diaSemana+momento]',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('productos').toCollection().modify((p: Producto) => {
+          if (!p.emoji) p.emoji = emojiPorDefecto(p.nombre);
+        });
+      });
   }
 }
 

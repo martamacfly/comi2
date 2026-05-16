@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { ProductoEmoji } from '../components/ProductoEmoji';
 import { TagChip } from '../components/TagChip';
 import { db } from '../db/database';
 import type { Etiqueta, MomentoPlato } from '../db/types';
@@ -16,7 +17,7 @@ import {
   eliminarPlato,
   guardarPlato,
 } from '../lib/platos';
-import { CookingPot, X } from '@phosphor-icons/react';
+import { Check, CookingPot, Trash, X } from '@phosphor-icons/react';
 
 export function PlatoEditPage() {
   const { id } = useParams();
@@ -402,7 +403,10 @@ export function PlatoEditPage() {
               <ul className="plato-productos-list">
                 {productosAsignados.map((p) => (
                   <li key={p.id} className="plato-productos-list__item">
-                    <span>{p.nombre}</span>
+                    <span className="plato-productos-list__label">
+                      <ProductoEmoji producto={p} size="sm" />
+                      {p.nombre}
+                    </span>
                     <button
                       type="button"
                       className="btn-icon btn-icon--remove"
@@ -440,12 +444,13 @@ export function PlatoEditPage() {
               <ul className="check-list check-list--spaced">
                 {productosDisponibles.map((p) => (
                   <li key={p.id}>
-                    <label>
+                    <label className="plato-productos-list__label">
                       <input
                         type="checkbox"
                         checked={false}
                         onChange={() => toggleProducto(p.id!)}
                       />
+                      <ProductoEmoji producto={p} size="sm" />
                       {p.nombre}
                     </label>
                   </li>
@@ -462,14 +467,16 @@ export function PlatoEditPage() {
         {error && <p className="form-error">{error}</p>}
 
         <div className="form-actions">
-          <button type="submit" className="btn-primary" disabled={saving}>
+          <button type="submit" className="btn-primary btn-primary--icon" disabled={saving}>
+            <Check size={20} weight="bold" aria-hidden />
             {saving ? 'Guardando…' : isNew ? 'Crear plato' : 'Guardar cambios'}
           </button>
           <Link to="/platos" className="btn-ghost">
             Cancelar
           </Link>
           {!isNew && platoId != null && (
-            <button type="button" className="btn-danger" onClick={onDelete}>
+            <button type="button" className="btn-danger btn-ghost--icon" onClick={onDelete}>
+              <Trash size={18} weight="regular" aria-hidden />
               Eliminar plato
             </button>
           )}

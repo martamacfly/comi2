@@ -6,7 +6,7 @@ Comi2 es una aplicación para **organizar qué comer cada día de la semana** y 
 
 Flujo principal:
 
-1. El usuario crea **productos** (ingredientes).
+1. El usuario crea **productos** (ingredientes con emoji).
 2. Crea **platos**, les asigna **productos** y **etiquetas** (ej. vegetariano, rápido).
 3. En el **planificador semanal**, elige platos para cada **comida** y **cena** de cada día.
 4. Genera la **lista de la compra** sumando los productos de todos los platos planificados.
@@ -26,22 +26,22 @@ flowchart LR
 
 | Feature | Descripción | Estado |
 |---------|-------------|--------|
-| CRUD productos | Alta, listado y borrado de productos | Hecho |
+| CRUD productos | Alta, listado, detalle, borrado | Hecho |
+| Emoji por producto | Elegir emoji en detalle; auto al crear | Hecho |
 | CRUD platos | Alta, edición y listado de platos | Hecho |
 | Etiquetas | CRUD de etiquetas y asignación de varias etiquetas por plato | Hecho |
 | Ingredientes del plato | Añadir/quitar productos; alta inline desde edición del plato | Hecho |
-| Listado platos agrupado | Por momento o por etiquetas; subsecciones colapsables | Hecho |
+| Listado platos agrupado | Todos (lista directa), por momento o por etiquetas; acordeones con color | Hecho |
 | Plan semanal | Lunes–domingo; 1 plato/comida + 1 plato/cena por día | Hecho |
-| Generar lista de la compra | Productos únicos de los platos planificados (sin cantidades) | Hecho |
-| Persistencia local | Todo en IndexedDB vía Dexie v2 | Hecho |
-| Marcar comprado en lista | Checkbox por línea | Pendiente |
+| Generar lista de la compra | Productos únicos; checkbox «ya en casa» | Hecho |
+| Persistencia local | IndexedDB vía Dexie v3 | Hecho |
 | Filtrar platos por etiqueta en Semana | Al asignar hueco | Pendiente |
 
 ## Funcionalidades futuras
 
 | Feature | Descripción | Prioridad |
 |---------|-------------|-----------|
-| Marcar productos comprados en la lista | Checkbox o estado por línea | Media |
+| Persistir «ya en casa» entre sesiones | Recordar marcas en la lista | Baja |
 | Copiar semana anterior | Plantilla de menú recurrente | Baja |
 | Categorías de productos | Agrupar en la lista (fruta, carnicería…) | Baja |
 | Desayuno u otras comidas | Ampliar más allá de comida/cena | Baja |
@@ -56,10 +56,12 @@ Gestión del inventario de ingredientes reutilizables entre platos.
 
 **Criterios de aceptación:**
 
-- [x] Puedo crear un producto con nombre.
-- [ ] Puedo editar un producto desde la pantalla Productos.
+- [x] Puedo crear un producto con nombre (recibe emoji automático).
+- [x] En el detalle (`/productos/:id`), edito el **nombre** con el lápiz (inline, Enter guarda).
+- [x] En el detalle, pulso el **emoji** y elijo otro en la rejilla de sugerencias.
 - [x] Puedo eliminar un producto si no está en ningún plato (o se avisa).
 - [x] Puedo crear un producto al editar un plato (`InlineProductoAdd`) y asignarlo al plato al instante.
+- [x] Al pulsar un producto en el listado, veo todos los **platos** que lo usan.
 
 ### Módulo 2 — Catálogo de platos
 
@@ -75,8 +77,7 @@ Cada plato agrupa los productos de su elaboración, tiene un **momento** (comida
 - [x] Puedo quitar una etiqueta del plato sin borrarla del catálogo.
 - [x] Puedo eliminar una etiqueta del catálogo (se desvincula de todos los platos).
 - [x] Las etiquetas se muestran como **chips** con color en listado, edición y planificador.
-- [x] En **Platos**, puedo ver el catálogo agrupado **por momento** o **por etiquetas**.
-- [x] Cada grupo es una subsección **colapsable** (lista oculta hasta abrirla).
+- [x] En **Platos**: pestaña **Todos** (lista directa); **Por momento** / **Por etiquetas** con acordeones colapsables y color.
 - [ ] Puedo eliminar un plato desde el listado o la edición.
 
 ### Módulo 3 — Planificador semanal
@@ -96,36 +97,43 @@ Generación automática desde el plan de la semana activa.
 
 **Criterios de aceptación:**
 
-- [x] Al generar la lista, aparecen todos los productos de los platos planificados.
+- [x] Al generar la lista, aparecen todos los productos de los platos planificados (con emoji).
 - [x] Si el mismo producto aparece en varios platos, aparece **una sola vez** (sin cantidades).
 - [x] Puedo regenerar la lista si cambio el plan semanal.
+- [x] Puedo marcar productos que **ya tengo en casa** con un checkbox para quitarlos de la lista principal.
+- [x] Puedo recuperar un producto marcado desde **Ya en casa**.
 
 ## Flujos de usuario
 
 ### Flujo A — Configurar un plato nuevo
 
 1. Ir a **Platos** → **Nuevo plato**.
-2. Introducir nombre, **momento** (comida, cena o ambos), crear o seleccionar **etiquetas** (con color).
-3. Añadir productos del catálogo o crear uno nuevo en la misma pantalla.
-4. Guardar.
+2. Introducir nombre, **momento**, etiquetas (con color) y productos.
+3. Guardar.
 
 ### Flujo A2 — Explorar platos
 
 1. Ir a **Platos**.
-2. Elegir pestaña **Por momento** o **Por etiquetas**.
-3. Abrir la subsección deseada para ver sus platos.
+2. Elegir **Todos**, **Por momento** o **Por etiquetas**.
+3. En momento/etiquetas, abrir la subsección deseada.
 
 ### Flujo B — Planificar la semana
 
 1. Ir a **Semana**.
-2. Para cada día, elegir plato de **Comida** y plato de **Cena**.
+2. Para cada día, elegir plato de **Comida** y **Cena**.
 3. Los cambios se guardan automáticamente en local.
 
 ### Flujo C — Hacer la compra
 
-1. Ir a **Lista de la compra** → **Generar** (o actualizar).
-2. Revisar la lista de productos únicos.
-3. (Futuro) Marcar como comprado mientras recorres el supermercado.
+1. Ir a **Lista** → **Generar lista**.
+2. Marcar con el checkbox lo que ya tienes en casa.
+3. Comprar solo lo que queda en la lista principal.
+
+### Flujo D — Gestionar un producto
+
+1. Ir a **Productos** → pulsar un ingrediente.
+2. Cambiar **emoji** o **nombre** (lápiz).
+3. Revisar qué platos lo usan.
 
 ## Decisiones de producto (cerradas)
 
@@ -134,13 +142,13 @@ Generación automática desde el plan de la semana activa.
 | Huecos por día | Un plato por comida + uno por cena |
 | Cantidades | Solo nombres de producto; sin cantidades en el MVP |
 | Momento del plato | Comida / cena / ambos; filtro en el planificador |
-| Etiquetas | CRUD en edición del plato; nombre + color; filtro opcional en planificador |
-| Listado de platos | Pestañas por momento / por etiquetas; acordeones cerrados por defecto |
-| Navegación principal | Orden: Platos, Productos, Semana, Lista; inicio en `/platos` |
+| Etiquetas | CRUD en edición del plato; nombre + color |
+| Productos | Nombre + emoji; edición en pantalla de detalle |
+| Listado de platos | Pestañas: Todos (ancho) / momento / etiquetas; acordeones con color |
+| Navegación principal | Platos, Productos, Semana, Lista |
 | Inicio de semana | Lunes |
-| Semanas múltiples | Solo semana actual en el MVP |
 
 ## Notas
 
-- Esquema de dominio en Dexie **v2** (`productos`, `platos`, `etiquetas`, relaciones, `semanas`, `planSlots`). La tabla `items` (v1) quedó obsoleta.
+- Esquema Dexie **v3** (`productos.emoji`, migración automática).
 - Detalle técnico: [arquitectura.md](../arquitectura/arquitectura.md).

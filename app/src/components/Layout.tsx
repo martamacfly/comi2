@@ -40,8 +40,12 @@ function NavItem({
         `layout__link${isActive ? ' layout__link--active' : ''}${className ? ` ${className}` : ''}`
       }
     >
-      <Icon size={20} weight="regular" aria-hidden />
-      <span>{label}</span>
+      {({ isActive }) => (
+        <>
+          <Icon size={20} weight={isActive ? 'duotone' : 'regular'} aria-hidden />
+          <span>{label}</span>
+        </>
+      )}
     </NavLink>
   );
 }
