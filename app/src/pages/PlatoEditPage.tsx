@@ -178,7 +178,7 @@ export function PlatoEditPage() {
     setSaving(true);
     setError('');
     try {
-      await guardarPlato({
+      const savedId = await guardarPlato({
         id: platoId,
         nombre,
         momento,
@@ -186,11 +186,11 @@ export function PlatoEditPage() {
         etiquetaIds: selectedEtiquetaIds,
       });
       if (isNew) {
-        navigate('/platos', {
+        navigate(`/platos/${savedId}`, {
           state: { platoCreado: nombre.trim() },
         });
       } else {
-        navigate('/platos', {
+        navigate(`/platos/${savedId}`, {
           state: { platoActualizado: nombre.trim() },
         });
       }
@@ -232,7 +232,17 @@ export function PlatoEditPage() {
       <p className="breadcrumb">
         <Link to="/platos">Platos</Link>
         <span> / </span>
-        <span>{isNew ? 'Nuevo' : nombre || 'Editar'}</span>
+        {isNew ? (
+          <span>Nuevo</span>
+        ) : (
+          <>
+            <Link to={`/platos/${platoId}`}>
+              {(plato?.nombre ?? nombre) || 'Plato'}
+            </Link>
+            <span> / </span>
+            <span>Editar</span>
+          </>
+        )}
       </p>
 
       <form className="plato-form" onSubmit={onSubmit}>

@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ListaCompraProvider } from './context/ListaCompraProvider';
 import { Layout } from './components/Layout';
 import { ListaPage } from './pages/ListaPage';
+import { PlatoDetailPage } from './pages/PlatoDetailPage';
 import { PlatoEditPage } from './pages/PlatoEditPage';
 import { PlatosPage } from './pages/PlatosPage';
 import { ProductoPlatosPage } from './pages/ProductoPlatosPage';
@@ -20,7 +21,9 @@ function App() {
             <Route path="productos" element={<ProductosPage />} />
             <Route path="productos/:id" element={<ProductoPlatosPage />} />
             <Route path="platos" element={<PlatosPage />} />
-            <Route path="platos/:id" element={<PlatoEditPage />} />
+            <Route path="platos/nuevo" element={<PlatoEditPage />} />
+            <Route path="platos/:id/editar" element={<PlatoEditPage />} />
+            <Route path="platos/:id" element={<PlatoDetailPage />} />
             <Route path="semana" element={<SemanaPage />} />
             <Route path="lista" element={<ListaPage />} />
           </Route>

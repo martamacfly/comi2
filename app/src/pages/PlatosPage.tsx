@@ -20,6 +20,7 @@ import {
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { EmptyState } from '../components/EmptyState';
+import { PlatosBackupPanel } from '../components/PlatosBackupPanel';
 import { PageHeader } from '../components/PageHeader';
 import { TagChip } from '../components/TagChip';
 import { MomentoBadge } from '../components/MomentoBadge';
@@ -227,16 +228,18 @@ export function PlatosPage() {
 
       {platos === undefined ? (
         <p className="muted">Cargando…</p>
-      ) : platos.length === 0 ? (
-        <EmptyState icon={CookingPot} iconTone="peach">
-          <p className="muted">Aún no tienes platos en tu catálogo.</p>
-          <Link to="/platos/nuevo" className="btn-primary btn-primary--icon">
-            <Plus size={20} weight="bold" aria-hidden />
-            Crear tu primer plato
-          </Link>
-        </EmptyState>
       ) : (
         <>
+          {platos.length === 0 ? (
+            <EmptyState icon={CookingPot} iconTone="peach">
+              <p className="muted">Aún no tienes platos en tu catálogo.</p>
+              <Link to="/platos/nuevo" className="btn-primary btn-primary--icon">
+                <Plus size={20} weight="bold" aria-hidden />
+                Crear tu primer plato
+              </Link>
+            </EmptyState>
+          ) : (
+            <>
           <div
             className="platos-tabs"
             role="tablist"
@@ -397,6 +400,13 @@ export function PlatosPage() {
               )}
             </div>
           )}
+            </>
+          )}
+          <PlatosBackupPanel
+            onImportSuccess={() =>
+              setMensaje('Respaldo importado correctamente.')
+            }
+          />
         </>
       )}
     </section>

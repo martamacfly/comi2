@@ -6,7 +6,7 @@
 
 | Documento | Descripción |
 |-----------|-------------|
-| [Howto Comi2](../howto-comi2.md) | Guía completa: producto, código, BD y uso de la app |
+| [Howto Comi2](../howto-comi2.md) | Guía completa: producto, código, BD, uso, **respaldo JSON** y APK |
 | [Requisitos](requisitos/requisitos.md) | Requisitos funcionales y no funcionales |
 | [Funcionalidades](funcionalidades/funcionalidades.md) | Casos de uso, módulos y prioridades |
 | [Arquitectura](arquitectura/arquitectura.md) | Stack técnico, capas y modelo de datos |

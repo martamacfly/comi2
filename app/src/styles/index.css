@@ -714,6 +714,46 @@ button[type='submit']:focus-visible {
   outline-offset: 2px;
 }
 
+.platos-backup {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.platos-backup__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.platos-backup__lead {
+  margin: 0 0 var(--space-4);
+  max-width: 42rem;
+}
+
+.platos-backup__actions {
+  flex-wrap: wrap;
+}
+
+.platos-backup__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.platos-backup__error {
+  margin-top: var(--space-3);
+  margin-bottom: 0;
+}
+
 .platos-panels {
   display: flex;
   flex-direction: column;
@@ -1178,6 +1218,88 @@ button[type='submit']:focus-visible {
 .lista-compra--tengo .lista-compra__nombre {
   color: var(--color-text-muted);
   text-decoration: line-through;
+}
+
+.plato-detail__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  padding: var(--space-5);
+  background: var(--color-header-bg);
+  border: 1px solid var(--color-header-border);
+  border-radius: var(--radius-lg);
+}
+
+.plato-detail__title-block {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.plato-detail__icon {
+  flex-shrink: 0;
+  color: var(--color-icon);
+}
+
+.plato-detail__title {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-2xl);
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--color-header-title);
+}
+
+.plato-detail__sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.plato-detail__section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.plato-detail__section-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.plato-detail__productos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.plato-detail__producto-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2));
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.plato-detail__producto-link:hover {
+  background: var(--color-bg);
 }
 
 .plato-form {

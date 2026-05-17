@@ -71,6 +71,10 @@ Guía dedicada (solo si vas a generar o firmar APK): **[android-apk.md](android-
 - Nombre de la BD: `comi2-db`.
 - Para inspeccionar datos: DevTools del navegador → **Application** → **IndexedDB** → `comi2-db`.
 
+## Respaldo JSON
+
+En la app, **Platos** incluye al pie el panel **Respaldo** (exportar / importar). El formato y la validación están en [`app/src/lib/backup.ts`](../../app/src/lib/backup.ts) (`comi2-backup`, versión 1). La importación ejecuta una transacción Dexie que vacía y repuebla las tablas afectadas.
+
 ## Convenciones
 
 - Código de la app solo en `app/src/`.
@@ -90,6 +94,8 @@ src/
 ├── App.tsx
 └── main.tsx
 ```
+
+`lib/backup.ts` y `components/PlatosBackupPanel.tsx` gestionan el respaldo JSON desde la pantalla Platos.
 
 ## Ramas y commits
 

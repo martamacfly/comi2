@@ -231,9 +231,10 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 | `/` | — | Redirige a `/platos` |
 | `/productos` | Productos | Alta, listado (con emoji) y eliminación |
 | `/productos/:id` | Detalle del producto | Editar nombre (lápiz inline), emoji y ver platos |
-| `/platos` | Platos | Catálogo agrupado (ver abajo) |
-| `/platos/nuevo` | Editar plato | Crear plato (`:id` = `nuevo`) |
-| `/platos/:id` | Editar plato | Modificar plato, productos y etiquetas |
+| `/platos` | Platos | Catálogo agrupado (ver abajo); al final, **Respaldo** exportar/importar JSON |
+| `/platos/nuevo` | Nuevo plato | Formulario de alta |
+| `/platos/:id` | Detalle del plato | Información del plato; botón **Editar plato** → `/platos/:id/editar` |
+| `/platos/:id/editar` | Editar plato | Modificar nombre, momento, productos y etiquetas |
 | `/semana` | Semana | Planificador 7 días × (comida, cena); **Limpiar semana** si hay platos asignados |
 | `/lista` | Lista de la compra | **Generar lista** / **Borrar lista**; la lista persiste al cambiar de ruta en la misma sesión; checkbox «ya lo tengo»; «Ya en casa» |
 
@@ -268,6 +269,17 @@ En `/platos` hay tres pestañas en dos filas (**Todos** a ancho completo; debajo
 
 En **Por momento** y **Por etiquetas**, cada subsección es un **acordeón cerrado por defecto** con **tinte de color** (comida/cena/ambos o color de la etiqueta). En **Todos** la lista se muestra directamente. En la vista por momento no se repite la pastilla de momento en cada tarjeta.
 
+### Respaldo JSON (final de la página Platos)
+
+Al pie de **Platos** (visible también si el catálogo está vacío, tras cargar la página):
+
+| Acción | Qué hace |
+|--------|----------|
+| **Exportar respaldo** | Descarga `comi2-respaldo-AAAA-MM-DD.json` con `format: "comi2-backup"` y `version: 1`. Incluye en `data`: `productos`, `platos`, `etiquetas`, `platoProductos`, `platoEtiquetas`, `semanas`, `planSlots` (ids preservados para mantener coherencia). |
+| **Importar respaldo** | Tras confirmación, **reemplaza por completo** esas tablas en IndexedDB y vacía la lista de la compra en memoria de la sesión. Valida el formato, referencias entre tablas e ids duplicados. |
+
+Útil para **copia de seguridad**, cambiar de navegador o llevar datos a otra instalación (web o APK) **con la misma versión de formato de respaldo**.
+
 ### Pantalla Productos — detalle (`/productos/:id`)
 
 1. Pulsa un producto en el listado.
@@ -279,7 +291,7 @@ En **Por momento** y **Por etiquetas**, cada subsección es un **acordeón cerra
 
 ## Etiquetas con color
 
-Gestionadas en la pantalla **Editar plato** (`/platos/nuevo` o `/platos/:id`).
+Gestionadas en la pantalla **Editar plato** (`/platos/nuevo` o `/platos/:id/editar`).
 
 ### Asignar al plato
 
@@ -370,6 +382,7 @@ app/src/
 │   ├── database.ts          # Comi2Database (Dexie)
 │   └── types.ts             # Tipos de dominio
 ├── lib/
+│   ├── backup.ts            # Exportar / importar respaldo JSON (formato versionado)
 │   ├── color.ts             # Hex, contraste, paleta de etiquetas
 │   ├── platos.ts            # Guardar plato, etiquetas, sincronizar relaciones
 │   ├── productos.ts         # CRUD producto, platos por producto
@@ -380,6 +393,7 @@ app/src/
 ├── components/
 │   ├── Layout.tsx           # Cabecera (logo2 + comi2), nav escritorio/móvil
 │   ├── PageHeader.tsx       # Título de página con icono
+│   ├── PlatosBackupPanel.tsx # UI exportar / importar respaldo en Platos
 │   ├── EmptyState.tsx       # Estados vacíos con ilustración
 │   ├── TagChip.tsx          # Chip de etiqueta con color
 │   ├── MomentoBadge.tsx     # Pastilla comida/cena/ambos
@@ -391,6 +405,7 @@ app/src/
 │   ├── ProductosPage.tsx
 │   ├── ProductoPlatosPage.tsx
 │   ├── PlatosPage.tsx
+│   ├── PlatoDetailPage.tsx
 │   ├── PlatoEditPage.tsx
 │   ├── SemanaPage.tsx
 │   └── ListaPage.tsx
@@ -403,9 +418,12 @@ app/src/
 | Archivo | Responsabilidad |
 |---------|-----------------|
 | `lib/platos.ts` | `guardarPlato`, `crearEtiqueta`, `actualizarEtiqueta`, `eliminarEtiqueta`, sync de productos/etiquetas |
+| `lib/backup.ts` | Formato `comi2-backup` v1; validación; exportación / restauración transaccional |
 | `ProductoPlatosPage.tsx` | Detalle: emoji, nombre inline, platos que lo usan |
-| `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color |
-| `PlatoEditPage.tsx` | Formulario del plato (sin pasos intermedios al crear); chip «Sin etiquetas»; sin `<form>` anidado |
+| `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color; panel **Respaldo** |
+| `PlatosBackupPanel.tsx` | UI para exportar / importar JSON |
+| `PlatoDetailPage.tsx` | Vista de un plato (momento, etiquetas, ingredientes); enlace a editar |
+| `PlatoEditPage.tsx` | Alta (`/nuevo`) y edición (`/:id/editar`) |
 | `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana** |
 | `ListaPage.tsx` | Generar / borrar lista; estado global en sesión; checkbox «ya en casa» |
 
@@ -419,13 +437,20 @@ app/src/
 2. Nombre y **momento** (comida / cena / ambos).
 3. Crear o seleccionar **etiquetas** (con color); si no hay ninguna, verás el chip «Sin etiquetas» deshabilitado.
 4. Añadir **productos**: marcar en «Añadir del catálogo», crear con **Añadir producto al catálogo**, o quitar con × en «En este plato».
-5. **Guardar** (vuelves al listado con mensaje de confirmación).
+5. **Guardar** (abres la **vista del plato** con mensaje de confirmación; desde ahí puedes **Editar** de nuevo).
 
 ### A2 — Consultar el catálogo de platos
 
 1. Ir a **Platos**.
 2. Elige **Todos**, **Por momento** o **Por etiquetas**.
-3. Abre la subsección que te interese para ver sus platos.
+3. Abre la subsección que te interese y pulsa un plato para ver su **ficha** (momento, etiquetas, ingredientes).
+4. Desde la ficha, **Editar plato** abre el formulario de cambios.
+
+### A3 — Copia de seguridad o migrar datos
+
+1. Ir a **Platos** y bajar hasta **Respaldo**.
+2. **Exportar respaldo** para descargar el JSON.
+3. En otro navegador o instalación de Comi2: **Importar respaldo**, elegir el archivo y confirmar (se sustituyen todos los datos locales de ese perfil).
 
 ### B — Planificar la semana
 
@@ -461,6 +486,7 @@ app/src/
 | RF-010 | Emoji por producto; edición inline del nombre en detalle |
 | RF-011 | Detalle producto: platos que usan el ingrediente |
 | RF-012 | Listado platos: pestañas Todos / momento / etiquetas con acordeones |
+| RF-013 | Respaldo JSON: exportar / importar datos (productos, platos, etiquetas, semana) |
 
 ### Pendientes / futuro
 

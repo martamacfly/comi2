@@ -18,6 +18,8 @@
 
 Todo se guarda **en tu navegador** (sin cuenta ni servidor). Si borras los datos del sitio, pierdes el contenido.
 
+**Copia de seguridad:** en **Platos**, al final de la página, la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos, etiquetas y semana planificada, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
+
 ```mermaid
 flowchart LR
   Productos[Productos] --> Platos[Platos]
@@ -96,7 +98,10 @@ Pasos completos, requisitos, solución de problemas y lista de cambios en el rep
 
 | Ruta | Qué es |
 |------|--------|
-| `/platos` | Tu recetario (por listado, momento o etiquetas) |
+| `/platos` | Tu recetario (pestañas, lista de platos y **Respaldo** JSON al final) |
+| `/platos/:id` | Vista de un plato (desde la lista); **Editar plato** lleva al formulario |
+| `/platos/:id/editar` | Formulario para cambiar ese plato |
+| `/platos/nuevo` | Crear un plato nuevo |
 | `/productos` | Ingredientes |
 | `/semana` | Planificador de la semana |
 | `/lista` | Lista de la compra |
