@@ -1033,6 +1033,10 @@ button[type='submit']:focus-visible {
 }
 
 /* Semana */
+.semana-toolbar {
+  margin-bottom: var(--space-4);
+}
+
 .semana-grid {
   display: grid;
   gap: var(--space-4);
@@ -1104,6 +1108,11 @@ button[type='submit']:focus-visible {
 
 .lista-compra .list__row {
   font-size: var(--text-lg);
+}
+
+.lista-compra__actions {
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .lista-compra__hint {

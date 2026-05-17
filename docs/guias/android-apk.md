@@ -1,5 +1,7 @@
 # Guía: generar la APK de Comi2 (Android)
 
+**Opcional.** Esta guía es solo para quien quiera **empaquetar la app en un móvil Android**. Para desarrollar y usar Comi2 en el ordenador basta con Node y `npm run dev` en la carpeta `app/` (o el atajo en la raíz del repo); **no necesitas** JDK, Android SDK ni `cap sync` para eso.
+
 Documento de referencia con **todos los pasos**, **requisitos** y **cambios en el repositorio** para empaquetar la app web como **APK Android** con [Capacitor](https://capacitorjs.com/).
 
 La carpeta nativa `app/android/` ya está en el repo; en una máquina nueva solo hace falta instalar herramientas, configurar el SDK local y ejecutar los scripts.

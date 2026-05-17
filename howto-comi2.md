@@ -86,8 +86,9 @@ flowchart LR
 ```
 Comi2/
 ├── README.md
+├── package.json           # Atajos npm (delegan en app/): dev, build, lint, preview
 ├── howto-comi2.md          # Este documento
-├── releases/               # APK comi2.apk (generada; ver README ahí)
+├── releases/               # APK comi2.apk local tras build (patrón *.apk en .gitignore)
 ├── .gitignore
 ├── docs/                   # Documentación de producto (español)
 │   ├── README.md
@@ -111,7 +112,9 @@ Comi2/
     └── src/
 ```
 
-**Convención:** `docs/` y `assets/` en la raíz; todo el código y `npm` viven en `app/`.
+**Convención:** `docs/` y `assets/` en la raíz; todo el código y dependencias npm viven en **`app/`**. En la raíz hay un `package.json` mínimo para quien prefiera ejecutar `npm run dev` sin hacer `cd app` cada vez (tras `npm install` una vez dentro de `app/`).
+
+**Android:** la carpeta `app/android/` forma parte del repo; **no es necesaria** para desarrollo web ni para `npm run dev`. Quien no vaya a generar APK puede ignorar JDK, SDK y la guía [android-apk.md](docs/guias/android-apk.md).
 
 ---
 
@@ -131,20 +134,50 @@ Comi2/
 
 ## Arranque y scripts
 
+### Solo navegador (recomendado para empezar)
+
+No necesitas Android Studio ni JDK para trabajar en Comi2: la app es una SPA que corre en el navegador con Vite.
+
 ### Requisitos previos
 
 - Node.js LTS (v20+ recomendado)
 - npm
 
-### Desarrollo
+### Instalar dependencias (una vez)
+
+Las dependencias están en **`app/`**:
 
 ```bash
 cd app
 npm install
+```
+
+### Desarrollo
+
+Desde **`app/`**:
+
+```bash
+npm run dev
+```
+
+También puedes arrancar desde la **raíz del repositorio** (usa `npm --prefix app run dev`):
+
+```bash
 npm run dev
 ```
 
 Abre la URL de Vite (por defecto `http://localhost:5173`).
+
+### Scripts en la raíz del repo (`package.json`)
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Igual que `npm run dev` en `app/` |
+| `npm run build` | Build de producción en `app/` |
+| `npm run lint` | ESLint en `app/` |
+| `npm run preview` | Vista previa del build en `app/` |
+
+Los scripts **`cap:*`** y la APK siguen documentados solo en **`app/package.json`** y en [docs/guias/android-apk.md](docs/guias/android-apk.md); ejecutarlos siempre desde **`cd app`**.
 
 ### Scripts (`app/`)
 
@@ -154,7 +187,7 @@ Abre la URL de Vite (por defecto `http://localhost:5173`).
 | `npm run build` | Compilación de producción (`dist/`) |
 | `npm run preview` | Vista previa del build |
 | `npm run lint` | ESLint |
-| `npm run cap:sync` | Build + `cap sync` (web → Android) |
+| `npm run cap:sync` | Build + `cap sync` (web → Android); solo si trabajas con APK |
 | `npm run cap:android` | Abre Android Studio |
 | `npm run cap:apk:debug` | APK de prueba → `releases/comi2.apk` |
 | `npm run cap:apk:release` | Build release (firma / keystore) |
@@ -178,14 +211,15 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 
 1. **Platos → Nuevo plato** — Nombre, momento (comida/cena/ambos), productos del plato, etiquetas con color. (Puedes crear productos al vuelo desde la edición del plato.)
 2. **Productos** — Opcional: revisa o amplía el catálogo de ingredientes.
-3. **Semana** — Asigna un plato a cada comida y cena de lunes a domingo.
-4. **Lista** — Pulsa **Generar lista** y marca con el checkbox los productos que **ya tienes en casa** para quitarlos de la compra.
+3. **Semana** — Asigna un plato a cada comida y cena de lunes a domingo. **Limpiar semana** borra todas las asignaciones de la semana activa (pide confirmación).
+4. **Lista** — Pulsa **Generar lista** y marca con el checkbox los productos que **ya tienes en casa** para quitarlos de la compra. **Borrar lista** deja la pantalla como al inicio.
 
 ### Reglas importantes
 
 - No puedes eliminar un **producto** si está en algún plato.
 - En **Semana**, solo aparecen platos cuyo **momento** encaja con el hueco (un plato `cena` no sale al planificar comida).
-- La **lista** se recalcula al pulsar el botón; si cambias el plan, vuelve a generar.
+- La **lista** se recalcula al pulsar **Generar lista**. Mientras navegas por la app, la última lista generada y tus marcas «ya en casa» **se conservan** hasta que vuelvas a generar, borres la lista o recargues la página por completo.
+- Si cambias el plan en **Semana**, conviene **Generar lista** otra vez para alinear la compra con el menú actual (la lista anterior puede quedar desfasada hasta que lo hagas).
 - Editar el **nombre o color** de una etiqueta en el catálogo afecta a **todos** los platos que la usan.
 
 ---
@@ -200,8 +234,8 @@ DevTools → **Application** → **IndexedDB** → `comi2-db` → tablas.
 | `/platos` | Platos | Catálogo agrupado (ver abajo) |
 | `/platos/nuevo` | Editar plato | Crear plato (`:id` = `nuevo`) |
 | `/platos/:id` | Editar plato | Modificar plato, productos y etiquetas |
-| `/semana` | Semana | Planificador 7 días × (comida, cena) |
-| `/lista` | Lista de la compra | Generar lista; filas con checkbox, emoji y nombre alineados a la izquierda; «Ya lo tengo» |
+| `/semana` | Semana | Planificador 7 días × (comida, cena); **Limpiar semana** si hay platos asignados |
+| `/lista` | Lista de la compra | **Generar lista** / **Borrar lista**; la lista persiste al cambiar de ruta en la misma sesión; checkbox «ya lo tengo»; «Ya en casa» |
 
 Navegación (orden en menú): **Platos · Productos · Semana · Lista**. La ruta `/` redirige a `/platos`.
 
@@ -314,7 +348,7 @@ Implementado en [`app/src/lib/lista.ts`](app/src/lib/lista.ts):
 3. Unir en un conjunto (cada producto **una sola vez**).
 4. Ordenar por nombre y mostrar.
 
-La lista **no se guarda** en IndexedDB; se calcula al pulsar **Generar lista**.
+La lista **no se guarda** en IndexedDB; se calcula al pulsar **Generar lista**. Los productos marcados «ya en casa» y la última lista generada **persisten en memoria** durante la sesión de la app (contexto React), de modo que al cambiar de sección no se pierden hasta regenerar, borrar la lista o recargar la página.
 
 ### Semana actual
 
@@ -327,7 +361,11 @@ La lista **no se guarda** en IndexedDB; se calcula al pulsar **Generar lista**.
 ```
 app/src/
 ├── main.tsx                 # Punto de entrada
-├── App.tsx                  # Rutas React Router
+├── App.tsx                  # Rutas React Router + ListaCompraProvider
+├── context/
+│   ├── listaCompraContext.ts
+│   ├── ListaCompraProvider.tsx
+│   └── useListaCompra.ts    # Lista de compra en sesión (entre rutas)
 ├── db/
 │   ├── database.ts          # Comi2Database (Dexie)
 │   └── types.ts             # Tipos de dominio
@@ -368,8 +406,8 @@ app/src/
 | `ProductoPlatosPage.tsx` | Detalle: emoji, nombre inline, platos que lo usan |
 | `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color |
 | `PlatoEditPage.tsx` | Formulario del plato (sin pasos intermedios al crear); chip «Sin etiquetas»; sin `<form>` anidado |
-| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna en huecos |
-| `ListaPage.tsx` | Generar lista; checkbox «ya en casa»; emoji + nombre compactos a la izquierda |
+| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana** |
+| `ListaPage.tsx` | Generar / borrar lista; estado global en sesión; checkbox «ya en casa» |
 
 ---
 
@@ -394,6 +432,7 @@ app/src/
 1. Ir a **Semana**.
 2. En cada día, elegir plato de **Comida** y de **Cena** (desplegable).
 3. Los cambios se guardan al instante en IndexedDB.
+4. Opcional: **Limpiar semana** vacía todos los huecos (confirmación).
 
 ### C — Hacer la compra
 
@@ -401,7 +440,8 @@ app/src/
 2. Cada fila muestra **checkbox · emoji · nombre** alineados a la izquierda.
 3. Marca con el checkbox los productos que **ya tienes**; desaparecen de la lista principal.
 4. Si te equivocas, ábrelos en **Ya en casa** (misma fila con emoji y nombre) y desmarca para volver a añadirlos.
-5. Si cambias el plan en **Semana**, vuelve a **Generar lista**.
+5. Puedes ir a otras secciones y volver: la lista y las marcas **siguen en la misma sesión del navegador** hasta que pulses **Generar lista** de nuevo, **Borrar lista** o recargues la página.
+6. Si cambias el plan en **Semana**, vuelve a **Generar lista** para actualizar la compra.
 
 ---
 
@@ -457,7 +497,9 @@ Detalle: [docs/funcionalidades/funcionalidades.md](docs/funcionalidades/funciona
 
 ---
 
-## APK Android (Capacitor)
+## APK Android (Capacitor) — opcional
+
+**Quien solo quiera ejecutar Comi2 en el ordenador no necesita este apartado:** basta con Node, `npm install` en `app/` y `npm run dev` (o el atajo desde la raíz del repo). La APK es para instalar la misma interfaz en un dispositivo Android; implica **JDK 21**, **Android SDK** y los pasos de [docs/guias/android-apk.md](docs/guias/android-apk.md).
 
 La misma app web se empaqueta como **APK** para Android. Los datos siguen en **IndexedDB** en el dispositivo (sin servidor).
 

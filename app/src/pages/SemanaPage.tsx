@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { CalendarDots, CalendarPlus, CookingPot } from '@phosphor-icons/react';
+import {
+  CalendarDots,
+  CalendarPlus,
+  CookingPot,
+  Trash,
+} from '@phosphor-icons/react';
 import { db } from '../db/database';
 import type { Etiqueta, MomentoSlot, Plato, PlatoEtiqueta } from '../db/types';
 import { EmptyState } from '../components/EmptyState';
@@ -21,11 +26,10 @@ export function SemanaPage() {
   const [semanaId, setSemanaId] = useState<number | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const [listo, setListo] = useState(false);
+  const [limpiando, setLimpiando] = useState(false);
 
   useEffect(() => {
     let activo = true;
-    setListo(false);
-    setInitError(null);
 
     obtenerOCrearSemanaActiva()
       .then((semana) => {
@@ -63,6 +67,25 @@ export function SemanaPage() {
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
   const etiquetas = useLiveQuery(() => db.etiquetas.toArray());
   const platoEtiquetas = useLiveQuery(() => db.platoEtiquetas.toArray());
+
+  const hayPlatosAsignados = useMemo(
+    () => (slots ?? []).some((s) => s.platoId != null),
+    [slots],
+  );
+
+  const limpiarSemana = async () => {
+    if (semanaId == null || !hayPlatosAsignados || limpiando) return;
+    const ok = window.confirm(
+      '¿Vaciar toda la semana? Se quitarán los platos de comida y cena.',
+    );
+    if (!ok) return;
+    setLimpiando(true);
+    try {
+      await db.planSlots.where('semanaId').equals(semanaId).delete();
+    } finally {
+      setLimpiando(false);
+    }
+  };
 
   const asignar = async (
     diaSemana: number,
@@ -111,6 +134,23 @@ export function SemanaPage() {
         icon={CalendarDots}
         iconTone="sky"
       />
+
+      {datosListos &&
+        !initError &&
+        semanaId != null &&
+        hayPlatosAsignados && (
+          <div className="semana-toolbar">
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => void limpiarSemana()}
+              disabled={limpiando}
+            >
+              <Trash size={20} weight="duotone" aria-hidden />
+              {limpiando ? 'Limpiando…' : 'Limpiar semana'}
+            </button>
+          </div>
+        )}
 
       {initError && (
         <div className="alert alert--error" role="alert">

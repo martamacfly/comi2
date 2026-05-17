@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ListaCompraProvider } from './context/ListaCompraProvider';
 import { Layout } from './components/Layout';
 import { ListaPage } from './pages/ListaPage';
 import { PlatoEditPage } from './pages/PlatoEditPage';
@@ -12,17 +13,19 @@ import './styles/index.css';
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index element={<Navigate to="/platos" replace />} />
-          <Route path="productos" element={<ProductosPage />} />
-          <Route path="productos/:id" element={<ProductoPlatosPage />} />
-          <Route path="platos" element={<PlatosPage />} />
-          <Route path="platos/:id" element={<PlatoEditPage />} />
-          <Route path="semana" element={<SemanaPage />} />
-          <Route path="lista" element={<ListaPage />} />
-        </Route>
-      </Routes>
+      <ListaCompraProvider>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route index element={<Navigate to="/platos" replace />} />
+            <Route path="productos" element={<ProductosPage />} />
+            <Route path="productos/:id" element={<ProductoPlatosPage />} />
+            <Route path="platos" element={<PlatosPage />} />
+            <Route path="platos/:id" element={<PlatoEditPage />} />
+            <Route path="semana" element={<SemanaPage />} />
+            <Route path="lista" element={<ListaPage />} />
+          </Route>
+        </Routes>
+      </ListaCompraProvider>
     </BrowserRouter>
   );
 }

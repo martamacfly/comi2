@@ -1,8 +1,10 @@
 # APK de Comi2
 
-Tras `npm run cap:apk:debug` (desde `app/`), la APK de prueba se copia aquí:
+Tras `npm run cap:apk:debug` (desde `app/`), puedes copiar la APK de prueba aquí como:
 
 **`comi2.apk`**
+
+Los ficheros `*.apk` de esta carpeta **no se versionan** en git (`.gitignore`): cada persona genera la suya en local si la necesita.
 
 Copia también generada por Gradle en:
 

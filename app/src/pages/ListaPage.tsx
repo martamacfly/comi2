@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ClipboardText,
@@ -7,47 +6,23 @@ import {
   House,
   ShoppingCart,
   Sparkle,
+  Trash,
 } from '@phosphor-icons/react';
 import { ProductoEmoji } from '../components/ProductoEmoji';
-import { generarListaCompra } from '../lib/lista';
-import { obtenerSemanaActiva } from '../lib/semana';
+import { useListaCompra } from '../context/useListaCompra';
 import { PageHeader } from '../components/PageHeader';
 import type { Producto } from '../db/types';
 
 export function ListaPage() {
-  const [lista, setLista] = useState<Producto[] | null>(null);
-  const [yaTengoIds, setYaTengoIds] = useState<Set<number>>(new Set());
-  const [generando, setGenerando] = useState(false);
-
-  const semana = useLiveQuery(() => obtenerSemanaActiva());
-
-  const generar = async () => {
-    if (!semana?.id) {
-      setLista([]);
-      setYaTengoIds(new Set());
-      return;
-    }
-    setGenerando(true);
-    try {
-      const items = await generarListaCompra(semana.id);
-      setLista(items);
-      setYaTengoIds(new Set());
-    } finally {
-      setGenerando(false);
-    }
-  };
-
-  const marcarYaTengo = (productoId: number) => {
-    setYaTengoIds((prev) => new Set(prev).add(productoId));
-  };
-
-  const desmarcarYaTengo = (productoId: number) => {
-    setYaTengoIds((prev) => {
-      const next = new Set(prev);
-      next.delete(productoId);
-      return next;
-    });
-  };
+  const {
+    lista,
+    yaTengoIds,
+    generando,
+    generar,
+    borrarLista,
+    marcarYaTengo,
+    desmarcarYaTengo,
+  } = useListaCompra();
 
   const { pendientes, yaEnCasa } = useMemo(() => {
     if (!lista) return { pendientes: [], yaEnCasa: [] };
@@ -70,15 +45,28 @@ export function ListaPage() {
         iconTone="lavender"
       />
 
-      <button
-        type="button"
-        className="btn-primary btn-primary--icon"
-        onClick={generar}
-        disabled={generando}
-      >
-        <Sparkle size={20} weight="duotone" aria-hidden />
-        {generando ? 'Generando…' : 'Generar lista'}
-      </button>
+      <div className="btn-group lista-compra__actions">
+        <button
+          type="button"
+          className="btn-primary btn-primary--icon"
+          onClick={() => void generar()}
+          disabled={generando}
+        >
+          <Sparkle size={20} weight="duotone" aria-hidden />
+          {generando ? 'Generando…' : 'Generar lista'}
+        </button>
+        {lista !== null && (
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={borrarLista}
+            disabled={generando}
+          >
+            <Trash size={20} weight="duotone" aria-hidden />
+            Borrar lista
+          </button>
+        )}
+      </div>
 
       {lista === null ? (
         <p className="muted lista-compra__hint">Pulsa el botón para generar la lista.</p>
