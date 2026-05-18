@@ -22,7 +22,7 @@ import { Check, CookingPot, Trash, X } from '@phosphor-icons/react';
 export function PlatoEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isNew = id === 'nuevo';
+  const isNew = id == null || id === 'nuevo';
   const platoIdNum = isNew ? NaN : Number(id);
   const platoId =
     !isNew && Number.isFinite(platoIdNum) ? platoIdNum : undefined;

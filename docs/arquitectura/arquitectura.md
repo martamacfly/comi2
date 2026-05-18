@@ -21,6 +21,22 @@ Comi2/
 
 Detalle del empaquetado Android: [../guias/android-apk.md](../guias/android-apk.md).
 
+## Rutas (React Router)
+
+Definidas en [`app/src/App.tsx`](../../app/src/App.tsx). El orden importa: rutas literales como `platos/nuevo` deben declararse **antes** que `platos/:id`.
+
+| Ruta | Pantalla |
+|------|----------|
+| `/` | Redirección a `/platos` |
+| `/productos` | Listado de productos |
+| `/productos/:id` | Detalle del producto (platos que lo usan) |
+| `/platos` | Listado de platos |
+| **`/platos/nuevo`** | **Alta de plato** (`PlatoEditPage`). Esta ruta no tiene segmento `:id`; en código se considera «plato nuevo» cuando el parámetro `id` **falta** o es el literal `'nuevo'`. |
+| `/platos/:id/editar` | Edición de plato (`PlatoEditPage`) |
+| `/platos/:id` | Detalle del plato |
+| `/semana` | Planificador semanal |
+| `/lista` | Lista de la compra |
+
 ## Capas de la aplicación
 
 ```mermaid

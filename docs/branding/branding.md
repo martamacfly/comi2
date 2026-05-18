@@ -21,6 +21,7 @@ Guía de identidad visual para la aplicación Comi2: tipografía moderna, paleta
 - **Nombre:** Comi2 (C mayúscula; «2» como segunda versión / evolución del producto).
 - **Wordmark:** `assets/imagenes/logo2.svg` — texto «Comi2» en verde (`#1E5A36` y variantes).
 - **Icono de marca:** `assets/imagenes/comi2.svg` — ilustración (cuchara / comida); va a la **derecha** del wordmark en la cabecera.
+- **Logo raster:** `assets/imagenes/logo.png` — uso en documentación, redes o capturas donde interese PNG frente a SVG.
 - **Favicon / PWA:** `assets/imagenes/favicon.svg` (mismo motivo que logo2 con `viewBox` recortado); copias en `app/public/favicon.svg`, `icon-512.png`, `apple-touch-icon.png`.
 - **Cabecera:** fondo `--color-header-bg` (sage pastel); títulos `--color-header-title` / `--color-sage-deep` (`#1E5A36`); iconografía de UI `--color-icon`.
 - **Fondos:** usar sobre blanco, crema (`--color-surface`) o pastel muy suave; evitar sobre fotos sin overlay.

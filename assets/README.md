@@ -32,6 +32,7 @@ Recursos visuales y de diseño del proyecto (no código).
 | `logo2.svg` | Wordmark «Comi2» (cabecera, base del favicon) |
 | `comi2.svg` | Icono junto al wordmark en cabecera |
 | `favicon.svg` | Recorte para favicon (copiar a `app/public/favicon.svg`) |
+| `logo.png` | Logo raster para README, previews o uso donde convenga PNG |
 | `logo2.png`, `comi2.png` | Raster para PWA / touch icon si hace falta |
 
 ## Uso en la app

@@ -67,6 +67,8 @@ Gestión del inventario de ingredientes reutilizables entre platos.
 
 Cada plato agrupa los productos de su elaboración, tiene un **momento** (comida, cena o ambos) y puede llevar **varias etiquetas** libres.
 
+La **alta** de un plato es la vista en **`/platos/nuevo`** (React Router no expone un `:id` en esa URL; debe comportarse como formulario vacío para crear).
+
 **Criterios de aceptación:**
 
 - [x] Puedo crear un plato con nombre y **momento**: comida, cena o ambos.
