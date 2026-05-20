@@ -1,6 +1,6 @@
 # Comi2
 
-![Comi2](assets/imagenes/comi2.svg)
+![Comi2](assets/imagenes/logo.png)
 
 **Comi2** es una aplicación web sencilla para organizar **qué comer cada día de la semana** y sacar una **lista de la compra** con lo que necesitas. Pensada para el día a día en casa: tus platos, tus productos, tu menú.
 
