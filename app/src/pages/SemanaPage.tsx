@@ -78,6 +78,14 @@ export function SemanaPage() {
     [slots],
   );
 
+  const etiquetasDePlato = (platoId: number): Etiqueta[] => {
+    if (!platoEtiquetas || !etiquetas) return [];
+    const ids = platoEtiquetas
+      .filter((pe: PlatoEtiqueta) => pe.platoId === platoId)
+      .map((pe) => pe.etiquetaId);
+    return etiquetas.filter((e) => e.id != null && ids.includes(e.id));
+  };
+
   const resumenSemana = useMemo(() => {
     if (!slots || !platos) return [];
     return DIAS_SEMANA.map((diaLabel, diaSemana) => ({
@@ -136,14 +144,6 @@ export function SemanaPage() {
       return;
     }
     await asignarPlatoEnSlot(semanaId, diaSemana, momento, platoId);
-  };
-
-  const etiquetasDePlato = (platoId: number): Etiqueta[] => {
-    if (!platoEtiquetas || !etiquetas) return [];
-    const ids = platoEtiquetas
-      .filter((pe: PlatoEtiqueta) => pe.platoId === platoId)
-      .map((pe) => pe.etiquetaId);
-    return etiquetas.filter((e) => e.id != null && ids.includes(e.id));
   };
 
   const datosListos =
