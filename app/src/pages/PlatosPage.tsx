@@ -12,10 +12,12 @@ import {
   CookingPot,
   ForkKnife,
   ListBullets,
+  MagnifyingGlass,
   Plus,
   Sun,
   Tag,
   Moon,
+  X,
 } from '@phosphor-icons/react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
@@ -157,6 +159,7 @@ export function PlatosPage() {
   const navigate = useNavigate();
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [vista, setVista] = useState<VistaPlatos>('todos');
+  const [busqueda, setBusqueda] = useState('');
 
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
   const todasEtiquetas = useLiveQuery(() => db.etiquetas.orderBy('nombre').toArray());
@@ -180,6 +183,12 @@ export function PlatosPage() {
     );
     return map;
   }, [platos]);
+
+  const platosFiltrados = useMemo(() => {
+    if (!platos || busqueda.trim() === '') return platos ?? [];
+    const q = busqueda.trim().toLowerCase();
+    return platos.filter((p) => p.nombre.toLowerCase().includes(q));
+  }, [platos, busqueda]);
 
   const platosSinEtiqueta = useMemo(() => {
     if (!platos) return [];
@@ -240,6 +249,51 @@ export function PlatosPage() {
             </EmptyState>
           ) : (
             <>
+          <div className="platos-search">
+            <MagnifyingGlass
+              size={18}
+              weight="regular"
+              className="platos-search__icon"
+              aria-hidden
+            />
+            <input
+              type="search"
+              className="platos-search__input"
+              placeholder="Buscar plato…"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              aria-label="Buscar platos"
+              autoComplete="off"
+            />
+            {busqueda && (
+              <button
+                type="button"
+                className="platos-search__clear"
+                onClick={() => setBusqueda('')}
+                aria-label="Borrar búsqueda"
+              >
+                <X size={16} weight="bold" aria-hidden />
+              </button>
+            )}
+          </div>
+
+          {busqueda.trim() !== '' ? (
+            <div className="platos-panels platos-panels--flat" role="region" aria-label="Resultados de búsqueda">
+              {platosFiltrados.length === 0 ? (
+                <p className="muted platos-search__empty">
+                  No hay platos que coincidan con «{busqueda.trim()}».
+                </p>
+              ) : (
+                <PlatosLista
+                  platos={platosFiltrados}
+                  etiquetasPorPlato={etiquetasPorPlato}
+                  showMomentoBadge
+                  vacio=""
+                />
+              )}
+            </div>
+          ) : (
+          <>
           <div
             className="platos-tabs"
             role="tablist"
@@ -399,6 +453,8 @@ export function PlatosPage() {
                 </>
               )}
             </div>
+          )}
+          </>
           )}
             </>
           )}

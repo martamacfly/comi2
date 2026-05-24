@@ -90,10 +90,11 @@ export function SemanaPage() {
           slot?.platoId != null
             ? platos.find((p) => p.id === slot.platoId)
             : undefined;
-        return { momento, plato };
+        const tags = plato?.id != null ? etiquetasDePlato(plato.id) : [];
+        return { momento, plato, tags };
       }),
     }));
-  }, [slots, platos]);
+  }, [slots, platos, platoEtiquetas, etiquetas]);
 
   useEffect(() => {
     if (!mostrarResumen) return;
@@ -302,18 +303,23 @@ export function SemanaPage() {
                 <article key={diaLabel} className="semana-resumen__dia">
                   <h3>{diaLabel}</h3>
                   <ul className="semana-resumen__lista">
-                    {momentos.map(({ momento, plato }) => (
+                    {momentos.map(({ momento, plato, tags }) => (
                       <li key={momento} className="semana-resumen__item">
                         <span className="semana-resumen__momento">
                           <MomentoSlotIcon momento={momento} />
                           {momento === 'comida' ? 'Comida' : 'Cena'}
                         </span>
-                        <span
-                          className={
-                            plato ? 'semana-resumen__plato' : 'semana-resumen__plato muted'
-                          }
-                        >
-                          {plato?.nombre ?? '— Sin plato —'}
+                        <span className="semana-resumen__plato-wrap">
+                          <span
+                            className={
+                              plato ? 'semana-resumen__plato' : 'semana-resumen__plato muted'
+                            }
+                          >
+                            {plato?.nombre ?? '— Sin plato —'}
+                          </span>
+                          {tags.map((t) => (
+                            <TagChip key={t.id} etiqueta={t} small />
+                          ))}
                         </span>
                       </li>
                     ))}

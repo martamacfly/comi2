@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
   CalendarDots,
@@ -56,7 +56,28 @@ function NavItem({
   );
 }
 
+function useTecladoVisible(): boolean {
+  const [teclado, setTeclado] = useState(false);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const check = () => {
+      // Si el viewport visual es más de 150 px más pequeño que el innerHeight, hay teclado
+      setTeclado(window.innerHeight - vv.height > 150);
+    };
+
+    vv.addEventListener('resize', check);
+    return () => vv.removeEventListener('resize', check);
+  }, []);
+
+  return teclado;
+}
+
 export function Layout() {
+  const tecladoVisible = useTecladoVisible();
+
   return (
     <div className="layout">
       <header className="layout__header">
@@ -84,7 +105,7 @@ export function Layout() {
       </main>
 
       <nav
-        className="layout__nav layout__nav--mobile"
+        className={`layout__nav layout__nav--mobile${tecladoVisible ? ' layout__nav--oculto' : ''}`}
         aria-label="Principal móvil"
       >
         {navItems.map((item) => (

@@ -160,6 +160,11 @@ a:hover {
   display: none;
 }
 
+.layout__nav--oculto {
+  transform: translateY(100%);
+  pointer-events: none;
+}
+
 .layout__link {
   display: inline-flex;
   align-items: center;
@@ -261,7 +266,8 @@ a:hover {
     box-shadow: 0 -4px 12px rgba(45, 42, 38, 0.06);
     padding: var(--space-2) var(--space-2) max(var(--space-2), env(safe-area-inset-bottom));
     z-index: 100;
-    transform: translateZ(0);
+    transform: translateY(0);
+    transition: transform 200ms ease-in-out;
   }
 
   .layout__link--mobile {
@@ -661,6 +667,67 @@ button[type='submit']:focus-visible {
 .badge--ambos {
   background: var(--color-sage);
   color: #2d4a3d;
+}
+
+/* Platos — buscador */
+.platos-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.platos-search__icon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.platos-search__input {
+  width: 100%;
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3) var(--space-2) calc(var(--space-3) + 18px + var(--space-2));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.platos-search__input:focus {
+  outline: none;
+  border-color: var(--color-sage-dark);
+  box-shadow: 0 0 0 3px rgba(127, 168, 150, 0.25);
+}
+
+.platos-search__clear {
+  position: absolute;
+  right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.platos-search__clear:hover {
+  background: var(--color-text-muted);
+  color: var(--color-surface);
+}
+
+.platos-search__empty {
+  padding: var(--space-4) 0;
 }
 
 /* Platos — vistas y subsecciones */
@@ -1147,7 +1214,14 @@ button[type='submit']:focus-visible {
   display: grid;
   grid-template-columns: 6.5rem 1fr;
   gap: var(--space-2);
-  align-items: baseline;
+  align-items: center;
+}
+
+.semana-resumen__plato-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .semana-resumen__momento {
