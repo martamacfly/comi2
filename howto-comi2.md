@@ -293,19 +293,22 @@ Al pie de **Platos** (visible también si el catálogo está vacío, tras cargar
 
 Gestionadas en la pantalla **Editar plato** (`/platos/nuevo` o `/platos/:id/editar`).
 
-### Asignar al plato
+### Asignar al plato (inline)
 
 - **Chips asignados** — Muestran etiquetas del plato; **×** las quita del plato (no borra del catálogo).
-- **Sin etiquetas** — Si el plato aún no tiene ninguna, se muestra un chip **deshabilitado** con el texto «Sin etiquetas» (mismo aspecto que una etiqueta, pero atenuado y sin interacción).
-- **Añadir existente** — Clic en un chip disponible para asignarlo.
-- **Nueva etiqueta** — Nombre + color (selector nativo o paleta de colores) → **Crear y asignar**.
+- **Sin etiquetas** — Si el plato aún no tiene ninguna, se muestra un chip **deshabilitado** con el texto «Sin etiquetas».
+- **Añadir existente** — Clic en un chip disponible para asignarlo directamente en el formulario.
 
-### Catálogo global
+### Gestionar etiquetas (modal)
 
-Sección desplegable **Catálogo de etiquetas (editar o eliminar)**:
+El botón **Gestionar etiquetas** abre un modal dedicado con dos secciones:
 
-- **Editar** — Modal para cambiar nombre y color (aplica a todos los platos).
-- **Eliminar** — Borra la etiqueta y la desvincula de todos los platos.
+- **Nueva etiqueta** — Nombre + color (selector nativo o paleta de colores) → **Crear y asignar**. La etiqueta creada queda asignada al plato al instante.
+- **Catálogo** — Lista de todas las etiquetas con dos acciones por fila:
+  - **Editar** — Abre un sub-modal para cambiar nombre y color (aplica a todos los platos).
+  - **Eliminar** — Borra la etiqueta y la desvincula de todos los platos.
+
+El modal se cierra con el botón **Cerrar**, pulsando fuera o con **Escape** (si hay un sub-modal de edición abierto, Escape cierra ese primero).
 
 ### Visualización
 
@@ -389,7 +392,7 @@ app/src/
 │   ├── producto-emoji.ts    # Catálogo de emojis, búsqueda por keywords ES, valor por defecto
 │   ├── lista.ts             # generarListaCompra()
 │   ├── momento-icons.tsx    # Iconos sol/luna para comida y cena
-│   └── semana.ts            # Semana activa, normalización de fechas
+│   └── semana.ts            # Semana activa, normalización de fechas, asignarPlatoEnSlot
 ├── components/
 │   ├── Layout.tsx           # Cabecera (logo2 + comi2), nav escritorio/móvil
 │   ├── PageHeader.tsx       # Título de página con icono
@@ -423,8 +426,8 @@ app/src/
 | `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color; panel **Respaldo** |
 | `PlatosBackupPanel.tsx` | UI para exportar / importar JSON |
 | `PlatoDetailPage.tsx` | Vista de un plato (momento, etiquetas, ingredientes); enlace a editar |
-| `PlatoEditPage.tsx` | Alta (`/nuevo`) y edición (`/:id/editar`) |
-| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana** |
+| `PlatoEditPage.tsx` | Alta (`/nuevo`) y edición (`/:id/editar`); recibe `state.desdeSemana` para asignar plato al volver; modal **Gestionar etiquetas** |
+| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana**; **Ver resumen** (modal); **«+ Nuevo plato…»** en desplegables |
 | `ListaPage.tsx` | Generar / borrar lista; estado global en sesión; checkbox «ya en casa» |
 
 ---
@@ -433,11 +436,13 @@ app/src/
 
 ### A — Configurar un plato
 
-1. Ir a **Platos** → **Nuevo plato** (formulario directo, sin indicador de pasos).
-2. Nombre y **momento** (comida / cena / ambos).
-3. Crear o seleccionar **etiquetas** (con color); si no hay ninguna, verás el chip «Sin etiquetas» deshabilitado.
+1. Ir a **Platos** → **Nuevo plato**, o elegir **«+ Nuevo plato…»** en cualquier hueco de la semana.
+2. Nombre y **momento** (comida / cena / ambos; si vienes desde un hueco, ya viene preseleccionado).
+3. Asignar **etiquetas** existentes (chips clicables) o pulsar **Gestionar etiquetas** para crear nuevas o editar/eliminar el catálogo.
 4. Añadir **productos**: marcar en «Añadir del catálogo», crear con **Añadir producto al catálogo**, o quitar con × en «En este plato».
-5. **Guardar** (abres la **vista del plato** con mensaje de confirmación; desde ahí puedes **Editar** de nuevo).
+5. **Guardar**:
+   - Si venías desde **Semana**, el plato se asigna automáticamente en el hueco elegido y regresas al planificador.
+   - En caso contrario, abres la **vista del plato** con mensaje de confirmación; desde ahí puedes **Editar** de nuevo.
 
 ### A2 — Consultar el catálogo de platos
 
@@ -456,8 +461,10 @@ app/src/
 
 1. Ir a **Semana**.
 2. En cada día, elegir plato de **Comida** y de **Cena** (desplegable).
+   - Si no existe el plato, elegir **«+ Nuevo plato…»** al final de la lista: se abre el formulario de creación con el momento preseleccionado; al guardar el plato queda asignado en ese hueco y se regresa a Semana.
 3. Los cambios se guardan al instante en IndexedDB.
-4. Opcional: **Limpiar semana** vacía todos los huecos (confirmación).
+4. Pulsar **Ver resumen** para consultar los 7 días con sus platos en un modal de solo lectura (se cierra con el botón Cerrar, clic fuera o Escape).
+5. Opcional: **Limpiar semana** vacía todos los huecos (confirmación).
 
 ### C — Hacer la compra
 

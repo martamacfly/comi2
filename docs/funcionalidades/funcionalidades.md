@@ -73,11 +73,11 @@ La **alta** de un plato es la vista en **`/platos/nuevo`** (React Router no expo
 
 - [x] Puedo crear un plato con nombre y **momento**: comida, cena o ambos.
 - [x] Puedo añadir y quitar productos del plato (catálogo, lista «En este plato», alta rápida).
-- [x] Al **editar un plato**, puedo crear una etiqueta nueva (nombre + **color**) y asignarla al plato.
-- [x] Puedo elegir etiquetas ya existentes del catálogo.
-- [x] Puedo cambiar el nombre o el color de una etiqueta existente (aplica a todos los platos).
+- [x] Al **editar un plato**, puedo crear una etiqueta nueva (nombre + **color**) y asignarla al plato, desde un **modal** dedicado a gestionar etiquetas.
+- [x] Puedo elegir etiquetas ya existentes del catálogo (chips clicables en el formulario principal).
+- [x] Puedo cambiar el nombre o el color de una etiqueta existente desde el modal de gestión (aplica a todos los platos).
 - [x] Puedo quitar una etiqueta del plato sin borrarla del catálogo.
-- [x] Puedo eliminar una etiqueta del catálogo (se desvincula de todos los platos).
+- [x] Puedo eliminar una etiqueta del catálogo desde el modal de gestión (se desvincula de todos los platos).
 - [x] Las etiquetas se muestran como **chips** con color en listado, edición y planificador.
 - [x] Si un plato no tiene etiquetas, se muestra el chip **«Sin etiquetas»** en estado deshabilitado.
 - [x] En **Platos**: pestaña **Todos** (lista directa); **Por momento** / **Por etiquetas** con acordeones colapsables y color.
@@ -92,6 +92,8 @@ Vista de la semana actual con huecos **Comida** y **Cena** por día.
 - [x] Veo la semana de **lunes a domingo** con dos huecos por día (comida, cena).
 - [x] Puedo asignar **un plato** por hueco (o dejarlo vacío).
 - [x] Solo se ofrecen platos cuyo **momento** coincide con el hueco (comida, cena o ambos).
+- [x] Desde el desplegable de un hueco puedo elegir **«+ Nuevo plato…»** para crear un plato y que quede asignado automáticamente al volver a Semana.
+- [x] Puedo ver un **resumen de solo lectura** de la semana (todos los días con comida y cena asignadas) desde un modal accesible con el botón **Ver resumen**.
 - [ ] (Opcional MVP) Puedo filtrar platos por una o más etiquetas al asignar un hueco.
 
 ### Módulo 4 — Lista de la compra
@@ -110,9 +112,11 @@ Generación automática desde el plan de la semana activa.
 
 ### Flujo A — Configurar un plato nuevo
 
-1. Ir a **Platos** → **Nuevo plato**.
-2. Introducir nombre, **momento**, etiquetas (con color) y productos.
-3. Guardar.
+1. Ir a **Platos** → **Nuevo plato** (o elegir **«+ Nuevo plato…»** en un hueco de la semana).
+2. Introducir nombre y **momento**.
+3. Asignar etiquetas existentes (chips) o abrir **Gestionar etiquetas** para crear o editar etiquetas.
+4. Añadir productos.
+5. Guardar. Si venías desde Semana, el plato queda asignado en ese hueco y regresas a la vista semanal.
 
 ### Flujo A2 — Explorar platos
 
@@ -123,8 +127,11 @@ Generación automática desde el plan de la semana activa.
 ### Flujo B — Planificar la semana
 
 1. Ir a **Semana**.
-2. Para cada día, elegir plato de **Comida** y **Cena**.
+2. Para cada día, elegir plato de **Comida** y **Cena** en el desplegable.
+   - Si no existe el plato, elegir **«+ Nuevo plato…»** para crearlo y asignarlo al instante.
 3. Los cambios se guardan automáticamente en local.
+4. Pulsar **Ver resumen** para consultar la semana completa de un vistazo (solo lectura).
+5. Opcional: **Limpiar semana** vacía todos los huecos.
 
 ### Flujo C — Hacer la compra
 

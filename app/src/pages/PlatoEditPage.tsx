@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ProductoEmoji } from '../components/ProductoEmoji';
 import { TagChip } from '../components/TagChip';
@@ -11,17 +11,24 @@ import {
 } from '../lib/color';
 import { InlineProductoAdd } from '../components/InlineProductoAdd';
 import {
+  asignarPlatoEnSlot,
+  type SemanaPlatoNuevoState,
+} from '../lib/semana';
+import {
   actualizarEtiqueta,
   crearEtiqueta,
   eliminarEtiqueta,
   eliminarPlato,
   guardarPlato,
 } from '../lib/platos';
-import { Check, CookingPot, Trash, X } from '@phosphor-icons/react';
+import { Check, CookingPot, Tag, Trash, X } from '@phosphor-icons/react';
 
 export function PlatoEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const desdeSemana = (location.state as SemanaPlatoNuevoState | null)
+    ?.desdeSemana;
   const isNew = id == null || id === 'nuevo';
   const platoIdNum = isNew ? NaN : Number(id);
   const platoId =
@@ -57,7 +64,11 @@ export function PlatoEditPage() {
   );
 
   const [nombre, setNombre] = useState('');
-  const [momento, setMomento] = useState<MomentoPlato>('ambos');
+  const [momento, setMomento] = useState<MomentoPlato>(() =>
+    desdeSemana?.momento === 'comida' || desdeSemana?.momento === 'cena'
+      ? desdeSemana.momento
+      : 'ambos',
+  );
   const [selectedProductoIds, setSelectedProductoIds] = useState<number[]>([]);
   const [selectedEtiquetaIds, setSelectedEtiquetaIds] = useState<number[]>([]);
   const [nuevaEtiquetaNombre, setNuevaEtiquetaNombre] = useState('');
@@ -65,6 +76,7 @@ export function PlatoEditPage() {
     ETIQUETA_COLORES_PREDEFINIDOS[0],
   );
   const [editEtiqueta, setEditEtiqueta] = useState<Etiqueta | null>(null);
+  const [mostrarGestionEtiquetas, setMostrarGestionEtiquetas] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [loadedFromDb, setLoadedFromDb] = useState(isNew);
@@ -92,6 +104,20 @@ export function PlatoEditPage() {
     productoIdsAsignados,
     etiquetaIdsAsignados,
   ]);
+
+  useEffect(() => {
+    if (!mostrarGestionEtiquetas && !editEtiqueta) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (editEtiqueta) {
+        setEditEtiqueta(null);
+      } else {
+        setMostrarGestionEtiquetas(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mostrarGestionEtiquetas, editEtiqueta]);
 
   const etiquetasAsignadas =
     todasEtiquetas?.filter(
@@ -185,6 +211,16 @@ export function PlatoEditPage() {
         productoIds: selectedProductoIds,
         etiquetaIds: selectedEtiquetaIds,
       });
+      if (desdeSemana) {
+        await asignarPlatoEnSlot(
+          desdeSemana.semanaId,
+          desdeSemana.diaSemana,
+          desdeSemana.momento,
+          savedId,
+        );
+        navigate('/semana');
+        return;
+      }
       if (isNew) {
         navigate(`/platos/${savedId}`, {
           state: { platoCreado: nombre.trim() },
@@ -230,17 +266,27 @@ export function PlatoEditPage() {
   return (
     <section className="page">
       <p className="breadcrumb">
-        <Link to="/platos">Platos</Link>
-        <span> / </span>
-        {isNew ? (
-          <span>Nuevo</span>
+        {desdeSemana ? (
+          <>
+            <Link to="/semana">Semana</Link>
+            <span> / </span>
+            <span>Nuevo plato</span>
+          </>
         ) : (
           <>
-            <Link to={`/platos/${platoId}`}>
-              {(plato?.nombre ?? nombre) || 'Plato'}
-            </Link>
+            <Link to="/platos">Platos</Link>
             <span> / </span>
-            <span>Editar</span>
+            {isNew ? (
+              <span>Nuevo</span>
+            ) : (
+              <>
+                <Link to={`/platos/${platoId}`}>
+                  {(plato?.nombre ?? nombre) || 'Plato'}
+                </Link>
+                <span> / </span>
+                <span>Editar</span>
+              </>
+            )}
           </>
         )}
       </p>
@@ -252,7 +298,9 @@ export function PlatoEditPage() {
             <h1>{isNew ? 'Nuevo plato' : 'Editar plato'}</h1>
             {isNew && (
               <p className="page__lead plato-form__lead">
-                Define el plato, sus ingredientes y etiquetas. Después podrás usarlo en la semana.
+                {desdeSemana
+                  ? 'Crea el plato y volverás a la semana con el hueco ya asignado.'
+                  : 'Define el plato, sus ingredientes y etiquetas. Después podrás usarlo en la semana.'}
               </p>
             )}
           </div>
@@ -327,68 +375,17 @@ export function PlatoEditPage() {
             </div>
           )}
 
-          <div className="etiqueta-nueva">
-            <span className="field-hint">Nueva etiqueta</span>
-            <div className="form-inline">
-              <input
-                type="text"
-                placeholder="Nombre"
-                value={nuevaEtiquetaNombre}
-                onChange={(e) => setNuevaEtiquetaNombre(e.target.value)}
-              />
-              <input
-                type="color"
-                value={normalizeHex(nuevaEtiquetaColor)}
-                onChange={(e) => setNuevaEtiquetaColor(e.target.value)}
-                title="Color"
-              />
-              <button type="button" onClick={crearYAsignarEtiqueta}>
-                Crear y asignar
-              </button>
-            </div>
-            <div className="color-palette">
-              {ETIQUETA_COLORES_PREDEFINIDOS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={`color-swatch${nuevaEtiquetaColor === c ? ' color-swatch--active' : ''}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setNuevaEtiquetaColor(c)}
-                  aria-label={`Color ${c}`}
-                />
-              ))}
-            </div>
+          <div className="etiqueta-gestionar">
+            <button
+              type="button"
+              className="btn-secondary btn-secondary--icon"
+              onClick={() => setMostrarGestionEtiquetas(true)}
+            >
+              <Tag size={16} weight="duotone" aria-hidden />
+              Gestionar etiquetas
+            </button>
           </div>
         </div>
-
-        {todasEtiquetas && todasEtiquetas.length > 0 && (
-          <details className="catalogo-etiquetas">
-            <summary>Catálogo de etiquetas (editar o eliminar)</summary>
-            <ul className="list">
-              {todasEtiquetas.map((t) => (
-                <li key={t.id} className="list__row list__row--wrap">
-                  <TagChip etiqueta={t} small />
-                  <div className="btn-group">
-                    <button
-                      type="button"
-                      className="btn-ghost"
-                      onClick={() => setEditEtiqueta({ ...t })}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-ghost btn-danger"
-                      onClick={() => borrarEtiquetaCatalogo(t.id!)}
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
 
         <div className="field">
           <span>Productos del plato</span>
@@ -476,7 +473,7 @@ export function PlatoEditPage() {
             <Check size={20} weight="bold" aria-hidden />
             {saving ? 'Guardando…' : isNew ? 'Crear plato' : 'Guardar cambios'}
           </button>
-          <Link to="/platos" className="btn-ghost">
+          <Link to={desdeSemana ? '/semana' : '/platos'} className="btn-ghost">
             Cancelar
           </Link>
           {!isNew && platoId != null && (
@@ -487,6 +484,101 @@ export function PlatoEditPage() {
           )}
         </div>
       </form>
+
+      {mostrarGestionEtiquetas && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => setMostrarGestionEtiquetas(false)}
+        >
+          <div
+            className="modal modal--gestionar-etiquetas"
+            role="dialog"
+            aria-labelledby="gestionar-etiquetas-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="gestionar-etiquetas-title">Gestionar etiquetas</h2>
+
+            <div className="etiqueta-nueva">
+              <span className="field-hint">Nueva etiqueta</span>
+              <div className="form-inline">
+                <input
+                  type="text"
+                  placeholder="Nombre"
+                  value={nuevaEtiquetaNombre}
+                  onChange={(e) => setNuevaEtiquetaNombre(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void crearYAsignarEtiqueta();
+                    }
+                  }}
+                />
+                <input
+                  type="color"
+                  value={normalizeHex(nuevaEtiquetaColor)}
+                  onChange={(e) => setNuevaEtiquetaColor(e.target.value)}
+                  title="Color"
+                />
+                <button type="button" onClick={() => void crearYAsignarEtiqueta()}>
+                  Crear y asignar
+                </button>
+              </div>
+              <div className="color-palette">
+                {ETIQUETA_COLORES_PREDEFINIDOS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`color-swatch${nuevaEtiquetaColor === c ? ' color-swatch--active' : ''}`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => setNuevaEtiquetaColor(c)}
+                    aria-label={`Color ${c}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {todasEtiquetas && todasEtiquetas.length > 0 && (
+              <div className="gestionar-etiquetas-catalogo">
+                <span className="field-hint">Catálogo</span>
+                <ul className="list">
+                  {todasEtiquetas.map((t) => (
+                    <li key={t.id} className="list__row list__row--wrap">
+                      <TagChip etiqueta={t} small />
+                      <div className="btn-group">
+                        <button
+                          type="button"
+                          className="btn-ghost"
+                          onClick={() => setEditEtiqueta({ ...t })}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-ghost btn-danger"
+                          onClick={() => void borrarEtiquetaCatalogo(t.id!)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setMostrarGestionEtiquetas(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editEtiqueta && (
         <div className="modal-backdrop" role="presentation">

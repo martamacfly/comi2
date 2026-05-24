@@ -1,5 +1,37 @@
 import { db } from '../db/database';
-import type { Semana } from '../db/types';
+import type { MomentoSlot, Semana } from '../db/types';
+
+export type SemanaPlatoNuevoState = {
+  desdeSemana: {
+    semanaId: number;
+    diaSemana: number;
+    momento: MomentoSlot;
+  };
+};
+
+export const NUEVO_PLATO_SELECT = '__nuevo__';
+
+export async function asignarPlatoEnSlot(
+  semanaId: number,
+  diaSemana: number,
+  momento: MomentoSlot,
+  platoId: number,
+): Promise<void> {
+  const slots = await db.planSlots.where('semanaId').equals(semanaId).toArray();
+  const existente = slots.find(
+    (s) => s.diaSemana === diaSemana && s.momento === momento,
+  );
+  if (existente?.id != null) {
+    await db.planSlots.update(existente.id, { platoId });
+  } else {
+    await db.planSlots.add({
+      semanaId,
+      diaSemana,
+      momento,
+      platoId,
+    });
+  }
+}
 
 export function lunesDeSemana(fecha = new Date()): Date {
   const d = new Date(fecha);

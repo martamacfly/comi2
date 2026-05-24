@@ -21,8 +21,10 @@ El usuario mantiene un catálogo de **platos** (cada uno con los **productos** n
 | RF-001 | Dar de alta, editar y eliminar **productos** (ingredientes base del catálogo) | Alta |
 | RF-002 | Dar de alta, editar y eliminar **platos**, con **momento** del día: solo comida, solo cena o ambos | Alta |
 | RF-003 | Asociar a cada plato los **productos** que necesita para su elaboración (solo nombre; sin cantidades en el MVP) | Alta |
-| RF-009 | Gestionar **etiquetas** al **editar un plato** (crear, editar color/nombre, eliminar, asignar varias por plato); cada etiqueta tiene **color** visible en la UI | Alta |
+| RF-009 | Gestionar **etiquetas** al **editar un plato** (crear, editar color/nombre, eliminar, asignar varias por plato); operaciones de creación y edición accesibles desde un **modal dedicado**; cada etiqueta tiene **color** visible en la UI | Alta |
 | RF-004 | **Planificar la semana** (lunes a domingo): un plato por **comida** y uno por **cena** cada día (14 huecos) | Alta |
+| RF-010 | **Vista resumen** de la semana: modal de solo lectura con los platos asignados a comida y cena de cada día | Media |
+| RF-011 | Crear un **plato nuevo directamente desde un hueco** de la semana; al guardar el plato se asigna automáticamente y se regresa al planificador | Media |
 | RF-005 | **Generar lista de la compra** a partir de los platos del plan semanal, listando cada producto una vez (sin sumar cantidades en el MVP) | Alta |
 | RF-006 | Consultar y marcar ítems de la lista de la compra (comprado / pendiente) | Media |
 | RF-007 | Duplicar o reutilizar el plan de una semana anterior | Baja (futuro) |

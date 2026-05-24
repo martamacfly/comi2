@@ -1,19 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   CalendarDots,
-  CalendarPlus,
-  CookingPot,
+  ListBullets,
   Trash,
 } from '@phosphor-icons/react';
 import { db } from '../db/database';
 import type { Etiqueta, MomentoSlot, Plato, PlatoEtiqueta } from '../db/types';
-import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { TagChip } from '../components/TagChip';
 import { MomentoSlotIcon } from '../lib/momento-icons';
-import { DIAS_SEMANA, obtenerOCrearSemanaActiva } from '../lib/semana';
+import {
+  asignarPlatoEnSlot,
+  DIAS_SEMANA,
+  NUEVO_PLATO_SELECT,
+  obtenerOCrearSemanaActiva,
+} from '../lib/semana';
 
 const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
 
@@ -23,10 +26,12 @@ function platoCompatible(plato: Plato, momento: MomentoSlot): boolean {
 }
 
 export function SemanaPage() {
+  const navigate = useNavigate();
   const [semanaId, setSemanaId] = useState<number | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const [listo, setListo] = useState(false);
   const [limpiando, setLimpiando] = useState(false);
+  const [mostrarResumen, setMostrarResumen] = useState(false);
 
   useEffect(() => {
     let activo = true;
@@ -73,6 +78,32 @@ export function SemanaPage() {
     [slots],
   );
 
+  const resumenSemana = useMemo(() => {
+    if (!slots || !platos) return [];
+    return DIAS_SEMANA.map((diaLabel, diaSemana) => ({
+      diaLabel,
+      momentos: MOMENTOS.map((momento) => {
+        const slot = slots.find(
+          (s) => s.diaSemana === diaSemana && s.momento === momento,
+        );
+        const plato =
+          slot?.platoId != null
+            ? platos.find((p) => p.id === slot.platoId)
+            : undefined;
+        return { momento, plato };
+      }),
+    }));
+  }, [slots, platos]);
+
+  useEffect(() => {
+    if (!mostrarResumen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMostrarResumen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [mostrarResumen]);
+
   const limpiarSemana = async () => {
     if (semanaId == null || !hayPlatosAsignados || limpiando) return;
     const ok = window.confirm(
@@ -103,16 +134,7 @@ export function SemanaPage() {
       }
       return;
     }
-    if (existente?.id != null) {
-      await db.planSlots.update(existente.id, { platoId });
-    } else {
-      await db.planSlots.add({
-        semanaId,
-        diaSemana,
-        momento,
-        platoId,
-      });
-    }
+    await asignarPlatoEnSlot(semanaId, diaSemana, momento, platoId);
   };
 
   const etiquetasDePlato = (platoId: number): Etiqueta[] => {
@@ -135,11 +157,18 @@ export function SemanaPage() {
         iconTone="sky"
       />
 
-      {datosListos &&
-        !initError &&
-        semanaId != null &&
-        hayPlatosAsignados && (
-          <div className="semana-toolbar">
+      {datosListos && !initError && semanaId != null && (
+        <div className="semana-toolbar">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setMostrarResumen(true)}
+            disabled={!hayPlatosAsignados}
+          >
+            <ListBullets size={20} weight="duotone" aria-hidden />
+            Ver resumen
+          </button>
+          {hayPlatosAsignados && (
             <button
               type="button"
               className="btn-secondary"
@@ -149,8 +178,9 @@ export function SemanaPage() {
               <Trash size={20} weight="duotone" aria-hidden />
               {limpiando ? 'Limpiando…' : 'Limpiar semana'}
             </button>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
       {initError && (
         <div className="alert alert--error" role="alert">
@@ -166,19 +196,14 @@ export function SemanaPage() {
         <p className="muted">Cargando planificador…</p>
       )}
 
-      {datosListos && !initError && platos.length === 0 && (
-        <EmptyState icon={CalendarPlus} iconTone="sky">
-          <p className="muted">
-            Necesitas al menos un plato para planificar la semana.
-          </p>
-          <Link to="/platos/nuevo" className="btn-primary btn-primary--icon">
-            <CookingPot size={20} weight="duotone" aria-hidden />
-            Crear un plato
-          </Link>
-        </EmptyState>
+      {datosListos && !initError && platos.length === 0 && semanaId != null && (
+        <p className="muted">
+          Aún no tienes platos. Elige «Nuevo plato…» en cualquier hueco para crear
+          uno y asignarlo.
+        </p>
       )}
 
-      {datosListos && !initError && platos.length > 0 && semanaId != null && (
+      {datosListos && !initError && semanaId != null && (
         <div className="semana-grid">
           {DIAS_SEMANA.map((diaLabel, diaSemana) => (
             <article key={diaLabel} className="semana-dia">
@@ -210,6 +235,15 @@ export function SemanaPage() {
                         value={slot?.platoId ?? ''}
                         onChange={(e) => {
                           const v = e.target.value;
+                          if (v === NUEVO_PLATO_SELECT) {
+                            if (semanaId == null) return;
+                            navigate('/platos/nuevo', {
+                              state: {
+                                desdeSemana: { semanaId, diaSemana, momento },
+                              },
+                            });
+                            return;
+                          }
                           void asignar(
                             diaSemana,
                             momento,
@@ -223,12 +257,13 @@ export function SemanaPage() {
                             {p.nombre}
                           </option>
                         ))}
+                        <option value={NUEVO_PLATO_SELECT}>+ Nuevo plato…</option>
                       </select>
                     </label>
                     {opciones.length === 0 && (
                       <p className="muted semana-slot__hint">
-                        No hay platos de{' '}
-                        {momento === 'comida' ? 'comida' : 'cena'}.
+                        No hay platos de {momento === 'comida' ? 'comida' : 'cena'}
+                        . Elige «Nuevo plato…» para crear uno.
                       </p>
                     )}
                     {tags.length > 0 && (
@@ -243,6 +278,59 @@ export function SemanaPage() {
               })}
             </article>
           ))}
+        </div>
+      )}
+
+      {mostrarResumen && (
+        <div
+          className="modal-backdrop"
+          role="presentation"
+          onClick={() => setMostrarResumen(false)}
+        >
+          <div
+            className="modal modal--semana-resumen"
+            role="dialog"
+            aria-labelledby="semana-resumen-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="semana-resumen-title">Resumen de la semana</h2>
+            <p className="muted semana-resumen__lead">
+              Vista de solo lectura de los platos planificados.
+            </p>
+            <div className="semana-resumen">
+              {resumenSemana.map(({ diaLabel, momentos }) => (
+                <article key={diaLabel} className="semana-resumen__dia">
+                  <h3>{diaLabel}</h3>
+                  <ul className="semana-resumen__lista">
+                    {momentos.map(({ momento, plato }) => (
+                      <li key={momento} className="semana-resumen__item">
+                        <span className="semana-resumen__momento">
+                          <MomentoSlotIcon momento={momento} />
+                          {momento === 'comida' ? 'Comida' : 'Cena'}
+                        </span>
+                        <span
+                          className={
+                            plato ? 'semana-resumen__plato' : 'semana-resumen__plato muted'
+                          }
+                        >
+                          {plato?.nombre ?? '— Sin plato —'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setMostrarResumen(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>
