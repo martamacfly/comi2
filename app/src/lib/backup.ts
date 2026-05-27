@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { emojiPorDefecto } from './producto-emoji';
 import { db } from '../db/database';
 import type {
@@ -310,14 +313,34 @@ export async function buildBackupPayload(): Promise<Comi2BackupPayload> {
   };
 }
 
-export function downloadBackupFile(payload: Comi2BackupPayload): void {
+export async function downloadBackupFile(payload: Comi2BackupPayload): Promise<void> {
   const json = JSON.stringify(payload, null, 2);
+  const day = new Date().toISOString().slice(0, 10);
+  const filename = `comi2-respaldo-${day}.json`;
+
+  // En Android nativo (Capacitor): escribir el fichero en Documents y compartirlo
+  if (Capacitor.isNativePlatform()) {
+    const { uri } = await Filesystem.writeFile({
+      path: filename,
+      data: json,
+      directory: Directory.Cache,
+      encoding: Encoding.UTF8,
+    });
+    await Share.share({
+      title: 'Respaldo Comi2',
+      text: 'Copia de seguridad de Comi2',
+      url: uri,
+      dialogTitle: 'Guardar o compartir respaldo',
+    });
+    return;
+  }
+
+  // Fallback para navegadores de escritorio
   const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const day = new Date().toISOString().slice(0, 10);
   a.href = url;
-  a.download = `comi2-respaldo-${day}.json`;
+  a.download = filename;
   a.rel = 'noopener';
   document.body.appendChild(a);
   a.click();

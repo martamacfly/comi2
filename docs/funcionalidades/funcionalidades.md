@@ -35,6 +35,9 @@ flowchart LR
 | Plan semanal | Lunes–domingo; 1 plato/comida + 1 plato/cena por día | Hecho |
 | Generar lista de la compra | Productos únicos; checkbox «ya en casa» | Hecho |
 | Persistencia local | IndexedDB vía Dexie v3 | Hecho |
+| Buscador predictivo de platos | Filtro por nombre en tiempo real en la vista Platos | Hecho |
+| Exportar respaldo (Android) | Share sheet nativo; fallback descarga web | Hecho |
+| Nav móvil oculta con teclado | Se oculta/muestra con transición vía `visualViewport` | Hecho |
 | Filtrar platos por etiqueta en Semana | Al asignar hueco | Pendiente |
 
 ## Funcionalidades futuras

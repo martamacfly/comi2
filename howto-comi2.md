@@ -421,10 +421,11 @@ app/src/
 | Archivo | Responsabilidad |
 |---------|-----------------|
 | `lib/platos.ts` | `guardarPlato`, `crearEtiqueta`, `actualizarEtiqueta`, `eliminarEtiqueta`, sync de productos/etiquetas |
-| `lib/backup.ts` | Formato `comi2-backup` v1; validación; exportación / restauración transaccional |
+| `lib/backup.ts` | Formato `comi2-backup` v1; validación; exportación con `@capacitor/filesystem` + `@capacitor/share` en Android y descarga web como fallback; restauración transaccional |
 | `ProductoPlatosPage.tsx` | Detalle: emoji, nombre inline, platos que lo usan |
-| `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color; panel **Respaldo** |
+| `PlatosPage.tsx` | Pestañas (Todos ancho completo); acordeones con color; **buscador predictivo**; panel **Respaldo** |
 | `PlatosBackupPanel.tsx` | UI para exportar / importar JSON |
+| `Layout.tsx` | Cabecera + nav móvil; oculta barra inferior al detectar teclado abierto (`visualViewport`) |
 | `PlatoDetailPage.tsx` | Vista de un plato (momento, etiquetas, ingredientes); enlace a editar |
 | `PlatoEditPage.tsx` | Alta (`/nuevo`) y edición (`/:id/editar`); recibe `state.desdeSemana` para asignar plato al volver; modal **Gestionar etiquetas** |
 | `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana**; **Ver resumen** (modal); **«+ Nuevo plato…»** en desplegables |
@@ -454,7 +455,9 @@ app/src/
 ### A3 — Copia de seguridad o migrar datos
 
 1. Ir a **Platos** y bajar hasta **Respaldo**.
-2. **Exportar respaldo** para descargar el JSON.
+2. **Exportar respaldo**:
+   - En **Android** (APK): se abre el selector nativo para compartir o guardar el fichero JSON (Drive, Descargas, WhatsApp…).
+   - En **navegador de escritorio**: se descarga directamente el JSON.
 3. En otro navegador o instalación de Comi2: **Importar respaldo**, elegir el archivo y confirmar (se sustituyen todos los datos locales de ese perfil).
 
 ### B — Planificar la semana
@@ -493,7 +496,9 @@ app/src/
 | RF-010 | Emoji por producto; edición inline del nombre en detalle |
 | RF-011 | Detalle producto: platos que usan el ingrediente |
 | RF-012 | Listado platos: pestañas Todos / momento / etiquetas con acordeones |
-| RF-013 | Respaldo JSON: exportar / importar datos (productos, platos, etiquetas, semana) |
+| RF-013 | Respaldo JSON: exportar (Share sheet nativo en Android; descarga en escritorio) / importar datos |
+| RF-014 | Buscador predictivo de platos por nombre |
+| RF-015 | Barra de navegación móvil se oculta automáticamente al abrir el teclado |
 
 ### Pendientes / futuro
 

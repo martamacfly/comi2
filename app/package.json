@@ -20,6 +20,8 @@
     "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
     "@phosphor-icons/react": "^2.1.10",
     "dexie": "^4.4.2",
     "dexie-react-hooks": "^4.4.0",

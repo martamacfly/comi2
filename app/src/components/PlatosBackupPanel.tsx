@@ -24,7 +24,7 @@ export function PlatosBackupPanel({ onImportSuccess }: PlatosBackupPanelProps) {
     setErrorImport(null);
     try {
       const payload = await buildBackupPayload();
-      downloadBackupFile(payload);
+      await downloadBackupFile(payload);
     } catch (e) {
       setErrorImport(
         e instanceof Error ? e.message : 'No se pudo exportar el respaldo',
