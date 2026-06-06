@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   CalendarDots,
+  DownloadSimple,
   ListBullets,
   Trash,
 } from '@phosphor-icons/react';
@@ -17,6 +18,7 @@ import {
   NUEVO_PLATO_SELECT,
   obtenerOCrearSemanaActiva,
 } from '../lib/semana';
+import { compartirImagenSemana } from '../lib/imagen-semana';
 
 const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
 
@@ -32,6 +34,7 @@ export function SemanaPage() {
   const [listo, setListo] = useState(false);
   const [limpiando, setLimpiando] = useState(false);
   const [mostrarResumen, setMostrarResumen] = useState(false);
+  const [descargandoImagen, setDescargandoImagen] = useState(false);
 
   useEffect(() => {
     let activo = true;
@@ -295,9 +298,6 @@ export function SemanaPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="semana-resumen-title">Resumen de la semana</h2>
-            <p className="muted semana-resumen__lead">
-              Vista de solo lectura de los platos planificados.
-            </p>
             <div className="semana-resumen">
               {resumenSemana.map(({ diaLabel, momentos }) => (
                 <article key={diaLabel} className="semana-resumen__dia">
@@ -328,6 +328,19 @@ export function SemanaPage() {
               ))}
             </div>
             <div className="form-actions">
+              <button
+                type="button"
+                className="btn-secondary btn-secondary--icon"
+                disabled={descargandoImagen}
+                onClick={() => {
+                  setDescargandoImagen(true);
+                  compartirImagenSemana(resumenSemana)
+                    .finally(() => setDescargandoImagen(false));
+                }}
+              >
+                <DownloadSimple size={18} weight="duotone" aria-hidden />
+                {descargandoImagen ? 'Generando…' : 'Guardar imagen'}
+              </button>
               <button
                 type="button"
                 className="btn-primary"

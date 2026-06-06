@@ -283,7 +283,7 @@ Al pie de **Platos** (visible también si el catálogo está vacío, tras cargar
 ### Pantalla Productos — detalle (`/productos/:id`)
 
 1. Pulsa un producto en el listado.
-2. **Emoji:** pulsa el emoji para abrir el selector (cuadrícula con varias filas y **buscador** por nombre en español, p. ej. «tomate», «leche»).
+2. **Emoji:** pulsa el emoji para abrir el selector: **modal de pantalla completa** con buscador y rejilla desplazable (~220 emojis por categoría, p. ej. «tomate», «leche»). Se cierra con el botón o con Escape.
 3. **Nombre:** pulsa el **lápiz**, edita en línea; Enter o salir del campo guarda; Escape cancela.
 4. Debajo, los **platos** que usan ese ingrediente.
 
@@ -389,10 +389,11 @@ app/src/
 │   ├── color.ts             # Hex, contraste, paleta de etiquetas
 │   ├── platos.ts            # Guardar plato, etiquetas, sincronizar relaciones
 │   ├── productos.ts         # CRUD producto, platos por producto
-│   ├── producto-emoji.ts    # Catálogo de emojis, búsqueda por keywords ES, valor por defecto
+│   ├── producto-emoji.ts    # Catálogo de emojis (~220 entradas), búsqueda por keywords ES, valor por defecto
 │   ├── lista.ts             # generarListaCompra()
 │   ├── momento-icons.tsx    # Iconos sol/luna para comida y cena
-│   └── semana.ts            # Semana activa, normalización de fechas, asignarPlatoEnSlot
+│   ├── semana.ts            # Semana activa, normalización de fechas, asignarPlatoEnSlot
+│   └── imagen-semana.ts     # Genera imagen PNG del resumen semanal (Canvas API); compartir nativo en Android
 ├── components/
 │   ├── Layout.tsx           # Cabecera (logo2 + comi2), nav escritorio/móvil
 │   ├── PageHeader.tsx       # Título de página con icono
@@ -428,7 +429,8 @@ app/src/
 | `Layout.tsx` | Cabecera + nav móvil; oculta barra inferior al detectar teclado abierto (`visualViewport`) |
 | `PlatoDetailPage.tsx` | Vista de un plato (momento, etiquetas, ingredientes); enlace a editar |
 | `PlatoEditPage.tsx` | Alta (`/nuevo`) y edición (`/:id/editar`); recibe `state.desdeSemana` para asignar plato al volver; modal **Gestionar etiquetas** |
-| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana**; **Ver resumen** (modal); **«+ Nuevo plato…»** en desplegables |
+| `SemanaPage.tsx` | Grilla semanal; iconos sol/luna; **Limpiar semana**; **Ver resumen** (modal con etiquetas y botón **Guardar imagen**); **«+ Nuevo plato…»** en desplegables |
+| `lib/imagen-semana.ts` | `generarImagenSemanaCanvas` (Canvas API); `compartirImagenSemana` (share nativo Android / descarga web) |
 | `ListaPage.tsx` | Generar / borrar lista; estado global en sesión; checkbox «ya en casa» |
 
 ---
@@ -467,7 +469,8 @@ app/src/
    - Si no existe el plato, elegir **«+ Nuevo plato…»** al final de la lista: se abre el formulario de creación con el momento preseleccionado; al guardar el plato queda asignado en ese hueco y se regresa a Semana.
 3. Los cambios se guardan al instante en IndexedDB.
 4. Pulsar **Ver resumen** para consultar los 7 días con sus platos en un modal de solo lectura (se cierra con el botón Cerrar, clic fuera o Escape).
-5. Opcional: **Limpiar semana** vacía todos los huecos (confirmación).
+5. Desde el resumen, pulsar **Guardar imagen** para exportar el menú semanal como PNG (share nativo en Android, descarga en escritorio).
+6. Opcional: **Limpiar semana** vacía todos los huecos (confirmación).
 
 ### C — Hacer la compra
 
@@ -499,6 +502,7 @@ app/src/
 | RF-013 | Respaldo JSON: exportar (Share sheet nativo en Android; descarga en escritorio) / importar datos |
 | RF-014 | Buscador predictivo de platos por nombre |
 | RF-015 | Barra de navegación móvil se oculta automáticamente al abrir el teclado |
+| RF-016 | Descargar resumen semanal como imagen PNG (share nativo Android / descarga web) |
 
 ### Pendientes / futuro
 

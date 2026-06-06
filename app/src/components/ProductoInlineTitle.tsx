@@ -33,15 +33,6 @@ export function ProductoInlineTitle({
     if (editandoNombre) inputRef.current?.focus();
   }, [editandoNombre]);
 
-  useEffect(() => {
-    if (!mostrarEmojis) return;
-    const cerrar = (e: MouseEvent) => {
-      const wrap = document.querySelector('.producto-inline-title__emoji-wrap');
-      if (wrap && !wrap.contains(e.target as Node)) setMostrarEmojis(false);
-    };
-    document.addEventListener('mousedown', cerrar);
-    return () => document.removeEventListener('mousedown', cerrar);
-  }, [mostrarEmojis]);
 
   const guardarNombre = async () => {
     const n = nombre.trim();

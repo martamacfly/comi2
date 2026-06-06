@@ -25,6 +25,7 @@ El usuario mantiene un catálogo de **platos** (cada uno con los **productos** n
 | RF-004 | **Planificar la semana** (lunes a domingo): un plato por **comida** y uno por **cena** cada día (14 huecos) | Alta |
 | RF-010 | **Vista resumen** de la semana: modal de solo lectura con los platos asignados a comida y cena de cada día | Media |
 | RF-011 | Crear un **plato nuevo directamente desde un hueco** de la semana; al guardar el plato se asigna automáticamente y se regresa al planificador | Media |
+| RF-016 | **Descargar resumen semanal como imagen** (PNG) desde el modal de resumen; share sheet nativo en Android, descarga directa en navegador | Media |
 | RF-005 | **Generar lista de la compra** a partir de los platos del plan semanal, listando cada producto una vez (sin sumar cantidades en el MVP) | Alta |
 | RF-006 | Consultar y marcar ítems de la lista de la compra (comprado / pendiente) | Media |
 | RF-007 | Duplicar o reutilizar el plan de una semana anterior | Baja (futuro) |

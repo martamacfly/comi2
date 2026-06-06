@@ -38,6 +38,8 @@ flowchart LR
 | Buscador predictivo de platos | Filtro por nombre en tiempo real en la vista Platos | Hecho |
 | Exportar respaldo (Android) | Share sheet nativo; fallback descarga web | Hecho |
 | Nav móvil oculta con teclado | Se oculta/muestra con transición vía `visualViewport` | Hecho |
+| Selector emoji modal | Full-screen con buscador, ~220 emojis por categoría y scroll libre | Hecho |
+| Descargar resumen semanal | Imagen PNG del menú semanal desde el modal de resumen | Hecho |
 | Filtrar platos por etiqueta en Semana | Al asignar hueco | Pendiente |
 
 ## Funcionalidades futuras
@@ -61,7 +63,7 @@ Gestión del inventario de ingredientes reutilizables entre platos.
 
 - [x] Puedo crear un producto con nombre (recibe emoji automático).
 - [x] En el detalle (`/productos/:id`), edito el **nombre** con el lápiz (inline, Enter guarda).
-- [x] En el detalle, pulso el **emoji** y elijo otro en el panel (buscador + rejilla de sugerencias).
+- [x] En el detalle, pulso el **emoji** y elijo otro en el selector: **modal de pantalla completa** con buscador y rejilla desplazable (~220 emojis organizados por categoría).
 - [x] Puedo eliminar un producto si no está en ningún plato (o se avisa).
 - [x] Puedo crear un producto al editar un plato (`InlineProductoAdd`) y asignarlo al plato al instante.
 - [x] Al pulsar un producto en el listado, veo todos los **platos** que lo usan.
@@ -97,6 +99,7 @@ Vista de la semana actual con huecos **Comida** y **Cena** por día.
 - [x] Solo se ofrecen platos cuyo **momento** coincide con el hueco (comida, cena o ambos).
 - [x] Desde el desplegable de un hueco puedo elegir **«+ Nuevo plato…»** para crear un plato y que quede asignado automáticamente al volver a Semana.
 - [x] Puedo ver un **resumen de solo lectura** de la semana (todos los días con comida y cena asignadas) desde un modal accesible con el botón **Ver resumen**.
+- [x] Desde el modal de resumen, puedo **descargar la semana como imagen** (botón «Guardar imagen»): en Android usa la hoja compartida nativa; en escritorio descarga un PNG directamente.
 - [ ] (Opcional MVP) Puedo filtrar platos por una o más etiquetas al asignar un hueco.
 
 ### Módulo 4 — Lista de la compra
@@ -134,7 +137,8 @@ Generación automática desde el plan de la semana activa.
    - Si no existe el plato, elegir **«+ Nuevo plato…»** para crearlo y asignarlo al instante.
 3. Los cambios se guardan automáticamente en local.
 4. Pulsar **Ver resumen** para consultar la semana completa de un vistazo (solo lectura).
-5. Opcional: **Limpiar semana** vacía todos los huecos.
+5. Desde el resumen, pulsar **Guardar imagen** para exportar el menú semanal como PNG.
+6. Opcional: **Limpiar semana** vacía todos los huecos.
 
 ### Flujo C — Hacer la compra
 

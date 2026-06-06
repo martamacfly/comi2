@@ -408,6 +408,7 @@ button[type='submit']:focus-visible {
 }
 
 .btn-primary--icon,
+.btn-secondary--icon,
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -1815,36 +1816,96 @@ button[type='submit']:focus-visible {
   margin: 0;
 }
 
-.producto-emoji-picker {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  left: 0;
-  z-index: 20;
-  width: min(18.5rem, calc(100vw - var(--space-8)));
+/* Emoji picker modal */
+.emoji-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 42, 38, 0.45);
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+  padding: 0;
+  animation: fadeIn var(--duration-normal) var(--ease-out);
 }
 
-.producto-emoji-picker__search {
+@media (min-width: 480px) {
+  .emoji-modal-backdrop {
+    align-items: center;
+    padding: var(--space-4);
+  }
+}
+
+.emoji-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp var(--duration-normal) var(--ease-out);
+}
+
+@media (min-width: 480px) {
+  .emoji-modal {
+    border-radius: var(--radius-lg);
+    max-height: 70vh;
+  }
+}
+
+.emoji-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.emoji-modal__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-base);
+}
+
+.emoji-modal__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.emoji-modal__close:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.emoji-modal__search {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg);
+  flex-shrink: 0;
 }
 
-.producto-emoji-picker__search svg {
+.emoji-modal__search svg {
   flex-shrink: 0;
   color: var(--color-icon);
 }
 
-.producto-emoji-picker__input {
+.emoji-modal__input {
   flex: 1;
   min-width: 0;
   border: none;
@@ -1853,40 +1914,42 @@ button[type='submit']:focus-visible {
   font-size: var(--text-sm);
   color: var(--color-text);
   outline: none;
+  padding: var(--space-1) 0;
 }
 
-.producto-emoji-picker__input::placeholder {
+.emoji-modal__input::placeholder {
   color: var(--color-text-muted);
 }
 
-.producto-emoji-picker__input::-webkit-search-cancel-button {
+.emoji-modal__input::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
 
-.producto-emoji-picker__grid {
+.emoji-modal__grid {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   gap: 2px;
-  max-height: 11.5rem;
   overflow-y: auto;
-  padding: var(--space-2);
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-3);
+  flex: 1;
 }
 
-.producto-emoji-picker__empty {
+.emoji-modal__empty {
   grid-column: 1 / -1;
-  margin: var(--space-4) var(--space-2);
+  padding: var(--space-6) 0;
   text-align: center;
   font-size: var(--text-sm);
 }
 
-.producto-emoji-picker__btn {
+.emoji-modal__btn {
   width: 100%;
   aspect-ratio: 1;
-  min-height: 2rem;
+  min-height: 2.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   line-height: 1;
   border: none;
   border-radius: var(--radius-sm);
@@ -1895,11 +1958,11 @@ button[type='submit']:focus-visible {
   transition: background var(--duration-fast) var(--ease-out);
 }
 
-.producto-emoji-picker__btn:hover {
+.emoji-modal__btn:hover {
   background: var(--color-bg);
 }
 
-.producto-emoji-picker__btn--active {
+.emoji-modal__btn--active {
   background: color-mix(in srgb, var(--color-sage) 40%, var(--color-surface));
   box-shadow: inset 0 0 0 1px var(--color-sage-dark);
 }
