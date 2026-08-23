@@ -91,10 +91,12 @@ export async function eliminarPlato(platoId: number): Promise<void> {
     async () => {
       await db.platoProductos.where('platoId').equals(platoId).delete();
       await db.platoEtiquetas.where('platoId').equals(platoId).delete();
-      const slots = await db.planSlots.where('platoId').equals(platoId).toArray();
-      await Promise.all(
-        slots.map((s) => db.planSlots.update(s.id!, { platoId: undefined })),
-      );
+      await db.planSlots
+        .where('platoId')
+        .equals(platoId)
+        .modify((slot) => {
+          delete slot.platoId;
+        });
       await db.platos.delete(platoId);
     },
   );

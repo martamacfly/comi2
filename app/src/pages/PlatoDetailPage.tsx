@@ -11,11 +11,13 @@ import {
   CheckCircle,
   ForkKnife,
   PencilSimple,
+  Trash,
 } from '@phosphor-icons/react';
 import { db } from '../db/database';
 import { ProductoEmoji } from '../components/ProductoEmoji';
 import { TagChip } from '../components/TagChip';
 import { MomentoBadge } from '../components/MomentoBadge';
+import { eliminarPlato } from '../lib/platos';
 
 type LocationState = {
   platoCreado?: string;
@@ -30,6 +32,8 @@ export function PlatoDetailPage() {
   const idValido = Number.isFinite(platoId) && platoId > 0;
 
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const detail = useLiveQuery(
     async () => {
@@ -117,6 +121,25 @@ export function PlatoDetailPage() {
     a.nombre.localeCompare(b.nombre, 'es'),
   );
 
+  const onDelete = async () => {
+    if (
+      !confirm(
+        `¿Eliminar «${plato.nombre}»? Se quitará también de la semana planificada. Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setError(null);
+    try {
+      await eliminarPlato(platoId);
+      navigate('/platos', { state: { platoEliminado: plato.nombre } });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar el plato');
+      setDeleting(false);
+    }
+  };
+
   return (
     <section className="page">
       <p className="breadcrumb">
@@ -135,6 +158,12 @@ export function PlatoDetailPage() {
         </p>
       )}
 
+      {error && (
+        <p className="alert alert--error" role="alert">
+          {error}
+        </p>
+      )}
+
       <header className="plato-detail__header">
         <div className="plato-detail__title-block">
           <ForkKnife
@@ -148,13 +177,24 @@ export function PlatoDetailPage() {
             <MomentoBadge momento={plato.momento} />
           </div>
         </div>
-        <Link
-          to={`/platos/${platoId}/editar`}
-          className="btn-primary btn-primary--icon"
-        >
-          <PencilSimple size={20} weight="duotone" aria-hidden />
-          Editar plato
-        </Link>
+        <div className="plato-detail__actions">
+          <Link
+            to={`/platos/${platoId}/editar`}
+            className="btn-primary btn-primary--icon"
+          >
+            <PencilSimple size={20} weight="duotone" aria-hidden />
+            Editar plato
+          </Link>
+          <button
+            type="button"
+            className="btn-danger"
+            onClick={() => void onDelete()}
+            disabled={deleting}
+          >
+            <Trash size={20} weight="duotone" aria-hidden />
+            {deleting ? 'Eliminando…' : 'Eliminar'}
+          </button>
+        </div>
       </header>
 
       <div className="plato-detail__sections">

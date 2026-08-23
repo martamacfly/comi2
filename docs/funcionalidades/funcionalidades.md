@@ -28,13 +28,13 @@ flowchart LR
 |---------|-------------|--------|
 | CRUD productos | Alta, listado, detalle, borrado | Hecho |
 | Emoji por producto | Selector con buscador y rejilla; auto al crear | Hecho |
-| CRUD platos | Alta, edición y listado de platos | Hecho |
+| CRUD platos | Alta, edición, listado y borrado de platos | Hecho |
 | Etiquetas | CRUD de etiquetas y asignación de varias etiquetas por plato | Hecho |
 | Ingredientes del plato | Añadir/quitar productos; alta inline desde edición del plato | Hecho |
 | Listado platos agrupado | Todos (lista directa), por momento o por etiquetas; acordeones con color | Hecho |
 | Plan semanal | Lunes–domingo; 1 plato/comida + 1 plato/cena por día | Hecho |
 | Generar lista de la compra | Productos únicos; checkbox «ya en casa» | Hecho |
-| Persistencia local | IndexedDB vía Dexie v3 | Hecho |
+| Persistencia local | IndexedDB vía Dexie v4 | Hecho |
 | Buscador predictivo de platos | Filtro por nombre en tiempo real en la vista Platos | Hecho |
 | Exportar respaldo (Android) | Share sheet nativo; fallback descarga web | Hecho |
 | Nav móvil oculta con teclado | Se oculta/muestra con transición vía `visualViewport` | Hecho |
@@ -86,7 +86,7 @@ La **alta** de un plato es la vista en **`/platos/nuevo`** (React Router no expo
 - [x] Las etiquetas se muestran como **chips** con color en listado, edición y planificador.
 - [x] Si un plato no tiene etiquetas, se muestra el chip **«Sin etiquetas»** en estado deshabilitado.
 - [x] En **Platos**: pestaña **Todos** (lista directa); **Por momento** / **Por etiquetas** con acordeones colapsables y color.
-- [ ] Puedo eliminar un plato desde el listado o la edición.
+- [x] Puedo eliminar un plato desde el detalle o la edición (se desvincula de la semana).
 
 ### Módulo 3 — Planificador semanal
 
@@ -167,5 +167,5 @@ Generación automática desde el plan de la semana activa.
 
 ## Notas
 
-- Esquema Dexie **v3** (`productos.emoji`, migración automática).
+- Esquema Dexie **v4** (`productos.emoji`, índice `planSlots.platoId`).
 - Detalle técnico: [arquitectura.md](../arquitectura/arquitectura.md).

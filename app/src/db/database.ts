@@ -51,6 +51,10 @@ export class Comi2Database extends Dexie {
           if (!p.emoji) p.emoji = emojiPorDefecto(p.nombre);
         });
       });
+
+    this.version(4).stores({
+      planSlots: '++id, semanaId, platoId, [semanaId+diaSemana+momento]',
+    });
   }
 }
 

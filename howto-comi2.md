@@ -329,8 +329,9 @@ Componente `TagChip`: fondo con el color de la etiqueta y texto con contraste au
 | 1 | Tabla `items` (prueba inicial; obsoleta) |
 | 2 | Modelo de dominio completo |
 | 3 | Campo `emoji` en `productos` (migración asigna emoji a registros existentes) |
+| 4 | Índice `platoId` en `planSlots` (permite desasignar al eliminar un plato) |
 
-### Tablas (v3)
+### Tablas (v4)
 
 | Tabla | Campos principales | Descripción |
 |-------|-------------------|-------------|

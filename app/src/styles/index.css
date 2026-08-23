@@ -460,13 +460,54 @@ button[type='submit']:focus-visible {
 }
 
 .btn-danger {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-base);
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-error-bg);
   color: var(--color-error-text);
-  border-color: var(--color-error-bg);
-  background: var(--color-surface);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error-bg) 72%, var(--color-error-text));
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-danger:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn-ghost.btn-danger {
+  font: inherit;
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-error-bg);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-error-text);
+}
+
+.btn-ghost.btn-danger:hover:not(:disabled) {
   background: var(--color-error-bg);
+  transform: none;
 }
 
 /* Forms */
@@ -527,6 +568,10 @@ button[type='submit']:focus-visible {
   gap: var(--space-3);
   align-items: center;
   margin-top: var(--space-6);
+}
+
+.form-actions .btn-danger {
+  margin-left: auto;
 }
 
 .radio-group {
@@ -1401,6 +1446,13 @@ button[type='submit']:focus-visible {
   align-items: flex-start;
   gap: var(--space-3);
   min-width: 0;
+}
+
+.plato-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .plato-detail__icon {

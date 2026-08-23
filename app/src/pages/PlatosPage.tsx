@@ -46,6 +46,7 @@ type VistaPlatos = 'todos' | 'momento' | 'etiquetas';
 type LocationState = {
   platoCreado?: string;
   platoActualizado?: string;
+  platoEliminado?: string;
 };
 
 function PlatoCard({
@@ -205,6 +206,9 @@ export function PlatosPage() {
       navigate(location.pathname, { replace: true, state: {} });
     } else if (state?.platoActualizado) {
       setMensaje(`Plato «${state.platoActualizado}» actualizado.`);
+      navigate(location.pathname, { replace: true, state: {} });
+    } else if (state?.platoEliminado) {
+      setMensaje(`Plato «${state.platoEliminado}» eliminado.`);
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, location.pathname, navigate]);

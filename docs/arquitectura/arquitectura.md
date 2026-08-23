@@ -136,7 +136,7 @@ erDiagram
 | `platoEtiquetas` | `++id, platoId, etiquetaId, [platoId+etiquetaId]` | Etiquetas asignadas a cada plato |
 | `platoProductos` | `++id, platoId, productoId` | Productos que lleva cada plato (sin cantidad) |
 | `semanas` | `++id, fechaInicioLunes` | Semana planificada |
-| `planSlots` | `++id, semanaId, [semanaId+diaSemana+momento]` | Un plato por hueco; único por semana+día+momento |
+| `planSlots` | `++id, semanaId, platoId, [semanaId+diaSemana+momento]` | Un plato por hueco; único por semana+día+momento |
 
 La **lista de la compra** se calcula en memoria (sin tabla en el MVP).
 
@@ -156,6 +156,7 @@ La **lista de la compra** se calcula en memoria (sin tabla en el MVP).
 | 1 | Tabla `items` de ejemplo (smoke test) |
 | 2 | `productos`, `platos`, `etiquetas`, `platoEtiquetas`, `platoProductos`, `semanas`, `planSlots` |
 | 3 | Campo `emoji` en `productos` (upgrade asigna emoji a filas existentes) |
+| 4 | Índice `platoId` en `planSlots` (desasignar huecos al eliminar un plato) |
 
 Definición en [`app/src/db/database.ts`](../../app/src/db/database.ts). La tabla `items` (v1) quedó obsoleta.
 

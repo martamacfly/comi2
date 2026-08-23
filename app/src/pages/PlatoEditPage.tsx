@@ -79,6 +79,7 @@ export function PlatoEditPage() {
   const [mostrarGestionEtiquetas, setMostrarGestionEtiquetas] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [loadedFromDb, setLoadedFromDb] = useState(isNew);
 
   useEffect(() => {
@@ -239,9 +240,23 @@ export function PlatoEditPage() {
 
   const onDelete = async () => {
     if (platoId == null) return;
-    if (!confirm('¿Eliminar este plato?')) return;
-    await eliminarPlato(platoId);
-    navigate('/platos');
+    const nombrePlato = (plato?.nombre ?? nombre).trim() || 'este plato';
+    if (
+      !confirm(
+        `¿Eliminar «${nombrePlato}»? Se quitará también de la semana planificada. Esta acción no se puede deshacer.`,
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setError('');
+    try {
+      await eliminarPlato(platoId);
+      navigate('/platos', { state: { platoEliminado: nombrePlato } });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar el plato');
+      setDeleting(false);
+    }
   };
 
   if (!isNew && (platoId == null || Number.isNaN(platoIdNum))) {
@@ -477,9 +492,14 @@ export function PlatoEditPage() {
             Cancelar
           </Link>
           {!isNew && platoId != null && (
-            <button type="button" className="btn-danger btn-ghost--icon" onClick={onDelete}>
-              <Trash size={18} weight="regular" aria-hidden />
-              Eliminar plato
+            <button
+              type="button"
+              className="btn-danger"
+              onClick={() => void onDelete()}
+              disabled={saving || deleting}
+            >
+              <Trash size={20} weight="duotone" aria-hidden />
+              {deleting ? 'Eliminando…' : 'Eliminar plato'}
             </button>
           )}
         </div>
