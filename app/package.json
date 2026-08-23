@@ -13,7 +13,7 @@
     "cap:android": "cap open android",
     "cap:apk:debug": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleDebug && mkdir ..\\..\\releases 2>nul & copy /Y app\\build\\outputs\\apk\\debug\\app-debug.apk ..\\..\\releases\\comi2.apk",
     "cap:apk:release": "npm run cap:sync && cd android && set \"JAVA_HOME=C:\\Program Files\\Android\\Android Studio\\jbr\"&& .\\gradlew.bat assembleRelease",
-    "cap:apk:debug:unix": "npm run cap:sync && cd android && ./gradlew assembleDebug"
+    "cap:apk:debug:unix": "npm run cap:sync && cd android && ./gradlew assembleDebug && mkdir -p ../../releases && cp -f app/build/outputs/apk/debug/app-debug.apk ../../releases/comi2.apk && echo APK lista: ../../releases/comi2.apk"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.4",
