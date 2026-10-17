@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { DownloadSimple, UploadSimple } from '@phosphor-icons/react';
-import { useListaCompra } from '../context/useListaCompra';
 import {
   buildBackupPayload,
   downloadBackupFile,
@@ -13,7 +12,6 @@ type PlatosBackupPanelProps = {
 };
 
 export function PlatosBackupPanel({ onImportSuccess }: PlatosBackupPanelProps) {
-  const { borrarLista } = useListaCompra();
   const fileRef = useRef<HTMLInputElement>(null);
   const [exportando, setExportando] = useState(false);
   const [importando, setImportando] = useState(false);
@@ -45,7 +43,7 @@ export function PlatosBackupPanel({ onImportSuccess }: PlatosBackupPanelProps) {
     if (!file) return;
 
     const ok = window.confirm(
-      '¿Restaurar desde este archivo? Se borrarán todos los datos actuales en este dispositivo (productos, platos, etiquetas, semana planificada y lista generada en memoria) y se sustituirán por los del respaldo. Esta acción no se puede deshacer.',
+      '¿Restaurar desde este archivo? Se borrarán todos los datos actuales en este dispositivo (productos, platos, etiquetas, despensa y semana planificada) y se sustituirán por los del respaldo. Esta acción no se puede deshacer.',
     );
     if (!ok) return;
 
@@ -61,7 +59,6 @@ export function PlatosBackupPanel({ onImportSuccess }: PlatosBackupPanelProps) {
             : new TextDecoder().decode(reader.result as ArrayBuffer);
         const data = parseBackupJson(text);
         await restoreBackupData(data);
-        borrarLista();
         onImportSuccess?.();
       } catch (err) {
         setErrorImport(

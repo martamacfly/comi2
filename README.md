@@ -2,7 +2,7 @@
 
 ![Comi2](assets/imagenes/logo.png)
 
-**Comi2** es una aplicación web sencilla para organizar **qué comer cada día de la semana** y sacar una **lista de la compra** con lo que necesitas. Pensada para el día a día en casa: tus platos, tus productos, tu menú.
+**Comi2** es una aplicación web sencilla para organizar **qué comer cada día de la semana** a partir de lo que tienes en tu **despensa**. Pensada para el día a día en casa: tus platos, tus productos, tu menú.
 
 > **Proyecto personal · hecho con IA y vibecoding**  
 > Este repositorio nació como una herramienta para uso propio. El código y la documentación se han ido construyendo con ayuda de **inteligencia artificial** y **vibecoding** (iterar en conversación con el asistente, probar en el navegador, ajustar). No es un producto comercial ni un servicio con soporte: si te sirve, adelante; si encuentras algo raro, es normal en un proyecto así.
@@ -13,18 +13,19 @@
 
 1. Guardas **productos** (ingredientes, con emoji si quieres).
 2. Creas **platos** con esos productos, si son de comida, cena o ambos, y etiquetas de color.
-3. En **Semana** asignas un plato a cada comida y cena (lunes a domingo). Puedes usar **Limpiar semana** para vaciar el plan de golpe (tras confirmar).
-4. En **Lista** generas la compra: productos únicos de los platos planificados; puedes tachar lo que ya tienes en casa. La lista **se mantiene al cambiar de sección** hasta que pulses **Generar lista** de nuevo o **Borrar lista**.
+3. En **Despensa** añades, con un buscador predictivo, los platos y productos que tienes disponibles.
+4. En **Semana** asignas a cada comida y cena (lunes a domingo) un plato o un producto **de tu despensa**. Puedes usar **Limpiar semana** para vaciar el plan de golpe (tras confirmar).
 
 Todo se guarda **en tu navegador** (sin cuenta ni servidor). Si borras los datos del sitio, pierdes el contenido.
 
-**Copia de seguridad:** en **Platos**, al final de la página, la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos, etiquetas y semana planificada, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
+**Copia de seguridad:** en **Platos**, al final de la página, la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos, etiquetas, despensa y semana planificada, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
 
 ```mermaid
 flowchart LR
   Productos[Productos] --> Platos[Platos]
-  Platos --> Semana[Semana]
-  Semana --> Lista[Lista de la compra]
+  Productos --> Despensa[Despensa]
+  Platos --> Despensa
+  Despensa --> Semana[Semana]
 ```
 
 ---
@@ -56,7 +57,7 @@ npm run dev
 
 Abre la URL que muestre la terminal (suele ser `http://localhost:5173`).
 
-**Primer paseo:** crea un plato → rellena la semana → genera la lista. Los productos también puedes crearlos al editar un plato.
+**Primer paseo:** crea un plato → añádelo a la despensa → rellena la semana. Los productos también puedes crearlos al editar un plato.
 
 La **APK Android** es un paso **aparte y opcional**: solo quien quiera instalar la app en el móvil necesita JDK y Android SDK. Toda la guía está en **[docs/guias/android-apk.md](docs/guias/android-apk.md)** para no mezclar requisitos con quien solo desarrolla en local.
 
@@ -103,8 +104,8 @@ Pasos completos, requisitos, solución de problemas y lista de cambios en el rep
 | `/platos/:id/editar` | Formulario para cambiar ese plato |
 | `/platos/nuevo` | Crear un plato nuevo |
 | `/productos` | Ingredientes |
+| `/despensa` | Platos y productos disponibles para la semana |
 | `/semana` | Planificador de la semana |
-| `/lista` | Lista de la compra |
 
 ---
 

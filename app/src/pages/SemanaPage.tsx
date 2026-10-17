@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   CalendarDots,
@@ -8,12 +8,19 @@ import {
   Trash,
 } from '@phosphor-icons/react';
 import { db } from '../db/database';
-import type { Etiqueta, MomentoSlot, Plato, PlatoEtiqueta } from '../db/types';
+import type {
+  Etiqueta,
+  MomentoSlot,
+  PlanSlot,
+  Plato,
+  PlatoEtiqueta,
+  Producto,
+} from '../db/types';
 import { PageHeader } from '../components/PageHeader';
 import { TagChip } from '../components/TagChip';
 import { MomentoSlotIcon } from '../lib/momento-icons';
 import {
-  asignarPlatoEnSlot,
+  asignarEnSlot,
   DIAS_SEMANA,
   NUEVO_PLATO_SELECT,
   obtenerOCrearSemanaActiva,
@@ -25,6 +32,17 @@ const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
 function platoCompatible(plato: Plato, momento: MomentoSlot): boolean {
   if (plato.momento === 'ambos') return true;
   return plato.momento === momento;
+}
+
+/** Valor del <select>: «plato:3», «producto:7» o '' si el hueco está vacío. */
+function valorSlot(slot: PlanSlot | undefined): string {
+  if (slot?.platoId != null) return `plato:${slot.platoId}`;
+  if (slot?.productoId != null) return `producto:${slot.productoId}`;
+  return '';
+}
+
+function nombreProducto(p: Producto): string {
+  return p.emoji ? `${p.emoji} ${p.nombre}` : p.nombre;
 }
 
 export function SemanaPage() {
@@ -73,11 +91,13 @@ export function SemanaPage() {
   );
 
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
+  const productos = useLiveQuery(() => db.productos.orderBy('nombre').toArray());
+  const despensa = useLiveQuery(() => db.despensa.toArray());
   const etiquetas = useLiveQuery(() => db.etiquetas.toArray());
   const platoEtiquetas = useLiveQuery(() => db.platoEtiquetas.toArray());
 
   const hayPlatosAsignados = useMemo(
-    () => (slots ?? []).some((s) => s.platoId != null),
+    () => (slots ?? []).some((s) => s.platoId != null || s.productoId != null),
     [slots],
   );
 
@@ -89,8 +109,17 @@ export function SemanaPage() {
     return etiquetas.filter((e) => e.id != null && ids.includes(e.id));
   };
 
+  const { platosDespensa, productosDespensa } = useMemo(() => {
+    const platoIds = new Set((despensa ?? []).map((d) => d.platoId));
+    const productoIds = new Set((despensa ?? []).map((d) => d.productoId));
+    return {
+      platosDespensa: (platos ?? []).filter((p) => platoIds.has(p.id)),
+      productosDespensa: (productos ?? []).filter((p) => productoIds.has(p.id)),
+    };
+  }, [despensa, platos, productos]);
+
   const resumenSemana = useMemo(() => {
-    if (!slots || !platos) return [];
+    if (!slots || !platos || !productos) return [];
     return DIAS_SEMANA.map((diaLabel, diaSemana) => ({
       diaLabel,
       momentos: MOMENTOS.map((momento) => {
@@ -101,11 +130,20 @@ export function SemanaPage() {
           slot?.platoId != null
             ? platos.find((p) => p.id === slot.platoId)
             : undefined;
+        const producto =
+          slot?.productoId != null
+            ? productos.find((p) => p.id === slot.productoId)
+            : undefined;
         const tags = plato?.id != null ? etiquetasDePlato(plato.id) : [];
-        return { momento, plato, tags };
+        const elemento = plato
+          ? { nombre: plato.nombre }
+          : producto
+            ? { nombre: nombreProducto(producto) }
+            : undefined;
+        return { momento, plato: elemento, tags };
       }),
     }));
-  }, [slots, platos, platoEtiquetas, etiquetas]);
+  }, [slots, platos, productos, platoEtiquetas, etiquetas]);
 
   useEffect(() => {
     if (!mostrarResumen) return;
@@ -133,24 +171,39 @@ export function SemanaPage() {
   const asignar = async (
     diaSemana: number,
     momento: MomentoSlot,
-    platoId: number | '',
+    valor: string,
   ) => {
     if (semanaId == null) return;
-    const lista = slots ?? [];
-    const existente = lista.find(
-      (s) => s.diaSemana === diaSemana && s.momento === momento,
-    );
-    if (platoId === '') {
+    if (valor === '') {
+      const existente = (slots ?? []).find(
+        (s) => s.diaSemana === diaSemana && s.momento === momento,
+      );
       if (existente?.id != null) {
-        await db.planSlots.update(existente.id, { platoId: undefined });
+        await db.planSlots.update(existente.id, {
+          platoId: undefined,
+          productoId: undefined,
+        });
       }
       return;
     }
-    await asignarPlatoEnSlot(semanaId, diaSemana, momento, platoId);
+    const [tipo, id] = valor.split(':');
+    await asignarEnSlot(
+      semanaId,
+      diaSemana,
+      momento,
+      tipo === 'producto' ? { productoId: Number(id) } : { platoId: Number(id) },
+    );
   };
 
   const datosListos =
-    listo && platos !== undefined && slots !== undefined && etiquetas !== undefined;
+    listo &&
+    platos !== undefined &&
+    productos !== undefined &&
+    despensa !== undefined &&
+    slots !== undefined &&
+    etiquetas !== undefined;
+  const despensaVacia =
+    platosDespensa.length === 0 && productosDespensa.length === 0;
 
   return (
     <section className="page">
@@ -200,10 +253,10 @@ export function SemanaPage() {
         <p className="muted">Cargando planificador…</p>
       )}
 
-      {datosListos && !initError && platos.length === 0 && semanaId != null && (
+      {datosListos && !initError && despensaVacia && semanaId != null && (
         <p className="muted">
-          Aún no tienes platos. Elige «Nuevo plato…» en cualquier hueco para crear
-          uno y asignarlo.
+          Tu despensa está vacía. Añade platos o productos en{' '}
+          <Link to="/despensa">Despensa</Link> para poder elegirlos aquí.
         </p>
       )}
 
@@ -216,13 +269,28 @@ export function SemanaPage() {
                 const slot = slots.find(
                   (s) => s.diaSemana === diaSemana && s.momento === momento,
                 );
-                const opciones = platos.filter((p) =>
-                  platoCompatible(p, momento),
-                );
                 const platoAsignado =
                   slot?.platoId != null
                     ? platos.find((p) => p.id === slot.platoId)
                     : undefined;
+                const productoAsignado =
+                  slot?.productoId != null
+                    ? productos.find((p) => p.id === slot.productoId)
+                    : undefined;
+                // Lo ya asignado sigue visible aunque se haya quitado de la despensa
+                const opcionesPlatos = platosDespensa.filter((p) =>
+                  platoCompatible(p, momento),
+                );
+                if (platoAsignado && !opcionesPlatos.includes(platoAsignado)) {
+                  opcionesPlatos.push(platoAsignado);
+                }
+                const opcionesProductos = [...productosDespensa];
+                if (
+                  productoAsignado &&
+                  !opcionesProductos.includes(productoAsignado)
+                ) {
+                  opcionesProductos.push(productoAsignado);
+                }
                 const tags =
                   platoAsignado?.id != null
                     ? etiquetasDePlato(platoAsignado.id)
@@ -236,7 +304,7 @@ export function SemanaPage() {
                         {momento === 'comida' ? 'Comida' : 'Cena'}
                       </span>
                       <select
-                        value={slot?.platoId ?? ''}
+                        value={valorSlot(slot)}
                         onChange={(e) => {
                           const v = e.target.value;
                           if (v === NUEVO_PLATO_SELECT) {
@@ -248,28 +316,39 @@ export function SemanaPage() {
                             });
                             return;
                           }
-                          void asignar(
-                            diaSemana,
-                            momento,
-                            v === '' ? '' : Number(v),
-                          );
+                          void asignar(diaSemana, momento, v);
                         }}
                       >
                         <option value="">— Sin plato —</option>
-                        {opciones.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.nombre}
-                          </option>
-                        ))}
+                        {opcionesPlatos.length > 0 && (
+                          <optgroup label="Platos">
+                            {opcionesPlatos.map((p) => (
+                              <option key={p.id} value={`plato:${p.id}`}>
+                                {p.nombre}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {opcionesProductos.length > 0 && (
+                          <optgroup label="Productos">
+                            {opcionesProductos.map((p) => (
+                              <option key={p.id} value={`producto:${p.id}`}>
+                                {nombreProducto(p)}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
                         <option value={NUEVO_PLATO_SELECT}>+ Nuevo plato…</option>
                       </select>
                     </label>
-                    {opciones.length === 0 && (
-                      <p className="muted semana-slot__hint">
-                        No hay platos de {momento === 'comida' ? 'comida' : 'cena'}
-                        . Elige «Nuevo plato…» para crear uno.
-                      </p>
-                    )}
+                    {!despensaVacia &&
+                      opcionesPlatos.length === 0 &&
+                      opcionesProductos.length === 0 && (
+                        <p className="muted semana-slot__hint">
+                          No hay nada en la despensa para la{' '}
+                          {momento === 'comida' ? 'comida' : 'cena'}.
+                        </p>
+                      )}
                     {tags.length > 0 && (
                       <div className="tag-row">
                         {tags.map((t) => (

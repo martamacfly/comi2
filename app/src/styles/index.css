@@ -1354,80 +1354,6 @@ button[type='submit']:focus-visible {
   box-shadow: 0 0 0 3px rgba(127, 168, 150, 0.25);
 }
 
-.lista-compra .list__row {
-  font-size: var(--text-lg);
-}
-
-.lista-compra__actions {
-  margin-top: var(--space-4);
-  flex-wrap: wrap;
-}
-
-.lista-compra__hint {
-  margin-top: var(--space-4);
-}
-
-.lista-compra__result {
-  margin-top: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.lista-compra__resumen {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: 0;
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.lista-compra__resumen strong {
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-.lista-compra__resumen:not(.lista-compra__resumen--done) svg {
-  color: var(--color-icon);
-  flex-shrink: 0;
-}
-
-.lista-compra.check-list,
-.check-list.lista-compra {
-  font-size: var(--text-lg);
-}
-
-.lista-compra__item {
-  width: 100%;
-  justify-content: flex-start;
-  gap: var(--space-2);
-}
-
-.lista-compra__nombre {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-.lista-compra__tengo {
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-}
-
-.lista-compra__tengo summary {
-  cursor: pointer;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.lista-compra--tengo .lista-compra__nombre {
-  color: var(--color-text-muted);
-  text-decoration: line-through;
-}
-
 .plato-detail__header {
   display: flex;
   flex-wrap: wrap;
@@ -1715,28 +1641,6 @@ button[type='submit']:focus-visible {
 .alert--with-icon svg {
   flex-shrink: 0;
   margin-top: 1px;
-}
-
-.lista-compra__resumen--done {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-success-text);
-}
-
-.lista-compra__resumen--done svg {
-  flex-shrink: 0;
-}
-
-.lista-compra__tengo summary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.lista-compra__tengo summary svg {
-  color: var(--color-icon);
-  flex-shrink: 0;
 }
 
 .list__row-icon {
@@ -2029,4 +1933,84 @@ button[type='submit']:focus-visible {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+/* Despensa */
+.despensa-buscador {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.despensa-buscador__campo {
+  margin-bottom: 0;
+}
+
+.despensa-sugerencias {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  max-height: 20rem;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.despensa-sugerencias__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.despensa-sugerencias__item svg {
+  flex-shrink: 0;
+  color: var(--color-icon);
+}
+
+.despensa-sugerencias__item--activo {
+  background: var(--color-nav-active-bg);
+}
+
+.despensa-sugerencias__nombre {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+}
+
+.despensa-sugerencias__tipo {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.despensa-sugerencias__vacio {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.despensa-grupo {
+  margin-top: var(--space-5);
+}
+
+.despensa-grupo__titulo {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.despensa-grupo .list {
+  margin-top: var(--space-2);
+}
+
+.despensa-grupo .list__row-link svg {
+  flex-shrink: 0;
+  color: var(--color-icon);
 }

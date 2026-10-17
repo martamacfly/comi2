@@ -25,6 +25,24 @@ export async function crearProducto(
   return db.productos.add({ nombre: n, emoji: e });
 }
 
+/** Borra el producto y lo quita de la despensa y de la semana. */
+export async function eliminarProducto(productoId: number): Promise<void> {
+  await db.transaction(
+    'rw',
+    [db.productos, db.despensa, db.planSlots],
+    async () => {
+      await db.despensa.where('productoId').equals(productoId).delete();
+      await db.planSlots
+        .where('productoId')
+        .equals(productoId)
+        .modify((slot) => {
+          delete slot.productoId;
+        });
+      await db.productos.delete(productoId);
+    },
+  );
+}
+
 export async function actualizarProducto(
   id: number,
   datos: Partial<Pick<Producto, 'nombre' | 'emoji'>>,

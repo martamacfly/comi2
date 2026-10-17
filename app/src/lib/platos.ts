@@ -87,8 +87,9 @@ export async function guardarPlato(
 export async function eliminarPlato(platoId: number): Promise<void> {
   await db.transaction(
     'rw',
-    [db.platos, db.platoProductos, db.platoEtiquetas, db.planSlots],
+    [db.platos, db.platoProductos, db.platoEtiquetas, db.planSlots, db.despensa],
     async () => {
+      await db.despensa.where('platoId').equals(platoId).delete();
       await db.platoProductos.where('platoId').equals(platoId).delete();
       await db.platoEtiquetas.where('platoId').equals(platoId).delete();
       await db.planSlots

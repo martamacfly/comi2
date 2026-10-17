@@ -43,6 +43,14 @@ export interface PlanSlot {
   diaSemana: number;
   momento: MomentoSlot;
   platoId?: number;
+  productoId?: number;
+}
+
+/** Plato o producto disponible en la despensa (uno de los dos ids). */
+export interface DespensaItem {
+  id?: number;
+  platoId?: number;
+  productoId?: number;
 }
 
 export interface EtiquetaConAsignacion extends Etiqueta {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Carrot, Plus, Trash } from '@phosphor-icons/react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
-import { crearProducto } from '../lib/productos';
+import { crearProducto, eliminarProducto } from '../lib/productos';
 import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { ProductoEmoji } from '../components/ProductoEmoji';
@@ -42,7 +42,7 @@ export function ProductosPage() {
       return;
     }
     setError('');
-    await db.productos.delete(id);
+    await eliminarProducto(id);
   };
 
   return (

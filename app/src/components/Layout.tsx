@@ -1,9 +1,9 @@
 import { useEffect, useState, type ComponentType } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import {
+  Basket,
   CalendarDots,
   Carrot,
-  ClipboardText,
   CookingPot,
 } from '@phosphor-icons/react';
 import type { IconProps } from '@phosphor-icons/react';
@@ -20,8 +20,8 @@ const navItems: {
 }[] = [
   { to: '/platos', label: 'Platos', Icon: CookingPot },
   { to: '/productos', label: 'Productos', Icon: Carrot },
+  { to: '/despensa', label: 'Despensa', Icon: Basket },
   { to: '/semana', label: 'Semana', Icon: CalendarDots },
-  { to: '/lista', label: 'Lista', Icon: ClipboardText },
 ];
 
 function NavItem({

@@ -10,10 +10,8 @@ import {
   normalizeHex,
 } from '../lib/color';
 import { InlineProductoAdd } from '../components/InlineProductoAdd';
-import {
-  asignarPlatoEnSlot,
-  type SemanaPlatoNuevoState,
-} from '../lib/semana';
+import { agregarPlatoADespensa } from '../lib/despensa';
+import { asignarEnSlot, type SemanaPlatoNuevoState } from '../lib/semana';
 import {
   actualizarEtiqueta,
   crearEtiqueta,
@@ -213,11 +211,13 @@ export function PlatoEditPage() {
         etiquetaIds: selectedEtiquetaIds,
       });
       if (desdeSemana) {
-        await asignarPlatoEnSlot(
+        // Un plato creado desde Semana también pasa a la despensa
+        await agregarPlatoADespensa(savedId);
+        await asignarEnSlot(
           desdeSemana.semanaId,
           desdeSemana.diaSemana,
           desdeSemana.momento,
-          savedId,
+          { platoId: savedId },
         );
         navigate('/semana');
         return;
