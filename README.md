@@ -9,6 +9,36 @@
 
 ---
 
+## Versiones: Despensa o Lista de la compra
+
+Comi2 tiene dos variantes. Cada una vive en su rama:
+
+| Variante | Qué hace | Rama | Versión | APK |
+|----------|----------|------|---------|-----|
+| **Despensa** | Añades a la despensa los platos y productos que tienes, y Semana se rellena con ellos | [`main`](https://github.com/martamacfly/comi2/tree/main) | 2.0 · [`v2.0-despensa`](https://github.com/martamacfly/comi2/releases/tag/v2.0-despensa) | `comi2-despensa.apk` en la Release |
+| **Lista de la compra** | Planificas la semana con todos tus platos y generas la lista de la compra a partir de ella | [`lista-compra`](https://github.com/martamacfly/comi2/tree/lista-compra) | 1.9 · [`v1.9-lista`](https://github.com/martamacfly/comi2/releases/tag/v1.9-lista) | `comi2-lista.apk` en la Release |
+
+```mermaid
+gitGraph
+  commit id: "1.9"
+  branch lista-compra
+  checkout lista-compra
+  commit id: "Lista de la compra"
+  checkout main
+  commit id: "2.0 Despensa"
+```
+
+Para trabajar con una u otra en local:
+
+```bash
+git switch main          # Despensa
+git switch lista-compra  # Lista de la compra
+```
+
+**Si las instalas en Android:** las dos usan el mismo identificador de app, así que no puedes tener las dos instaladas a la vez. Para pasar de la 2.0 a la 1.9, Android te obligará a desinstalar antes. Exporta un **Respaldo** primero para no perder tus datos; el respaldo de la 2.0 se puede importar en la 1.9 (la despensa se ignora).
+
+---
+
 ## ¿Para qué sirve?
 
 1. Guardas **productos** (ingredientes, con emoji si quieres).
