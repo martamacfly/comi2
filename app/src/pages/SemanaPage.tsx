@@ -26,6 +26,7 @@ import {
   obtenerOCrearSemanaActiva,
 } from '../lib/semana';
 import { compartirImagenSemana } from '../lib/imagen-semana';
+import { useModulos } from '../lib/opciones';
 
 const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
 
@@ -47,6 +48,7 @@ function nombreProducto(p: Producto): string {
 
 export function SemanaPage() {
   const navigate = useNavigate();
+  const modulos = useModulos();
   const [semanaId, setSemanaId] = useState<number | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const [listo, setListo] = useState(false);
@@ -109,14 +111,20 @@ export function SemanaPage() {
     return etiquetas.filter((e) => e.id != null && ids.includes(e.id));
   };
 
+  const usaDespensa = modulos?.despensa ?? false;
+
+  // Con la Despensa activa, solo lo que hay en ella; si no, todos los platos
   const { platosDespensa, productosDespensa } = useMemo(() => {
+    if (!usaDespensa) {
+      return { platosDespensa: platos ?? [], productosDespensa: [] };
+    }
     const platoIds = new Set((despensa ?? []).map((d) => d.platoId));
     const productoIds = new Set((despensa ?? []).map((d) => d.productoId));
     return {
       platosDespensa: (platos ?? []).filter((p) => platoIds.has(p.id)),
       productosDespensa: (productos ?? []).filter((p) => productoIds.has(p.id)),
     };
-  }, [despensa, platos, productos]);
+  }, [usaDespensa, despensa, platos, productos]);
 
   const resumenSemana = useMemo(() => {
     if (!slots || !platos || !productos) return [];
@@ -200,6 +208,7 @@ export function SemanaPage() {
     platos !== undefined &&
     productos !== undefined &&
     despensa !== undefined &&
+    modulos !== undefined &&
     slots !== undefined &&
     etiquetas !== undefined;
   const despensaVacia =
@@ -255,8 +264,17 @@ export function SemanaPage() {
 
       {datosListos && !initError && despensaVacia && semanaId != null && (
         <p className="muted">
-          Tu despensa está vacía. Añade platos o productos en{' '}
-          <Link to="/despensa">Despensa</Link> para poder elegirlos aquí.
+          {usaDespensa ? (
+            <>
+              Tu despensa está vacía. Añade platos o productos en{' '}
+              <Link to="/despensa">Despensa</Link> para poder elegirlos aquí.
+            </>
+          ) : (
+            <>
+              Aún no tienes platos. Elige «Nuevo plato…» en cualquier hueco para
+              crear uno y asignarlo.
+            </>
+          )}
         </p>
       )}
 
@@ -345,8 +363,9 @@ export function SemanaPage() {
                       opcionesPlatos.length === 0 &&
                       opcionesProductos.length === 0 && (
                         <p className="muted semana-slot__hint">
-                          No hay nada en la despensa para la{' '}
-                          {momento === 'comida' ? 'comida' : 'cena'}.
+                          {usaDespensa
+                            ? `No hay nada en la despensa para la ${momento}.`
+                            : `No hay platos de ${momento}. Elige «Nuevo plato…» para crear uno.`}
                         </p>
                       )}
                     {tags.length > 0 && (

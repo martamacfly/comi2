@@ -2,40 +2,10 @@
 
 ![Comi2](assets/imagenes/logo.png)
 
-**Comi2** es una aplicación web sencilla para organizar **qué comer cada día de la semana** a partir de lo que tienes en tu **despensa**. Pensada para el día a día en casa: tus platos, tus productos, tu menú.
+**Comi2** es una aplicación web sencilla para organizar **qué comer cada día de la semana** con tu **despensa**, tu **lista de la compra** y tus **recetas**. Pensada para el día a día en casa: tus platos, tus productos, tu menú.
 
 > **Proyecto personal · hecho con IA y vibecoding**  
 > Este repositorio nació como una herramienta para uso propio. El código y la documentación se han ido construyendo con ayuda de **inteligencia artificial** y **vibecoding** (iterar en conversación con el asistente, probar en el navegador, ajustar). No es un producto comercial ni un servicio con soporte: si te sirve, adelante; si encuentras algo raro, es normal en un proyecto así.
-
----
-
-## Versiones: Despensa o Lista de la compra
-
-Comi2 tiene dos variantes. Cada una vive en su rama:
-
-| Variante | Qué hace | Rama | Versión | APK |
-|----------|----------|------|---------|-----|
-| **Despensa** | Añades a la despensa los platos y productos que tienes, y Semana se rellena con ellos | [`main`](https://github.com/martamacfly/comi2/tree/main) | 2.0 · [`v2.0-despensa`](https://github.com/martamacfly/comi2/releases/tag/v2.0-despensa) | `comi2-despensa.apk` en la Release |
-| **Lista de la compra** | Planificas la semana con todos tus platos y generas la lista de la compra a partir de ella | [`lista-compra`](https://github.com/martamacfly/comi2/tree/lista-compra) | 1.9 · [`v1.9-lista`](https://github.com/martamacfly/comi2/releases/tag/v1.9-lista) | `comi2-lista.apk` en la Release |
-
-```mermaid
-gitGraph
-  commit id: "1.9"
-  branch lista-compra
-  checkout lista-compra
-  commit id: "Lista de la compra"
-  checkout main
-  commit id: "2.0 Despensa"
-```
-
-Para trabajar con una u otra en local:
-
-```bash
-git switch main          # Despensa
-git switch lista-compra  # Lista de la compra
-```
-
-**Si las instalas en Android:** las dos usan el mismo identificador de app, así que no puedes tener las dos instaladas a la vez. Para pasar de la 2.0 a la 1.9, Android te obligará a desinstalar antes. Exporta un **Respaldo** primero para no perder tus datos; el respaldo de la 2.0 se puede importar en la 1.9 (la despensa se ignora).
 
 ---
 
@@ -44,11 +14,23 @@ git switch lista-compra  # Lista de la compra
 1. Guardas **productos** (ingredientes, con emoji si quieres).
 2. Creas **platos** con esos productos, si son de comida, cena o ambos, y etiquetas de color.
 3. En **Despensa** añades, con un buscador predictivo, los platos y productos que tienes disponibles.
-4. En **Semana** asignas a cada comida y cena (lunes a domingo) un plato o un producto **de tu despensa**. Puedes usar **Limpiar semana** para vaciar el plan de golpe (tras confirmar).
+4. En **Semana** asignas a cada comida y cena (lunes a domingo) un plato o un producto. Puedes usar **Limpiar semana** para vaciar el plan de golpe (tras confirmar).
+5. En **Lista** generas la compra: los productos de los platos planificados y los productos asignados directamente. Puedes tachar lo que ya tienes en casa. La lista **se mantiene al cambiar de sección** hasta que pulses **Generar lista** de nuevo o **Borrar lista**.
+6. En cada plato puedes guardar su **receta**: pasos en orden (que puedes reordenar) y notas.
+
+### Opciones
+
+Con el **engranaje** de arriba a la derecha eliges qué secciones usar. Al instalar están todas activadas, y apagar una no borra sus datos.
+
+| Opción | Si está activada | Si está desactivada |
+|--------|------------------|---------------------|
+| **Despensa** | Aparece la sección Despensa y Semana solo ofrece lo que hay en ella | Semana ofrece todos tus platos |
+| **Lista de la compra** | Aparece la sección Lista | Se oculta la sección Lista |
+| **Recetas** | Puedes ver y editar pasos y notas en cada plato | Se ocultan en la ficha y en el formulario del plato |
 
 Todo se guarda **en tu navegador** (sin cuenta ni servidor). Si borras los datos del sitio, pierdes el contenido.
 
-**Copia de seguridad:** en **Platos**, al final de la página, la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos, etiquetas, despensa y semana planificada, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
+**Copia de seguridad:** en **Platos**, al final de la página, la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos y sus recetas, etiquetas, despensa, semana planificada y opciones, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
 
 ```mermaid
 flowchart LR
@@ -56,6 +38,8 @@ flowchart LR
   Productos --> Despensa[Despensa]
   Platos --> Despensa
   Despensa --> Semana[Semana]
+  Platos -. sin Despensa .-> Semana
+  Semana --> Lista[Lista de la compra]
 ```
 
 ---
@@ -87,7 +71,7 @@ npm run dev
 
 Abre la URL que muestre la terminal (suele ser `http://localhost:5173`).
 
-**Primer paseo:** crea un plato → añádelo a la despensa → rellena la semana. Los productos también puedes crearlos al editar un plato.
+**Primer paseo:** crea un plato → añádelo a la despensa → rellena la semana → genera la lista. Los productos también puedes crearlos al editar un plato.
 
 La **APK Android** es un paso **aparte y opcional**: solo quien quiera instalar la app en el móvil necesita JDK y Android SDK. Toda la guía está en **[docs/guias/android-apk.md](docs/guias/android-apk.md)** para no mezclar requisitos con quien solo desarrolla en local.
 
@@ -136,6 +120,8 @@ Pasos completos, requisitos, solución de problemas y lista de cambios en el rep
 | `/productos` | Ingredientes |
 | `/despensa` | Platos y productos disponibles para la semana |
 | `/semana` | Planificador de la semana |
+| `/lista` | Lista de la compra |
+| `/opciones` | Elegir qué secciones usar |
 
 ---
 

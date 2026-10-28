@@ -10,6 +10,10 @@ export interface Plato {
   id?: number;
   nombre: string;
   momento: MomentoPlato;
+  /** Receta: pasos en orden */
+  pasos?: string[];
+  /** Receta: texto libre (trucos, variantes, enlace…) */
+  notas?: string;
 }
 
 export interface Etiqueta {
@@ -51,6 +55,14 @@ export interface DespensaItem {
   id?: number;
   platoId?: number;
   productoId?: number;
+}
+
+/** Secciones que se pueden activar o desactivar en Opciones. */
+export type Modulo = 'despensa' | 'listaCompra' | 'recetas';
+
+export interface AjusteModulo {
+  clave: Modulo;
+  activo: boolean;
 }
 
 export interface EtiquetaConAsignacion extends Etiqueta {

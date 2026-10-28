@@ -18,6 +18,7 @@ import { ProductoEmoji } from '../components/ProductoEmoji';
 import { TagChip } from '../components/TagChip';
 import { MomentoBadge } from '../components/MomentoBadge';
 import { eliminarPlato } from '../lib/platos';
+import { useModulos } from '../lib/opciones';
 
 type LocationState = {
   platoCreado?: string;
@@ -28,6 +29,7 @@ export function PlatoDetailPage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const modulos = useModulos();
   const platoId = id != null ? Number(id) : NaN;
   const idValido = Number.isFinite(platoId) && platoId > 0;
 
@@ -235,6 +237,34 @@ export function PlatoDetailPage() {
             </ul>
           )}
         </section>
+
+        {modulos?.recetas && (
+          <section className="plato-detail__section">
+            <h2 className="plato-detail__section-title">Receta</h2>
+            {(plato.pasos ?? []).length === 0 && !plato.notas ? (
+              <p className="muted">
+                Sin receta. Puedes añadirla en{' '}
+                <Link to={`/platos/${platoId}/editar`}>Editar plato</Link>.
+              </p>
+            ) : (
+              <>
+                {(plato.pasos ?? []).length > 0 && (
+                  <ol className="receta-pasos">
+                    {plato.pasos!.map((paso, i) => (
+                      <li key={i}>{paso}</li>
+                    ))}
+                  </ol>
+                )}
+                {plato.notas && (
+                  <>
+                    <h3 className="plato-detail__subsection-title">Notas</h3>
+                    <p className="receta-notas">{plato.notas}</p>
+                  </>
+                )}
+              </>
+            )}
+          </section>
+        )}
       </div>
     </section>
   );

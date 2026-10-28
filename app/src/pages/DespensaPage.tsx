@@ -1,47 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import {
-  Basket,
-  CookingPot,
-  MagnifyingGlass,
-  Trash,
-  X,
-} from '@phosphor-icons/react';
+import { Basket, CookingPot, Trash } from '@phosphor-icons/react';
 import { db } from '../db/database';
 import type { Plato, Producto } from '../db/types';
+import {
+  BuscadorPredictivo,
+  type OpcionBuscador,
+} from '../components/BuscadorPredictivo';
 import { EmptyState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { ProductoEmoji } from '../components/ProductoEmoji';
 import {
   agregarPlatoADespensa,
   agregarProductoADespensa,
-  normalizarBusqueda,
   quitarDeDespensa,
 } from '../lib/despensa';
-
-const MAX_SUGERENCIAS = 8;
-
-type Sugerencia =
-  | { tipo: 'plato'; plato: Plato }
-  | { tipo: 'producto'; producto: Producto };
-
-function nombreSugerencia(s: Sugerencia): string {
-  return s.tipo === 'plato' ? s.plato.nombre : s.producto.nombre;
-}
-
-function claveSugerencia(s: Sugerencia): string {
-  return s.tipo === 'plato' ? `plato-${s.plato.id}` : `producto-${s.producto.id}`;
-}
 
 export function DespensaPage() {
   const despensa = useLiveQuery(() => db.despensa.toArray());
   const platos = useLiveQuery(() => db.platos.orderBy('nombre').toArray());
   const productos = useLiveQuery(() => db.productos.orderBy('nombre').toArray());
-
-  const [consulta, setConsulta] = useState('');
-  const [abierto, setAbierto] = useState(false);
-  const [activo, setActivo] = useState(0);
 
   const { platosEnDespensa, productosEnDespensa } = useMemo(() => {
     const platosEnDespensa: { itemId: number; plato: Plato }[] = [];
@@ -66,66 +45,40 @@ export function DespensaPage() {
     return { platosEnDespensa, productosEnDespensa };
   }, [despensa, platos, productos]);
 
-  const sugerencias = useMemo<Sugerencia[]>(() => {
-    const q = normalizarBusqueda(consulta);
-    if (!q || !despensa || !platos || !productos) return [];
-    const platoIds = new Set(despensa.map((d) => d.platoId).filter((id) => id != null));
-    const productoIds = new Set(
-      despensa.map((d) => d.productoId).filter((id) => id != null),
-    );
-    const candidatas: Sugerencia[] = [
+  // Lo que aún no está en la despensa
+  const opciones = useMemo<OpcionBuscador[]>(() => {
+    if (!despensa || !platos || !productos) return [];
+    const platoIds = new Set(despensa.map((d) => d.platoId));
+    const productoIds = new Set(despensa.map((d) => d.productoId));
+    return [
       ...platos
         .filter((p) => p.id != null && !platoIds.has(p.id))
-        .map((plato): Sugerencia => ({ tipo: 'plato', plato })),
+        .map((p) => ({
+          clave: `plato:${p.id}`,
+          nombre: p.nombre,
+          icono: <CookingPot size={20} weight="duotone" aria-hidden />,
+          etiqueta: 'Plato',
+        })),
       ...productos
         .filter((p) => p.id != null && !productoIds.has(p.id))
-        .map((producto): Sugerencia => ({ tipo: 'producto', producto })),
+        .map((p) => ({
+          clave: `producto:${p.id}`,
+          nombre: p.nombre,
+          icono: <ProductoEmoji producto={p} size="sm" />,
+          etiqueta: 'Producto',
+        })),
     ];
-    // Primero las que empiezan por la consulta, luego las que la contienen
-    const empiezan: Sugerencia[] = [];
-    const contienen: Sugerencia[] = [];
-    for (const s of candidatas) {
-      const n = normalizarBusqueda(nombreSugerencia(s));
-      if (n.startsWith(q)) empiezan.push(s);
-      else if (n.includes(q)) contienen.push(s);
-    }
-    const porNombre = (a: Sugerencia, b: Sugerencia) =>
-      nombreSugerencia(a).localeCompare(nombreSugerencia(b), 'es');
-    return [...empiezan.sort(porNombre), ...contienen.sort(porNombre)].slice(
-      0,
-      MAX_SUGERENCIAS,
-    );
-  }, [consulta, despensa, platos, productos]);
+  }, [despensa, platos, productos]);
 
-  const elegir = async (s: Sugerencia) => {
-    // Limpiar antes de guardar para no borrar lo que se teclee mientras tanto
-    setConsulta('');
-    setActivo(0);
-    if (s.tipo === 'plato') await agregarPlatoADespensa(s.plato.id!);
-    else await agregarProductoADespensa(s.producto.id!);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown' && sugerencias.length > 0) {
-      e.preventDefault();
-      setAbierto(true);
-      setActivo((i) => (i + 1) % sugerencias.length);
-    } else if (e.key === 'ArrowUp' && sugerencias.length > 0) {
-      e.preventDefault();
-      setActivo((i) => (i - 1 + sugerencias.length) % sugerencias.length);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      const s = sugerencias[activo];
-      if (s) void elegir(s);
-    } else if (e.key === 'Escape') {
-      setAbierto(false);
-    }
+  const elegir = async (clave: string) => {
+    const [tipo, id] = clave.split(':');
+    if (tipo === 'plato') await agregarPlatoADespensa(Number(id));
+    else await agregarProductoADespensa(Number(id));
   };
 
   const cargando =
     despensa === undefined || platos === undefined || productos === undefined;
   const catalogoVacio = !cargando && platos.length === 0 && productos.length === 0;
-  const mostrarSugerencias = abierto && consulta.trim() !== '';
 
   return (
     <section className="page">
@@ -136,97 +89,17 @@ export function DespensaPage() {
         iconTone="lavender"
       />
 
-      <div className="despensa-buscador">
-        <div className="platos-search despensa-buscador__campo">
-          <MagnifyingGlass
-            size={18}
-            weight="regular"
-            className="platos-search__icon"
-            aria-hidden
-          />
-          <input
-            type="text"
-            className="platos-search__input"
-            placeholder="Añade un plato o producto…"
-            value={consulta}
-            onChange={(e) => {
-              setConsulta(e.target.value);
-              setActivo(0);
-              setAbierto(true);
-            }}
-            onFocus={() => setAbierto(true)}
-            onBlur={() => setAbierto(false)}
-            onKeyDown={onKeyDown}
-            role="combobox"
-            aria-expanded={mostrarSugerencias}
-            aria-controls="despensa-sugerencias"
-            aria-autocomplete="list"
-            aria-activedescendant={
-              mostrarSugerencias && sugerencias[activo]
-                ? `despensa-sug-${claveSugerencia(sugerencias[activo])}`
-                : undefined
-            }
-            aria-label="Añadir a la despensa"
-            autoComplete="off"
-            disabled={cargando || catalogoVacio}
-          />
-          {consulta && (
-            <button
-              type="button"
-              className="platos-search__clear"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setConsulta('')}
-              aria-label="Borrar búsqueda"
-            >
-              <X size={16} weight="bold" aria-hidden />
-            </button>
-          )}
-        </div>
-
-        {mostrarSugerencias && (
-          <ul
-            id="despensa-sugerencias"
-            className="despensa-sugerencias"
-            role="listbox"
-          >
-            {sugerencias.length === 0 ? (
-              <li className="despensa-sugerencias__vacio muted">
-                No hay platos ni productos que coincidan con «{consulta.trim()}».
-              </li>
-            ) : (
-              sugerencias.map((s, i) => (
-                <li
-                  key={claveSugerencia(s)}
-                  id={`despensa-sug-${claveSugerencia(s)}`}
-                  role="option"
-                  aria-selected={i === activo}
-                  className={`despensa-sugerencias__item${
-                    i === activo ? ' despensa-sugerencias__item--activo' : ''
-                  }`}
-                  // mousedown para que el blur del input no cierre antes del click
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    void elegir(s);
-                  }}
-                  onMouseEnter={() => setActivo(i)}
-                >
-                  {s.tipo === 'plato' ? (
-                    <CookingPot size={20} weight="duotone" aria-hidden />
-                  ) : (
-                    <ProductoEmoji producto={s.producto} size="sm" />
-                  )}
-                  <span className="despensa-sugerencias__nombre">
-                    {nombreSugerencia(s)}
-                  </span>
-                  <span className="despensa-sugerencias__tipo">
-                    {s.tipo === 'plato' ? 'Plato' : 'Producto'}
-                  </span>
-                </li>
-              ))
-            )}
-          </ul>
-        )}
-      </div>
+      <BuscadorPredictivo
+        id="despensa"
+        opciones={opciones}
+        onElegir={elegir}
+        textoSinResultados={(t) =>
+          `No hay platos ni productos que coincidan con «${t}».`
+        }
+        placeholder="Añade un plato o producto…"
+        ariaLabel="Añadir a la despensa"
+        disabled={cargando || catalogoVacio}
+      />
 
       {catalogoVacio && (
         <p className="muted">

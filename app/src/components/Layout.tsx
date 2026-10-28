@@ -4,9 +4,13 @@ import {
   Basket,
   CalendarDots,
   Carrot,
+  ClipboardText,
   CookingPot,
+  GearSix,
 } from '@phosphor-icons/react';
 import type { IconProps } from '@phosphor-icons/react';
+import type { Modulo } from '../db/types';
+import { useModulos } from '../lib/opciones';
 /** Origen: `assets/imagenes/logo2.svg` (wordmark y favicon), `comi2.svg` (icono cabecera). */
 const BRAND_MARK_SRC = '/logo-mark.svg';
 const BRAND_ICON_SRC = '/brand-icon.svg';
@@ -17,11 +21,14 @@ const navItems: {
   to: string;
   label: string;
   Icon: NavIcon;
+  /** Si se indica, solo aparece con esa sección activada en Opciones */
+  modulo?: Modulo;
 }[] = [
   { to: '/platos', label: 'Platos', Icon: CookingPot },
   { to: '/productos', label: 'Productos', Icon: Carrot },
-  { to: '/despensa', label: 'Despensa', Icon: Basket },
+  { to: '/despensa', label: 'Despensa', Icon: Basket, modulo: 'despensa' },
   { to: '/semana', label: 'Semana', Icon: CalendarDots },
+  { to: '/lista', label: 'Lista', Icon: ClipboardText, modulo: 'listaCompra' },
 ];
 
 function NavItem({
@@ -77,6 +84,10 @@ function useTecladoVisible(): boolean {
 
 export function Layout() {
   const tecladoVisible = useTecladoVisible();
+  const modulos = useModulos();
+  const visibles = navItems.filter(
+    (item) => item.modulo == null || modulos?.[item.modulo],
+  );
 
   return (
     <div className="layout">
@@ -94,10 +105,20 @@ export function Layout() {
           </NavLink>
         </div>
         <nav className="layout__nav layout__nav--desktop" aria-label="Principal">
-          {navItems.map((item) => (
-            <NavItem key={item.to} {...item} />
+          {visibles.map(({ to, label, Icon }) => (
+            <NavItem key={to} to={to} label={label} Icon={Icon} />
           ))}
         </nav>
+        <NavLink
+          to="/opciones"
+          className={({ isActive }) =>
+            `layout__opciones${isActive ? ' layout__opciones--active' : ''}`
+          }
+          aria-label="Opciones"
+          title="Opciones"
+        >
+          <GearSix size={22} weight="duotone" aria-hidden />
+        </NavLink>
       </header>
 
       <main className="layout__main">
@@ -108,8 +129,14 @@ export function Layout() {
         className={`layout__nav layout__nav--mobile${tecladoVisible ? ' layout__nav--oculto' : ''}`}
         aria-label="Principal móvil"
       >
-        {navItems.map((item) => (
-          <NavItem key={item.to} {...item} className="layout__link--mobile" />
+        {visibles.map(({ to, label, Icon }) => (
+          <NavItem
+            key={to}
+            to={to}
+            label={label}
+            Icon={Icon}
+            className="layout__link--mobile"
+          />
         ))}
       </nav>
     </div>

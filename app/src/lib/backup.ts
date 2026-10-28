@@ -4,8 +4,10 @@ import { Share } from '@capacitor/share';
 import { emojiPorDefecto } from './producto-emoji';
 import { db } from '../db/database';
 import type {
+  AjusteModulo,
   DespensaItem,
   Etiqueta,
+  Modulo,
   MomentoPlato,
   MomentoSlot,
   PlanSlot,
@@ -32,11 +34,13 @@ export type Comi2BackupPayload = {
     semanas: Semana[];
     planSlots: PlanSlot[];
     despensa: DespensaItem[];
+    ajustes: AjusteModulo[];
   };
 };
 
 const MOMENTOS_PLATO: MomentoPlato[] = ['comida', 'cena', 'ambos'];
 const MOMENTOS_SLOT: MomentoSlot[] = ['comida', 'cena'];
+const MODULOS: Modulo[] = ['despensa', 'listaCompra', 'recetas'];
 
 function isPositiveInt(n: unknown): n is number {
   return typeof n === 'number' && Number.isInteger(n) && n > 0;
@@ -85,6 +89,10 @@ function revivePlato(raw: Record<string, unknown>): Plato {
     throw new Error('Plato inválido: momento');
   }
   const p: Plato = { nombre, momento: momento as MomentoPlato };
+  if (Array.isArray(raw.pasos)) {
+    p.pasos = raw.pasos.filter((x): x is string => typeof x === 'string');
+  }
+  if (typeof raw.notas === 'string') p.notas = raw.notas;
   if (raw.id !== undefined && raw.id !== null) {
     if (!isPositiveInt(raw.id)) throw new Error('Plato inválido: id');
     p.id = raw.id;
@@ -180,6 +188,14 @@ function reviveDespensaItem(raw: Record<string, unknown>): DespensaItem {
   return item;
 }
 
+function reviveAjuste(raw: Record<string, unknown>): AjusteModulo | null {
+  // Una opción desconocida (de otra versión) se ignora sin fallar
+  if (typeof raw.clave !== 'string' || !MODULOS.includes(raw.clave as Modulo)) {
+    return null;
+  }
+  return { clave: raw.clave as Modulo, activo: raw.activo !== false };
+}
+
 function ensureArray<T>(v: unknown, label: string): T[] {
   if (!Array.isArray(v)) throw new Error(`Se esperaba un array: ${label}`);
   return v as T[];
@@ -231,6 +247,9 @@ export function parseBackupJson(text: string): Comi2BackupPayload['data'] {
   const despensa = ensureArray<unknown>(d.despensa ?? [], 'despensa').map((x) =>
     reviveDespensaItem(x as Record<string, unknown>),
   );
+  const ajustes = ensureArray<unknown>(d.ajustes ?? [], 'ajustes')
+    .map((x) => reviveAjuste(x as Record<string, unknown>))
+    .filter((a): a is AjusteModulo => a !== null);
 
   for (const p of productos) {
     if (p.id == null) throw new Error('Todos los productos deben tener id en el respaldo');
@@ -308,6 +327,7 @@ export function parseBackupJson(text: string): Comi2BackupPayload['data'] {
     semanas,
     planSlots,
     despensa,
+    ajustes,
   };
 }
 
@@ -321,6 +341,7 @@ export async function buildBackupPayload(): Promise<Comi2BackupPayload> {
     semanas,
     planSlots,
     despensa,
+    ajustes,
   ] = await Promise.all([
     db.productos.toArray(),
     db.platos.toArray(),
@@ -330,6 +351,7 @@ export async function buildBackupPayload(): Promise<Comi2BackupPayload> {
     db.semanas.toArray(),
     db.planSlots.toArray(),
     db.despensa.toArray(),
+    db.ajustes.toArray(),
   ]);
 
   return {
@@ -345,6 +367,7 @@ export async function buildBackupPayload(): Promise<Comi2BackupPayload> {
       semanas,
       planSlots,
       despensa,
+      ajustes,
     },
   };
 }
@@ -410,8 +433,10 @@ export async function restoreBackupData(data: Comi2BackupPayload['data']): Promi
       db.etiquetas,
       db.semanas,
       db.despensa,
+      db.ajustes,
     ],
     async () => {
+      await db.ajustes.clear();
       await db.despensa.clear();
       await db.planSlots.clear();
       await db.platoProductos.clear();
@@ -429,6 +454,7 @@ export async function restoreBackupData(data: Comi2BackupPayload['data']): Promi
       if (data.semanas.length) await db.semanas.bulkPut(data.semanas);
       if (planSlots.length) await db.planSlots.bulkPut(planSlots);
       if (despensa.length) await db.despensa.bulkPut(despensa);
+      if (data.ajustes.length) await db.ajustes.bulkPut(data.ajustes);
     },
   );
 }

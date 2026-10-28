@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import { emojiPorDefecto } from '../lib/producto-emoji';
 import type {
+  AjusteModulo,
   DespensaItem,
   Etiqueta,
   PlanSlot,
@@ -20,6 +21,7 @@ export class Comi2Database extends Dexie {
   semanas!: Table<Semana, number>;
   planSlots!: Table<PlanSlot, number>;
   despensa!: Table<DespensaItem, number>;
+  ajustes!: Table<AjusteModulo, string>;
 
   constructor() {
     super('comi2-db');
@@ -62,6 +64,10 @@ export class Comi2Database extends Dexie {
       planSlots:
         '++id, semanaId, platoId, productoId, [semanaId+diaSemana+momento]',
       despensa: '++id, platoId, productoId',
+    });
+
+    this.version(6).stores({
+      ajustes: 'clave',
     });
   }
 }

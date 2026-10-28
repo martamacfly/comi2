@@ -9,8 +9,13 @@ import {
   ETIQUETA_COLORES_PREDEFINIDOS,
   normalizeHex,
 } from '../lib/color';
-import { InlineProductoAdd } from '../components/InlineProductoAdd';
-import { agregarPlatoADespensa } from '../lib/despensa';
+import {
+  BuscadorPredictivo,
+  type OpcionBuscador,
+} from '../components/BuscadorPredictivo';
+import { crearProducto } from '../lib/productos';
+import { agregarPlatoADespensa, normalizarBusqueda } from '../lib/despensa';
+import { useModulos } from '../lib/opciones';
 import { asignarEnSlot, type SemanaPlatoNuevoState } from '../lib/semana';
 import {
   actualizarEtiqueta,
@@ -19,7 +24,16 @@ import {
   eliminarPlato,
   guardarPlato,
 } from '../lib/platos';
-import { Check, CookingPot, Tag, Trash, X } from '@phosphor-icons/react';
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  CookingPot,
+  Plus,
+  Tag,
+  Trash,
+  X,
+} from '@phosphor-icons/react';
 
 export function PlatoEditPage() {
   const { id } = useParams();
@@ -27,6 +41,7 @@ export function PlatoEditPage() {
   const location = useLocation();
   const desdeSemana = (location.state as SemanaPlatoNuevoState | null)
     ?.desdeSemana;
+  const modulos = useModulos();
   const isNew = id == null || id === 'nuevo';
   const platoIdNum = isNew ? NaN : Number(id);
   const platoId =
@@ -69,6 +84,10 @@ export function PlatoEditPage() {
   );
   const [selectedProductoIds, setSelectedProductoIds] = useState<number[]>([]);
   const [selectedEtiquetaIds, setSelectedEtiquetaIds] = useState<number[]>([]);
+  const [pasos, setPasos] = useState<string[]>([]);
+  const [notas, setNotas] = useState('');
+  /** Índice del paso recién añadido, para darle el foco */
+  const [pasoNuevo, setPasoNuevo] = useState<number | null>(null);
   const [nuevaEtiquetaNombre, setNuevaEtiquetaNombre] = useState('');
   const [nuevaEtiquetaColor, setNuevaEtiquetaColor] = useState<string>(
     ETIQUETA_COLORES_PREDEFINIDOS[0],
@@ -94,6 +113,8 @@ export function PlatoEditPage() {
     setMomento(plato.momento);
     setSelectedProductoIds(productoIdsAsignados);
     setSelectedEtiquetaIds(etiquetaIdsAsignados);
+    setPasos(plato.pasos ?? []);
+    setNotas(plato.notas ?? '');
     setLoadedFromDb(true);
   }, [
     isNew,
@@ -138,6 +159,33 @@ export function PlatoEditPage() {
       ?.filter((p) => p.id != null && !selectedProductoIds.includes(p.id))
       .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')) ?? [];
 
+  const opcionesProducto: OpcionBuscador[] = productosDisponibles.map((p) => ({
+    clave: String(p.id),
+    nombre: p.nombre,
+    icono: <ProductoEmoji producto={p} size="sm" />,
+  }));
+
+  const productoNoExiste = (texto: string) => {
+    const n = normalizarBusqueda(texto);
+    return !productos?.some((p) => normalizarBusqueda(p.nombre) === n);
+  };
+
+  const agregarProducto = (productoId: number) => {
+    setSelectedProductoIds((prev) =>
+      prev.includes(productoId) ? prev : [...prev, productoId],
+    );
+  };
+
+  const crearYAgregarProducto = async (texto: string) => {
+    try {
+      // Si ya existe con ese nombre, crearProducto devuelve el existente
+      agregarProducto(await crearProducto(texto));
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo crear el producto');
+    }
+  };
+
   const quitarProducto = (productoId: number) => {
     setSelectedProductoIds((prev) => prev.filter((x) => x !== productoId));
   };
@@ -158,6 +206,24 @@ export function PlatoEditPage() {
 
   const quitarEtiqueta = (etiquetaId: number) => {
     setSelectedEtiquetaIds((prev) => prev.filter((x) => x !== etiquetaId));
+  };
+
+  const cambiarPaso = (i: number, texto: string) => {
+    setPasos((prev) => prev.map((p, j) => (j === i ? texto : p)));
+  };
+
+  const moverPaso = (i: number, hacia: -1 | 1) => {
+    setPasos((prev) => {
+      const j = i + hacia;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  };
+
+  const quitarPaso = (i: number) => {
+    setPasos((prev) => prev.filter((_, j) => j !== i));
   };
 
   const crearYAsignarEtiqueta = async () => {
@@ -209,10 +275,12 @@ export function PlatoEditPage() {
         momento,
         productoIds: selectedProductoIds,
         etiquetaIds: selectedEtiquetaIds,
+        // Con Recetas desactivado no se toca la receta guardada
+        receta: modulos?.recetas ? { pasos, notas } : undefined,
       });
       if (desdeSemana) {
         // Un plato creado desde Semana también pasa a la despensa
-        await agregarPlatoADespensa(savedId);
+        if (modulos?.despensa) await agregarPlatoADespensa(savedId);
         await asignarEnSlot(
           desdeSemana.semanaId,
           desdeSemana.diaSemana,
@@ -414,7 +482,7 @@ export function PlatoEditPage() {
             </span>
             {productosAsignados.length === 0 ? (
               <p className="muted plato-productos-asignados__empty">
-                Aún no hay productos. Añádelos desde el catálogo o crea uno nuevo.
+                Aún no hay productos. Búscalos abajo o escribe uno nuevo para crearlo.
               </p>
             ) : (
               <ul className="plato-productos-list">
@@ -438,12 +506,17 @@ export function PlatoEditPage() {
             )}
           </div>
 
-          <InlineProductoAdd
-            onCreated={(id) =>
-              setSelectedProductoIds((prev) =>
-                prev.includes(id) ? prev : [...prev, id],
-              )
-            }
+          <BuscadorPredictivo
+            id="plato-productos"
+            opciones={opcionesProducto}
+            onElegir={(clave) => agregarProducto(Number(clave))}
+            onCrear={crearYAgregarProducto}
+            textoCrear={(t) => `Crear producto «${t}»`}
+            puedeCrear={productoNoExiste}
+            textoSinResultados={(t) => `«${t}» ya está en este plato.`}
+            placeholder="Añadir producto: tomate, arroz…"
+            ariaLabel="Añadir producto al plato"
+            disabled={productos === undefined}
           />
 
           {productos === undefined ? (
@@ -455,7 +528,8 @@ export function PlatoEditPage() {
           ) : productosDisponibles.length > 0 ? (
             <details
               className="plato-productos-catalogo"
-              open={productosAsignados.length === 0}
+              // Al editar sale plegado; solo se abre de entrada al crear un plato
+              open={isNew}
             >
               <summary>Añadir del catálogo ({productosDisponibles.length})</summary>
               <ul className="check-list check-list--spaced">
@@ -480,6 +554,85 @@ export function PlatoEditPage() {
             </p>
           )}
         </div>
+
+        {modulos?.recetas && (
+          <div className="field">
+            <span>Receta</span>
+            <p className="field-hint">Pasos para prepararlo, en orden.</p>
+            {pasos.length > 0 && (
+              <ol className="receta-pasos-edit">
+                {pasos.map((paso, i) => (
+                  <li key={i} className="receta-pasos-edit__item">
+                    <span className="receta-pasos-edit__num" aria-hidden>
+                      {i + 1}
+                    </span>
+                    <textarea
+                      value={paso}
+                      onChange={(e) => cambiarPaso(i, e.target.value)}
+                      placeholder="Describe este paso"
+                      rows={2}
+                      autoFocus={i === pasoNuevo}
+                      aria-label={`Paso ${i + 1}`}
+                    />
+                    <span className="receta-pasos-edit__acciones">
+                      <button
+                        type="button"
+                        className="btn-icon btn-icon--mover"
+                        onClick={() => moverPaso(i, -1)}
+                        disabled={i === 0}
+                        aria-label={`Subir paso ${i + 1}`}
+                      >
+                        <ArrowUp size={16} weight="bold" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-icon btn-icon--mover"
+                        onClick={() => moverPaso(i, 1)}
+                        disabled={i === pasos.length - 1}
+                        aria-label={`Bajar paso ${i + 1}`}
+                      >
+                        <ArrowDown size={16} weight="bold" aria-hidden />
+                      </button>
+                    </span>
+                    <button
+                      type="button"
+                      className="btn-icon btn-icon--remove"
+                      onClick={() => quitarPaso(i)}
+                      aria-label={`Quitar paso ${i + 1}`}
+                    >
+                      <X size={18} weight="bold" aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+            <div>
+              <button
+                type="button"
+                className="btn-secondary btn-secondary--icon"
+                onClick={() => {
+                  setPasoNuevo(pasos.length);
+                  setPasos((prev) => [...prev, '']);
+                }}
+              >
+                <Plus size={16} weight="bold" aria-hidden />
+                Añadir paso
+              </button>
+            </div>
+          </div>
+        )}
+
+        {modulos?.recetas && (
+          <label className="field">
+            <span>Notas</span>
+            <textarea
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+              placeholder="Trucos, variantes, de dónde sacaste la receta…"
+              rows={3}
+            />
+          </label>
+        )}
 
         {error && <p className="form-error">{error}</p>}
 

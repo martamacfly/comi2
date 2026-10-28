@@ -1,5 +1,5 @@
 import { db } from '../db/database';
-import type { Etiqueta, MomentoPlato, Producto } from '../db/types';
+import type { Etiqueta, MomentoPlato, Plato, Producto } from '../db/types';
 
 export async function getEtiquetasDePlato(platoId: number): Promise<Etiqueta[]> {
   const links = await db.platoEtiquetas.where('platoId').equals(platoId).toArray();
@@ -64,19 +64,24 @@ export async function guardarPlato(
     momento: MomentoPlato;
     productoIds: number[];
     etiquetaIds: number[];
+    /** Si no se pasa, la receta guardada no se toca */
+    receta?: { pasos: string[]; notas: string };
   },
 ): Promise<number> {
   const nombre = datos.nombre.trim();
   if (!nombre) throw new Error('El nombre del plato es obligatorio');
 
+  const cambios: Partial<Plato> = { nombre, momento: datos.momento };
+  if (datos.receta) {
+    cambios.pasos = datos.receta.pasos.map((p) => p.trim()).filter(Boolean);
+    cambios.notas = datos.receta.notas.trim();
+  }
+
   let platoId = datos.id;
   if (platoId != null) {
-    await db.platos.update(platoId, { nombre, momento: datos.momento });
+    await db.platos.update(platoId, cambios);
   } else {
-    platoId = await db.platos.add({
-      nombre,
-      momento: datos.momento,
-    });
+    platoId = await db.platos.add({ ...cambios, nombre, momento: datos.momento });
   }
 
   await syncPlatoProductos(platoId, datos.productoIds);
