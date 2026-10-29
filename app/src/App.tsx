@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ROUTER_BASENAME } from './lib/base';
 import { ListaCompraProvider } from './context/ListaCompraProvider';
 import { Layout } from './components/Layout';
 import { ModuloRoute } from './components/ModuloRoute';
@@ -14,12 +15,9 @@ import { SemanaPage } from './pages/SemanaPage';
 import './styles/tokens.css';
 import './styles/index.css';
 
-// Con base absoluta (GitHub Pages) el router trabaja bajo ese prefijo; con './' (APK) desde la raíz.
-const basename = import.meta.env.BASE_URL.startsWith('/') ? import.meta.env.BASE_URL : undefined;
-
 function App() {
   return (
-    <BrowserRouter basename={basename}>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       <ListaCompraProvider>
         <Routes>
           <Route element={<Layout />}>

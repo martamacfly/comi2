@@ -156,9 +156,10 @@ export function PlatoDetailPage() {
     conReceta: modulos?.recetas ?? false,
   };
 
-  const abrirCompartir = () => {
+  const abrirCompartir = async () => {
     setAvisoCompartir(null);
-    setVistaPrevia(generarImagenRecetaCanvas(datosImagen).toDataURL('image/png'));
+    const canvas = await generarImagenRecetaCanvas(datosImagen);
+    setVistaPrevia(canvas.toDataURL('image/png'));
   };
 
   const cerrarCompartir = () => setVistaPrevia(null);
@@ -278,7 +279,7 @@ export function PlatoDetailPage() {
             <PencilSimple size={20} weight="duotone" aria-hidden />
             Editar plato
           </Link>
-          <button type="button" className="btn-secondary" onClick={abrirCompartir}>
+          <button type="button" className="btn-secondary" onClick={() => void abrirCompartir()}>
             <ShareNetwork size={20} weight="duotone" aria-hidden />
             Compartir
           </button>

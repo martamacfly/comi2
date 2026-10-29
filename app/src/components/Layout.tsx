@@ -10,10 +10,11 @@ import {
 } from '@phosphor-icons/react';
 import type { IconProps } from '@phosphor-icons/react';
 import type { Modulo } from '../db/types';
+import { publicUrl } from '../lib/base';
 import { useModulos } from '../lib/opciones';
 /** Origen: `assets/imagenes/logo2.svg` (wordmark y favicon), `comi2.svg` (icono cabecera). */
-const BRAND_MARK_SRC = '/logo-mark.svg';
-const BRAND_ICON_SRC = '/brand-icon.svg';
+const BRAND_MARK_SRC = publicUrl('logo-mark.svg');
+const BRAND_ICON_SRC = publicUrl('brand-icon.svg');
 
 type NavIcon = ComponentType<IconProps>;
 

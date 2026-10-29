@@ -2,6 +2,7 @@ import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { Media } from '@capacitor-community/media';
+import { publicUrl } from './base';
 import { textColorForBackground } from './color';
 
 export type MomentoResumen = {
@@ -64,6 +65,65 @@ export function roundRect(
 
 type TagImagen = MomentoResumen['tags'][number];
 
+// ─── Logo (mismo montaje que la cabecera de la app, ver .layout__brand en index.css) ───
+// Las dos piezas son SVG de 677×369. En la cabecera el wordmark mide 40 px de alto y el icono 66 px,
+// solapados: el icono empieza 17,4 px a la derecha del inicio del wordmark.
+const LOGO_PROPORCION = 677 / 369;
+const LOGO_ICONO_H = 66;
+const LOGO_MARCA_H = 40;
+const LOGO_ICONO_X = 17.4;
+const LOGO_ANCHO = LOGO_ICONO_X + LOGO_ICONO_H * LOGO_PROPORCION;
+// Los SVG tienen mucho margen transparente: la parte que se ve ocupa del 29 % al 57 % del alto
+// del montaje y queda desplazada a la izquierda un 8 % del alto (medido sobre los SVG actuales).
+const LOGO_VISIBLE_TOP = 0.29;
+const LOGO_VISIBLE_H = 0.28;
+const LOGO_VISIBLE_DX = 0.08;
+
+export type Logo = { marca: HTMLImageElement; icono: HTMLImageElement };
+
+let logoCargado: Promise<Logo | null> | null = null;
+
+function cargarImagen(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
+    img.src = src;
+  });
+}
+
+/** Carga el logo una sola vez. Si falla, las imágenes se generan sin él. */
+export function cargarLogo(): Promise<Logo | null> {
+  logoCargado ??= Promise.all([
+    cargarImagen(publicUrl('logo-mark.svg')),
+    cargarImagen(publicUrl('brand-icon.svg')),
+  ])
+    .then(([marca, icono]) => ({ marca, icono }))
+    .catch(() => {
+      logoCargado = null;
+      return null;
+    });
+  return logoCargado;
+}
+
+/** Dibuja el logo centrado en cx, con la parte visible empezando en top y midiendo altoVisible. */
+export function dibujarLogo(
+  ctx: CanvasRenderingContext2D,
+  logo: Logo,
+  cx: number,
+  top: number,
+  altoVisible: number,
+) {
+  const alto = altoVisible / LOGO_VISIBLE_H;
+  top -= alto * LOGO_VISIBLE_TOP;
+  cx += alto * LOGO_VISIBLE_DX;
+  const k = alto / LOGO_ICONO_H;
+  const x0 = cx - (LOGO_ANCHO * k) / 2;
+  const marcaH = LOGO_MARCA_H * k;
+  ctx.drawImage(logo.marca, x0, top + (alto - marcaH) / 2, marcaH * LOGO_PROPORCION, marcaH);
+  ctx.drawImage(logo.icono, x0 + LOGO_ICONO_X * k, top, alto * LOGO_PROPORCION, alto);
+}
+
 function tagsWidth(
   ctx: CanvasRenderingContext2D,
   tags: TagImagen[],
@@ -112,7 +172,10 @@ function calcDayHeight(
   return h + 12;
 }
 
-export function generarImagenSemanaCanvas(dias: DiaResumen[]): HTMLCanvasElement {
+export async function generarImagenSemanaCanvas(dias: DiaResumen[]): Promise<HTMLCanvasElement> {
+  const logo = await cargarLogo();
+  const LOGO_H = logo ? 56 : 0;
+
   // Calcular altura total en un canvas temporal
   const tmp = document.createElement('canvas');
   tmp.width = W * DPR;
@@ -121,7 +184,7 @@ export function generarImagenSemanaCanvas(dias: DiaResumen[]): HTMLCanvasElement
 
   const HEADER_H = 96;
   const FOOTER_H = 44;
-  let totalH = PAD + HEADER_H;
+  let totalH = PAD + LOGO_H + HEADER_H;
   for (const dia of dias) totalH += calcDayHeight(tmpCtx, dia) + 12;
   totalH += FOOTER_H + PAD;
 
@@ -138,6 +201,10 @@ export function generarImagenSemanaCanvas(dias: DiaResumen[]): HTMLCanvasElement
 
   // ── Cabecera ──
   let y = PAD + 8;
+  if (logo) {
+    dibujarLogo(ctx, logo, W / 2, PAD, 40);
+    y += LOGO_H;
+  }
   ctx.fillStyle = C.sageDark;
   ctx.font = `700 26px ${FONT}`;
   ctx.textAlign = 'center';
@@ -342,10 +409,10 @@ function nombreArchivo(): string {
   return `menu-semana-${day}`;
 }
 
-export function guardarImagenSemana(dias: DiaResumen[]): Promise<void> {
-  return guardarCanvas(generarImagenSemanaCanvas(dias), nombreArchivo());
+export async function guardarImagenSemana(dias: DiaResumen[]): Promise<void> {
+  return guardarCanvas(await generarImagenSemanaCanvas(dias), nombreArchivo());
 }
 
-export function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean> {
-  return compartirCanvas(generarImagenSemanaCanvas(dias), nombreArchivo(), 'Menú de la semana');
+export async function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean> {
+  return compartirCanvas(await generarImagenSemanaCanvas(dias), nombreArchivo(), 'Menú de la semana');
 }

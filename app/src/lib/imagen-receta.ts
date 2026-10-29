@@ -1,5 +1,15 @@
 import type { Etiqueta, Plato, Producto } from '../db/types';
-import { C, compartirCanvas, drawTags, FONT, guardarCanvas, roundRect } from './imagen-semana';
+import {
+  C,
+  cargarLogo,
+  compartirCanvas,
+  dibujarLogo,
+  drawTags,
+  FONT,
+  guardarCanvas,
+  roundRect,
+  type Logo,
+} from './imagen-semana';
 
 export type RecetaImagen = {
   plato: Plato;
@@ -53,13 +63,24 @@ function truncar(ctx: CanvasRenderingContext2D, texto: string, maxW: number): st
  * Dibuja la receta. Con draw=false solo mide y devuelve el alto que necesita,
  * para poder crear el canvas del tamaño justo antes de pintar.
  */
-function pintarReceta(ctx: CanvasRenderingContext2D, datos: RecetaImagen, draw: boolean): number {
+function pintarReceta(
+  ctx: CanvasRenderingContext2D,
+  datos: RecetaImagen,
+  logo: Logo | null,
+  draw: boolean,
+): number {
   const { plato, ingredientes, etiquetas, conReceta } = datos;
   const pasos = conReceta ? (plato.pasos ?? []).filter((p) => p.trim()) : [];
   const notas = conReceta ? plato.notas?.trim() : undefined;
 
-  // ── Cabecera ──
+  // ── Logo ──
   let y = PAD;
+  if (logo) {
+    if (draw) dibujarLogo(ctx, logo, W / 2, y + 4, 34);
+    y += 4 + 34 + 18;
+  }
+
+  // ── Cabecera ──
   ctx.font = `700 30px ${FONT}`;
   const titulo = wrapLines(ctx, plato.nombre, INNER_W - 48);
   const cabeceraH = 24 + 22 + titulo.length * 38 + 30 + (etiquetas.length > 0 ? 34 : 0) + 8;
@@ -177,9 +198,10 @@ function pintarReceta(ctx: CanvasRenderingContext2D, datos: RecetaImagen, draw: 
   return y + 24 + PAD;
 }
 
-export function generarImagenRecetaCanvas(datos: RecetaImagen): HTMLCanvasElement {
+export async function generarImagenRecetaCanvas(datos: RecetaImagen): Promise<HTMLCanvasElement> {
+  const logo = await cargarLogo();
   const tmp = document.createElement('canvas').getContext('2d')!;
-  const contenido = pintarReceta(tmp, datos, false);
+  const contenido = pintarReceta(tmp, datos, logo, false);
   const alto = Math.max(MIN_H, contenido);
 
   const canvas = document.createElement('canvas');
@@ -191,7 +213,7 @@ export function generarImagenRecetaCanvas(datos: RecetaImagen): HTMLCanvasElemen
   ctx.fillRect(0, 0, W, alto);
   // Si la receta es corta, se centra en vertical dentro del formato 4:5
   ctx.translate(0, (alto - contenido) / 2);
-  pintarReceta(ctx, datos, true);
+  pintarReceta(ctx, datos, logo, true);
   return canvas;
 }
 
@@ -205,10 +227,14 @@ function nombreArchivo(plato: Plato): string {
   return `receta-${slug || 'comi2'}`;
 }
 
-export function guardarImagenReceta(datos: RecetaImagen): Promise<void> {
-  return guardarCanvas(generarImagenRecetaCanvas(datos), nombreArchivo(datos.plato));
+export async function guardarImagenReceta(datos: RecetaImagen): Promise<void> {
+  return guardarCanvas(await generarImagenRecetaCanvas(datos), nombreArchivo(datos.plato));
 }
 
-export function compartirImagenReceta(datos: RecetaImagen): Promise<boolean> {
-  return compartirCanvas(generarImagenRecetaCanvas(datos), nombreArchivo(datos.plato), datos.plato.nombre);
+export async function compartirImagenReceta(datos: RecetaImagen): Promise<boolean> {
+  return compartirCanvas(
+    await generarImagenRecetaCanvas(datos),
+    nombreArchivo(datos.plato),
+    datos.plato.nombre,
+  );
 }
