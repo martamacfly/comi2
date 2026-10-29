@@ -9,11 +9,14 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ArrowLeft,
   CheckCircle,
+  DownloadSimple,
   ForkKnife,
   PencilSimple,
   ShareNetwork,
+  TextAa,
   Trash,
 } from '@phosphor-icons/react';
+import { Capacitor } from '@capacitor/core';
 import { db } from '../db/database';
 import { ProductoEmoji } from '../components/ProductoEmoji';
 import { TagChip } from '../components/TagChip';
@@ -21,6 +24,12 @@ import { MomentoBadge } from '../components/MomentoBadge';
 import { eliminarPlato } from '../lib/platos';
 import { useModulos } from '../lib/opciones';
 import { compartirTexto, textoReceta } from '../lib/compartir';
+import {
+  compartirImagenReceta,
+  generarImagenRecetaCanvas,
+  guardarImagenReceta,
+  type RecetaImagen,
+} from '../lib/imagen-receta';
 
 type LocationState = {
   platoCreado?: string;
@@ -38,6 +47,12 @@ export function PlatoDetailPage() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [vistaPrevia, setVistaPrevia] = useState<string | null>(null);
+  const [ocupado, setOcupado] = useState<'guardar' | 'compartir' | null>(null);
+  const [avisoCompartir, setAvisoCompartir] = useState<{
+    tipo: 'success' | 'error';
+    texto: string;
+  } | null>(null);
 
   const detail = useLiveQuery(
     async () => {
@@ -84,6 +99,15 @@ export function PlatoDetailPage() {
     return () => window.clearTimeout(t);
   }, [mensaje]);
 
+  useEffect(() => {
+    if (!vistaPrevia) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setVistaPrevia(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [vistaPrevia]);
+
   if (!idValido) {
     return (
       <section className="page">
@@ -125,16 +149,68 @@ export function PlatoDetailPage() {
     a.nombre.localeCompare(b.nombre, 'es'),
   );
 
-  const onShare = async () => {
-    setError(null);
+  const datosImagen: RecetaImagen = {
+    plato,
+    ingredientes: productosSorted,
+    etiquetas: etiquetasSorted,
+    conReceta: modulos?.recetas ?? false,
+  };
+
+  const abrirCompartir = () => {
+    setAvisoCompartir(null);
+    setVistaPrevia(generarImagenRecetaCanvas(datosImagen).toDataURL('image/png'));
+  };
+
+  const cerrarCompartir = () => setVistaPrevia(null);
+
+  const onCompartirImagen = async () => {
+    setOcupado('compartir');
+    setAvisoCompartir(null);
+    try {
+      const ok = await compartirImagenReceta(datosImagen);
+      if (!ok) {
+        setAvisoCompartir({
+          tipo: 'error',
+          texto: 'Este navegador no permite compartir imágenes. Usa Guardar imagen.',
+        });
+      }
+    } catch {
+      setAvisoCompartir({ tipo: 'error', texto: 'No se pudo compartir la imagen.' });
+    } finally {
+      setOcupado(null);
+    }
+  };
+
+  const onGuardarImagen = async () => {
+    setOcupado('guardar');
+    setAvisoCompartir(null);
+    try {
+      await guardarImagenReceta(datosImagen);
+      setAvisoCompartir({
+        tipo: 'success',
+        texto: Capacitor.isNativePlatform()
+          ? 'Imagen guardada en la galería (álbum Comi2).'
+          : 'Imagen descargada.',
+      });
+    } catch {
+      setAvisoCompartir({ tipo: 'error', texto: 'No se pudo guardar la imagen.' });
+    } finally {
+      setOcupado(null);
+    }
+  };
+
+  const onCompartirTexto = async () => {
+    setAvisoCompartir(null);
     try {
       const resultado = await compartirTexto(
         plato.nombre,
         textoReceta(plato, productosSorted, modulos?.recetas ?? false),
       );
-      if (resultado === 'copiado') setMensaje('Receta copiada al portapapeles.');
+      if (resultado === 'copiado') {
+        setAvisoCompartir({ tipo: 'success', texto: 'Receta copiada al portapapeles.' });
+      }
     } catch {
-      setError('No se pudo compartir la receta.');
+      setAvisoCompartir({ tipo: 'error', texto: 'No se pudo compartir la receta.' });
     }
   };
 
@@ -202,7 +278,7 @@ export function PlatoDetailPage() {
             <PencilSimple size={20} weight="duotone" aria-hidden />
             Editar plato
           </Link>
-          <button type="button" className="btn-secondary" onClick={() => void onShare()}>
+          <button type="button" className="btn-secondary" onClick={abrirCompartir}>
             <ShareNetwork size={20} weight="duotone" aria-hidden />
             Compartir
           </button>
@@ -285,6 +361,61 @@ export function PlatoDetailPage() {
           </section>
         )}
       </div>
+
+      {vistaPrevia && (
+        <div className="modal-backdrop" role="presentation" onClick={cerrarCompartir}>
+          <div
+            className="modal modal--compartir-receta"
+            role="dialog"
+            aria-labelledby="compartir-receta-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="compartir-receta-title">Compartir receta</h2>
+            <div className="compartir-receta__preview">
+              <img src={vistaPrevia} alt={`Imagen de la receta ${plato.nombre}`} />
+            </div>
+            {avisoCompartir && (
+              <p
+                className={`alert alert--${avisoCompartir.tipo}`}
+                role={avisoCompartir.tipo === 'error' ? 'alert' : 'status'}
+              >
+                {avisoCompartir.texto}
+              </p>
+            )}
+            <div className="form-actions compartir-receta__actions">
+              <button
+                type="button"
+                className="btn-primary btn-primary--icon"
+                disabled={ocupado != null}
+                onClick={() => void onCompartirImagen()}
+              >
+                <ShareNetwork size={18} weight="duotone" aria-hidden />
+                {ocupado === 'compartir' ? 'Generando…' : 'Compartir imagen'}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary btn-secondary--icon"
+                disabled={ocupado != null}
+                onClick={() => void onGuardarImagen()}
+              >
+                <DownloadSimple size={18} weight="duotone" aria-hidden />
+                {ocupado === 'guardar' ? 'Guardando…' : 'Guardar imagen'}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary btn-secondary--icon"
+                onClick={() => void onCompartirTexto()}
+              >
+                <TextAa size={18} weight="duotone" aria-hidden />
+                Como texto
+              </button>
+              <button type="button" className="btn-ghost" onClick={cerrarCompartir}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

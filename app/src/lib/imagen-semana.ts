@@ -15,8 +15,8 @@ export type DiaResumen = {
   momentos: MomentoResumen[];
 };
 
-// ─── Paleta ──────────────────────────────────────────────────────────────────
-const C = {
+// ─── Paleta (también la usa imagen-receta.ts) ──────────────────────────────────────────────────────────────────
+export const C = {
   bg: '#f7f6f3',
   surface: '#ffffff',
   border: '#e5e1dc',
@@ -39,9 +39,9 @@ const TAG_H = 22;
 const TAG_PAD_X = 8;
 const TAG_RADIUS = 11;
 const TAG_GAP = 6;
-const FONT = 'system-ui, -apple-system, sans-serif';
+export const FONT = 'system-ui, -apple-system, sans-serif';
 
-function roundRect(
+export function roundRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -62,9 +62,11 @@ function roundRect(
   ctx.closePath();
 }
 
+type TagImagen = MomentoResumen['tags'][number];
+
 function tagsWidth(
   ctx: CanvasRenderingContext2D,
-  tags: DiaResumen['momentos'][0]['tags'],
+  tags: TagImagen[],
 ): number {
   let total = 0;
   for (const t of tags) {
@@ -75,9 +77,9 @@ function tagsWidth(
   return total - TAG_GAP;
 }
 
-function drawTags(
+export function drawTags(
   ctx: CanvasRenderingContext2D,
-  tags: DiaResumen['momentos'][0]['tags'],
+  tags: TagImagen[],
   startX: number,
   cy: number,
 ) {
@@ -264,11 +266,6 @@ export function generarImagenSemanaCanvas(dias: DiaResumen[]): HTMLCanvasElement
 
 const ALBUM_ANDROID = 'Comi2';
 
-function nombreArchivo(): string {
-  const day = new Date().toISOString().slice(0, 10);
-  return `menu-semana-${day}`;
-}
-
 async function albumComi2(): Promise<string> {
   const buscar = async () =>
     (await Media.getAlbums()).albums.find((a) => a.name === ALBUM_ANDROID)?.identifier;
@@ -281,10 +278,7 @@ async function albumComi2(): Promise<string> {
 }
 
 /** Guarda la imagen: en Android, en la galería (álbum Comi2); en el navegador, como descarga. */
-export async function guardarImagenSemana(dias: DiaResumen[]): Promise<void> {
-  const canvas = generarImagenSemanaCanvas(dias);
-  const nombre = nombreArchivo();
-
+export async function guardarCanvas(canvas: HTMLCanvasElement, nombre: string): Promise<void> {
   if (Capacitor.isNativePlatform()) {
     await Media.savePhoto({
       path: canvas.toDataURL('image/png'),
@@ -308,9 +302,12 @@ export async function guardarImagenSemana(dias: DiaResumen[]): Promise<void> {
 }
 
 /** Abre el menú de compartir del sistema con la imagen. Devuelve false si el navegador no puede. */
-export async function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean> {
-  const canvas = generarImagenSemanaCanvas(dias);
-  const filename = `${nombreArchivo()}.png`;
+export async function compartirCanvas(
+  canvas: HTMLCanvasElement,
+  nombre: string,
+  titulo: string,
+): Promise<boolean> {
+  const filename = `${nombre}.png`;
 
   if (Capacitor.isNativePlatform()) {
     const base64 = canvas.toDataURL('image/png').split(',')[1];
@@ -320,10 +317,10 @@ export async function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean
       directory: Directory.Cache,
     });
     await Share.share({
-      title: 'Menú de la semana',
-      text: 'Menú semanal generado con Comi2',
+      title: titulo,
+      text: `${titulo} · Comi2`,
       url: uri,
-      dialogTitle: 'Compartir menú',
+      dialogTitle: `Compartir ${titulo.toLowerCase()}`,
     });
     return true;
   }
@@ -333,9 +330,22 @@ export async function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean
   const file = new File([blob], filename, { type: 'image/png' });
   if (!navigator.canShare?.({ files: [file] })) return false;
   try {
-    await navigator.share({ files: [file], title: 'Menú de la semana' });
+    await navigator.share({ files: [file], title: titulo });
   } catch (e) {
     if ((e as Error).name !== 'AbortError') throw e;
   }
   return true;
+}
+
+function nombreArchivo(): string {
+  const day = new Date().toISOString().slice(0, 10);
+  return `menu-semana-${day}`;
+}
+
+export function guardarImagenSemana(dias: DiaResumen[]): Promise<void> {
+  return guardarCanvas(generarImagenSemanaCanvas(dias), nombreArchivo());
+}
+
+export function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean> {
+  return compartirCanvas(generarImagenSemanaCanvas(dias), nombreArchivo(), 'Menú de la semana');
 }
