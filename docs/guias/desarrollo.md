@@ -73,7 +73,7 @@ Guía dedicada (solo si vas a generar o firmar APK): **[android-apk.md](android-
 
 ## Respaldo JSON
 
-En la app, **Platos** incluye al pie el panel **Respaldo** (exportar / importar). El formato y la validación están en [`app/src/lib/backup.ts`](../../app/src/lib/backup.ts) (`comi2-backup`, versión 1). La importación ejecuta una transacción Dexie que vacía y repuebla las tablas afectadas.
+En la app, **Opciones** incluye el panel **Respaldo** (exportar / importar). El formato y la validación están en [`app/src/lib/backup.ts`](../../app/src/lib/backup.ts) (`comi2-backup`, versión 1). La importación ejecuta una transacción Dexie que vacía y repuebla las tablas afectadas.
 
 ## Convenciones
 

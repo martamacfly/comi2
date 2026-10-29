@@ -8,11 +8,11 @@ import {
   restoreBackupData,
 } from '../lib/backup';
 
-type PlatosBackupPanelProps = {
+type BackupPanelProps = {
   onImportSuccess?: () => void;
 };
 
-export function PlatosBackupPanel({ onImportSuccess }: PlatosBackupPanelProps) {
+export function BackupPanel({ onImportSuccess }: BackupPanelProps) {
   const { borrarLista } = useListaCompra();
   const fileRef = useRef<HTMLInputElement>(null);
   const [exportando, setExportando] = useState(false);

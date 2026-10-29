@@ -31,7 +31,7 @@ Con el **engranaje** de arriba a la derecha eliges qué secciones usar. Al insta
 
 Todo se guarda **en tu navegador** (sin cuenta ni servidor). Si borras los datos del sitio, pierdes el contenido.
 
-**Copia de seguridad:** en **Platos**, al final de la página, la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos y sus recetas, etiquetas, despensa, semana planificada y opciones, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
+**Copia de seguridad:** en **Opciones** (el engranaje), la sección **Respaldo** permite **exportar** un archivo JSON con productos, platos y sus recetas, etiquetas, despensa, semana planificada y opciones, o **importarlo** en esta u otra instalación de Comi2. La importación **sustituye por completo** los datos que hubiera en ese dispositivo.
 
 ```mermaid
 flowchart LR
@@ -122,7 +122,7 @@ Pasos completos, requisitos, solución de problemas y lista de cambios en el rep
 
 | Ruta | Qué es |
 |------|--------|
-| `/platos` | Tu recetario (pestañas, lista de platos y **Respaldo** JSON al final) |
+| `/platos` | Tu recetario (pestañas y lista de platos) |
 | `/platos/:id` | Vista de un plato (desde la lista); **Editar plato** lleva al formulario |
 | `/platos/:id/editar` | Formulario para cambiar ese plato |
 | `/platos/nuevo` | Crear un plato nuevo |
@@ -130,7 +130,7 @@ Pasos completos, requisitos, solución de problemas y lista de cambios en el rep
 | `/despensa` | Platos y productos disponibles para la semana |
 | `/semana` | Planificador de la semana |
 | `/lista` | Lista de la compra |
-| `/opciones` | Elegir qué secciones usar |
+| `/opciones` | Elegir qué secciones usar y **Respaldo** JSON (exportar / importar) |
 
 ---
 

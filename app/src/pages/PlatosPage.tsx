@@ -22,7 +22,6 @@ import {
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { EmptyState } from '../components/EmptyState';
-import { PlatosBackupPanel } from '../components/PlatosBackupPanel';
 import { PageHeader } from '../components/PageHeader';
 import { TagChip } from '../components/TagChip';
 import { MomentoBadge } from '../components/MomentoBadge';
@@ -462,11 +461,6 @@ export function PlatosPage() {
           )}
             </>
           )}
-          <PlatosBackupPanel
-            onImportSuccess={() =>
-              setMensaje('Respaldo importado correctamente.')
-            }
-          />
         </>
       )}
     </section>

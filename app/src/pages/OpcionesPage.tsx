@@ -1,9 +1,18 @@
-import { GearSix } from '@phosphor-icons/react';
+import { useEffect, useState } from 'react';
+import { CheckCircle, GearSix } from '@phosphor-icons/react';
+import { BackupPanel } from '../components/BackupPanel';
 import { PageHeader } from '../components/PageHeader';
 import { activarModulo, MODULOS, useModulos } from '../lib/opciones';
 
 export function OpcionesPage() {
   const modulos = useModulos();
+  const [mensaje, setMensaje] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!mensaje) return;
+    const t = window.setTimeout(() => setMensaje(null), 5000);
+    return () => window.clearTimeout(t);
+  }, [mensaje]);
 
   return (
     <section className="page">
@@ -13,6 +22,13 @@ export function OpcionesPage() {
         icon={GearSix}
         iconTone="sage"
       />
+
+      {mensaje && (
+        <p className="alert alert--success alert--with-icon" role="status">
+          <CheckCircle size={22} weight="duotone" aria-hidden />
+          <span>{mensaje}</span>
+        </p>
+      )}
 
       {modulos === undefined ? (
         <p className="muted">Cargando…</p>
@@ -40,6 +56,8 @@ export function OpcionesPage() {
           ))}
         </ul>
       )}
+
+      <BackupPanel onImportSuccess={() => setMensaje('Respaldo importado correctamente.')} />
     </section>
   );
 }
