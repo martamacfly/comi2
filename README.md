@@ -44,6 +44,14 @@ flowchart LR
 
 ---
 
+## Usar Comi2 en la web (GitHub Pages)
+
+Comi2 está publicada en **https://martamacfly.github.io/comi2/**. Cada vez que se sube un cambio a `main`, el workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) la compila y la vuelve a publicar.
+
+La misma app sirve para la web y para la APK. La APK se compila con rutas relativas (`./`), y GitHub Pages hace su propia compilación con `VITE_BASE=/comi2/`. Los datos se guardan en el navegador de cada dispositivo, así que la web y la APK no comparten datos (usa **Respaldo** para pasarlos de una a otra).
+
+---
+
 ## Probar la app en tu ordenador (solo web)
 
 **No hace falta Android ni APK** para usar Comi2: con el navegador basta.

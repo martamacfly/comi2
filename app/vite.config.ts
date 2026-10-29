@@ -6,5 +6,6 @@ export default defineConfig({
   plugins: [react()],
   // Rutas relativas: obligatorio para Capacitor/APK (assets en WebView).
   // Ver docs/guias/android-apk.md
-  base: './',
+  // En GitHub Pages se compila con VITE_BASE=/comi2/ (ver .github/workflows/pages.yml).
+  base: process.env.VITE_BASE ?? './',
 })

@@ -14,9 +14,12 @@ import { SemanaPage } from './pages/SemanaPage';
 import './styles/tokens.css';
 import './styles/index.css';
 
+// Con base absoluta (GitHub Pages) el router trabaja bajo ese prefijo; con './' (APK) desde la raíz.
+const basename = import.meta.env.BASE_URL.startsWith('/') ? import.meta.env.BASE_URL : undefined;
+
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <ListaCompraProvider>
         <Routes>
           <Route element={<Layout />}>
