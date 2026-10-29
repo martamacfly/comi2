@@ -72,7 +72,7 @@ Estos cambios **ya están hechos** en Comi2; sirven de inventario si clonas el p
 |--------|--------|
 | `npm run cap:sync` | `npm run build` + `cap sync` (copia `dist/` al proyecto Android) |
 | `npm run cap:android` | Abre el proyecto en Android Studio |
-| `npm run cap:apk:debug` | Sync + `assembleDebug` + copia a `releases/comi2.apk` |
+| `npm run cap:apk:debug` | Sync + `assembleDebug` + copia a `releases/comi2-v<versión>.apk` y `releases/comi2.apk` |
 | `npm run cap:apk:release` | Sync + `assembleRelease` → APK/AAB firmable (requiere keystore) |
 | `npm run cap:apk:debug:unix` | Igual que debug en Linux/macOS (`./gradlew`; define `JAVA_HOME` a JDK 21) |
 | `npm run cap:icons` | Regenera iconos/splash Android desde `favicon.svg` |
@@ -208,7 +208,7 @@ npm run cap:apk:debug
 | **Windows** | `package.json` define `JAVA_HOME` al JBR de Android Studio |
 | **Linux / macOS** | Antes del comando: `export JAVA_HOME=$(/usr/libexec/java_home -v 21)` (macOS) o ruta a tu JDK 21 |
 
-Salida principal: **`releases/comi2.apk`** en la raíz del repo (~4–5 MB). El script `cap:apk:debug` la copia ahí tras compilar; Gradle también genera `app/android/.../app-debug.apk`.
+Salida principal: **`releases/comi2-v<versión>.apk`** en la raíz del repo (~6 MB), con la versión de `versionName` en `app/android/app/build.gradle`, y **`releases/comi2.apk`** como copia de la última. El script `cap:apk:debug` las copia ahí tras compilar; Gradle también genera `app/android/.../app-debug.apk`.
 
 ### Release (distribución)
 

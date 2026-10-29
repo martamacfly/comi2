@@ -26,10 +26,7 @@ Set-Location android
 .\gradlew.bat assembleDebug
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-$apk = "app\build\outputs\apk\debug\app-debug.apk"
-$releases = Join-Path (Split-Path $appRoot -Parent) "releases"
-New-Item -ItemType Directory -Force -Path $releases | Out-Null
-$dest = Join-Path $releases "comi2.apk"
-Copy-Item -Force $apk $dest
+Set-Location $appRoot
 Write-Host ""
-Write-Host "APK lista: $(Resolve-Path $dest)"
+node scripts/copiar-apk.mjs
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

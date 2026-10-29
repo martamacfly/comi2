@@ -101,7 +101,7 @@ npm run cap:apk:debug
 
 La APK queda en:
 
-- **`releases/comi2.apk`** (copia fácil de encontrar en la raíz del repo)
+- **`releases/comi2-v<versión>.apk`** (por ejemplo `comi2-v2.4.apk`; la versión sale de `versionName` en `app/android/app/build.gradle`) y **`releases/comi2.apk`**, copia de la última
 - `app/android/app/build/outputs/apk/debug/app-debug.apk` (salida de Gradle; carpeta ignorada por git)
 
 Pasos completos, requisitos, solución de problemas y lista de cambios en el repo: **[docs/guias/android-apk.md](docs/guias/android-apk.md)**.

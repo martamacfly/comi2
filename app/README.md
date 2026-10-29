@@ -34,7 +34,7 @@ copy android\local.properties.example android\local.properties
 npm run cap:apk:debug
 ```
 
-APK: **`../releases/comi2.apk`** (el script la copia ahí; Gradle también deja una copia en `android/app/build/outputs/apk/debug/`)
+APK: **`../releases/comi2-v<versión>.apk`** y **`../releases/comi2.apk`** (copia de la última; el script [`scripts/copiar-apk.mjs`](scripts/copiar-apk.mjs) las copia ahí; Gradle también deja una copia en `android/app/build/outputs/apk/debug/`)
 
 | Script | Descripción |
 |--------|-------------|
