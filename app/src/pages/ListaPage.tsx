@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ClipboardText,
   Confetti,
   House,
+  ShareNetwork,
   ShoppingCart,
   Sparkle,
   Trash,
@@ -12,6 +13,7 @@ import { ProductoEmoji } from '../components/ProductoEmoji';
 import { useListaCompra } from '../context/useListaCompra';
 import { PageHeader } from '../components/PageHeader';
 import type { Producto } from '../db/types';
+import { compartirTexto, textoListaCompra } from '../lib/compartir';
 
 export function ListaPage() {
   const {
@@ -35,6 +37,24 @@ export function ListaPage() {
     }
     return { pendientes, yaEnCasa };
   }, [lista, yaTengoIds]);
+
+  const [aviso, setAviso] = useState<{ tipo: 'success' | 'error'; texto: string } | null>(null);
+
+  useEffect(() => {
+    if (!aviso) return;
+    const t = window.setTimeout(() => setAviso(null), 5000);
+    return () => window.clearTimeout(t);
+  }, [aviso]);
+
+  const onShare = async () => {
+    setAviso(null);
+    try {
+      const resultado = await compartirTexto('Lista de la compra', textoListaCompra(pendientes));
+      if (resultado === 'copiado') setAviso({ tipo: 'success', texto: 'Lista copiada al portapapeles.' });
+    } catch {
+      setAviso({ tipo: 'error', texto: 'No se pudo compartir la lista.' });
+    }
+  };
 
   return (
     <section className="page">
@@ -66,7 +86,22 @@ export function ListaPage() {
             Borrar lista
           </button>
         )}
+        {pendientes.length > 0 && (
+          <button type="button" className="btn-secondary" onClick={() => void onShare()}>
+            <ShareNetwork size={20} weight="duotone" aria-hidden />
+            Compartir
+          </button>
+        )}
       </div>
+
+      {aviso && (
+        <p
+          className={`alert alert--${aviso.tipo}`}
+          role={aviso.tipo === 'error' ? 'alert' : 'status'}
+        >
+          {aviso.texto}
+        </p>
+      )}
 
       {lista === null ? (
         <p className="muted lista-compra__hint">Pulsa el botón para generar la lista.</p>

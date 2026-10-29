@@ -11,6 +11,7 @@ import {
   CheckCircle,
   ForkKnife,
   PencilSimple,
+  ShareNetwork,
   Trash,
 } from '@phosphor-icons/react';
 import { db } from '../db/database';
@@ -19,6 +20,7 @@ import { TagChip } from '../components/TagChip';
 import { MomentoBadge } from '../components/MomentoBadge';
 import { eliminarPlato } from '../lib/platos';
 import { useModulos } from '../lib/opciones';
+import { compartirTexto, textoReceta } from '../lib/compartir';
 
 type LocationState = {
   platoCreado?: string;
@@ -123,6 +125,19 @@ export function PlatoDetailPage() {
     a.nombre.localeCompare(b.nombre, 'es'),
   );
 
+  const onShare = async () => {
+    setError(null);
+    try {
+      const resultado = await compartirTexto(
+        plato.nombre,
+        textoReceta(plato, productosSorted, modulos?.recetas ?? false),
+      );
+      if (resultado === 'copiado') setMensaje('Receta copiada al portapapeles.');
+    } catch {
+      setError('No se pudo compartir la receta.');
+    }
+  };
+
   const onDelete = async () => {
     if (
       !confirm(
@@ -187,6 +202,10 @@ export function PlatoDetailPage() {
             <PencilSimple size={20} weight="duotone" aria-hidden />
             Editar plato
           </Link>
+          <button type="button" className="btn-secondary" onClick={() => void onShare()}>
+            <ShareNetwork size={20} weight="duotone" aria-hidden />
+            Compartir
+          </button>
           <button
             type="button"
             className="btn-danger"

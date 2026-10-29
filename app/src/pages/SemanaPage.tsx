@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { Capacitor } from '@capacitor/core';
 import {
   CalendarDots,
   DownloadSimple,
   ListBullets,
+  ShareNetwork,
   Trash,
 } from '@phosphor-icons/react';
 import { db } from '../db/database';
@@ -25,7 +27,7 @@ import {
   NUEVO_PLATO_SELECT,
   obtenerOCrearSemanaActiva,
 } from '../lib/semana';
-import { compartirImagenSemana } from '../lib/imagen-semana';
+import { compartirImagenSemana, guardarImagenSemana } from '../lib/imagen-semana';
 import { useModulos } from '../lib/opciones';
 
 const MOMENTOS: MomentoSlot[] = ['comida', 'cena'];
@@ -54,7 +56,10 @@ export function SemanaPage() {
   const [listo, setListo] = useState(false);
   const [limpiando, setLimpiando] = useState(false);
   const [mostrarResumen, setMostrarResumen] = useState(false);
-  const [descargandoImagen, setDescargandoImagen] = useState(false);
+  const [generandoImagen, setGenerandoImagen] = useState<'guardar' | 'compartir' | null>(null);
+  const [avisoResumen, setAvisoResumen] = useState<{ tipo: 'success' | 'error'; texto: string } | null>(
+    null,
+  );
 
   useEffect(() => {
     let activo = true;
@@ -228,7 +233,10 @@ export function SemanaPage() {
           <button
             type="button"
             className="btn-secondary"
-            onClick={() => setMostrarResumen(true)}
+            onClick={() => {
+              setAvisoResumen(null);
+              setMostrarResumen(true);
+            }}
             disabled={!hayPlatosAsignados}
           >
             <ListBullets size={20} weight="duotone" aria-hidden />
@@ -425,19 +433,64 @@ export function SemanaPage() {
                 </article>
               ))}
             </div>
+            {avisoResumen && (
+              <p
+                className={`alert alert--${avisoResumen.tipo}`}
+                role={avisoResumen.tipo === 'error' ? 'alert' : 'status'}
+              >
+                {avisoResumen.texto}
+              </p>
+            )}
             <div className="form-actions">
               <button
                 type="button"
                 className="btn-secondary btn-secondary--icon"
-                disabled={descargandoImagen}
+                disabled={generandoImagen != null}
                 onClick={() => {
-                  setDescargandoImagen(true);
-                  compartirImagenSemana(resumenSemana)
-                    .finally(() => setDescargandoImagen(false));
+                  setGenerandoImagen('guardar');
+                  setAvisoResumen(null);
+                  guardarImagenSemana(resumenSemana)
+                    .then(() =>
+                      setAvisoResumen({
+                        tipo: 'success',
+                        texto: Capacitor.isNativePlatform()
+                          ? 'Imagen guardada en la galería (álbum Comi2).'
+                          : 'Imagen descargada.',
+                      }),
+                    )
+                    .catch(() =>
+                      setAvisoResumen({ tipo: 'error', texto: 'No se pudo guardar la imagen.' }),
+                    )
+                    .finally(() => setGenerandoImagen(null));
                 }}
               >
                 <DownloadSimple size={18} weight="duotone" aria-hidden />
-                {descargandoImagen ? 'Generando…' : 'Guardar imagen'}
+                {generandoImagen === 'guardar' ? 'Generando…' : 'Guardar imagen'}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary btn-secondary--icon"
+                disabled={generandoImagen != null}
+                onClick={() => {
+                  setGenerandoImagen('compartir');
+                  setAvisoResumen(null);
+                  compartirImagenSemana(resumenSemana)
+                    .then((ok) => {
+                      if (!ok) {
+                        setAvisoResumen({
+                          tipo: 'error',
+                          texto: 'Este navegador no permite compartir imágenes. Usa Guardar imagen.',
+                        });
+                      }
+                    })
+                    .catch(() =>
+                      setAvisoResumen({ tipo: 'error', texto: 'No se pudo compartir la imagen.' }),
+                    )
+                    .finally(() => setGenerandoImagen(null));
+                }}
+              >
+                <ShareNetwork size={18} weight="duotone" aria-hidden />
+                {generandoImagen === 'compartir' ? 'Generando…' : 'Compartir'}
               </button>
               <button
                 type="button"

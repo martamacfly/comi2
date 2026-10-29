@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { Media } from '@capacitor-community/media';
 import { textColorForBackground } from './color';
 
 export type MomentoResumen = {
@@ -261,13 +262,57 @@ export function generarImagenSemanaCanvas(dias: DiaResumen[]): HTMLCanvasElement
   return canvas;
 }
 
-export async function compartirImagenSemana(dias: DiaResumen[]): Promise<void> {
-  const canvas = generarImagenSemanaCanvas(dias);
+const ALBUM_ANDROID = 'Comi2';
+
+function nombreArchivo(): string {
   const day = new Date().toISOString().slice(0, 10);
-  const filename = `menu-semana-${day}.png`;
+  return `menu-semana-${day}`;
+}
+
+async function albumComi2(): Promise<string> {
+  const buscar = async () =>
+    (await Media.getAlbums()).albums.find((a) => a.name === ALBUM_ANDROID)?.identifier;
+  const existente = await buscar();
+  if (existente) return existente;
+  await Media.createAlbum({ name: ALBUM_ANDROID });
+  const creado = await buscar();
+  if (!creado) throw new Error('No se pudo crear el álbum Comi2');
+  return creado;
+}
+
+/** Guarda la imagen: en Android, en la galería (álbum Comi2); en el navegador, como descarga. */
+export async function guardarImagenSemana(dias: DiaResumen[]): Promise<void> {
+  const canvas = generarImagenSemanaCanvas(dias);
+  const nombre = nombreArchivo();
 
   if (Capacitor.isNativePlatform()) {
-    // En Android: escribir como base64 y compartir
+    await Media.savePhoto({
+      path: canvas.toDataURL('image/png'),
+      albumIdentifier: await albumComi2(),
+      fileName: nombre,
+    });
+    return;
+  }
+
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) return;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${nombre}.png`;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/** Abre el menú de compartir del sistema con la imagen. Devuelve false si el navegador no puede. */
+export async function compartirImagenSemana(dias: DiaResumen[]): Promise<boolean> {
+  const canvas = generarImagenSemanaCanvas(dias);
+  const filename = `${nombreArchivo()}.png`;
+
+  if (Capacitor.isNativePlatform()) {
     const base64 = canvas.toDataURL('image/png').split(',')[1];
     const { uri } = await Filesystem.writeFile({
       path: filename,
@@ -278,22 +323,19 @@ export async function compartirImagenSemana(dias: DiaResumen[]): Promise<void> {
       title: 'Menú de la semana',
       text: 'Menú semanal generado con Comi2',
       url: uri,
-      dialogTitle: 'Guardar o compartir menú',
+      dialogTitle: 'Compartir menú',
     });
-    return;
+    return true;
   }
 
-  // Navegador de escritorio: descarga directa
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 'image/png');
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+  if (!blob) return false;
+  const file = new File([blob], filename, { type: 'image/png' });
+  if (!navigator.canShare?.({ files: [file] })) return false;
+  try {
+    await navigator.share({ files: [file], title: 'Menú de la semana' });
+  } catch (e) {
+    if ((e as Error).name !== 'AbortError') throw e;
+  }
+  return true;
 }

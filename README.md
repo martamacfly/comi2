@@ -17,6 +17,7 @@
 4. En **Semana** asignas a cada comida y cena (lunes a domingo) un plato o un producto. Puedes usar **Limpiar semana** para vaciar el plan de golpe (tras confirmar).
 5. En **Lista** generas la compra: los productos de los platos planificados y los productos asignados directamente. Puedes tachar lo que ya tienes en casa. La lista **se mantiene al cambiar de sección** hasta que pulses **Generar lista** de nuevo o **Borrar lista**.
 6. En cada plato puedes guardar su **receta**: pasos en orden (que puedes reordenar) y notas.
+7. Con **Compartir** mandas la receta de un plato o la lista de la compra (por WhatsApp, correo…) como texto. En el **resumen de la semana**, **Guardar imagen** guarda el menú en la galería (álbum Comi2) en la APK o lo descarga en la web, y **Compartir** lo envía como imagen.
 
 ### Opciones
 
